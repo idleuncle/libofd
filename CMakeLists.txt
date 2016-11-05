@@ -4,10 +4,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 INCLUDE_DIRECTORIES(
     ./include
+    /usr/local/include
 )
 
 LINK_DIRECTORIES(
     /usr/local/lib
+    /usr/local/lib/pdfium
 )
 
 INCLUDE(FindPkgConfig)
@@ -32,8 +34,13 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(HarfBuzz DEFAULT_MSG HARFBUZZ_INCLUDE_DIRS HAR
 INCLUDE_DIRECTORIES(${HARFBUZZ_INCLUDE_DIRS})
 
 # -------- CXX Compile Options --------
+
+set(CMAKE_EXE_LINKER_FLAGS
+    "-framework CoreGraphics -framework CoreFoundation -framework Foundation  -framework QuartzCore -framework CoreText "
+        )
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-c++11-extensions")
-SET(LIBOFD_DEPENDICES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} harfbuzz-icu cairo tinyxml2 zip stdc++)
+SET(LIBOFD_DEPENDICES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} icuuc fdrm formfiller fpdfapi fpdfdoc fpdftext fx_agg fx_lcms2 fx_libjpeg fx_libopenjpeg fx_zlib fxcodec fxcrt fxge pdfium pdfwindow icuuc freetype harfbuzz-icu cairo tinyxml2 zip stdc++)
 
 # -std=c++11
 SET(CMAKE_CXX_STANDARD 11)
@@ -48,7 +55,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
-ADD_SUBDIRECTORY(tools)
+#ADD_SUBDIRECTORY(tools)
 
 ADD_TEST(ofdtest ${PROJECT_BINARY_DIR}/bin/ofdtest)
 ENABLE_TESTING()

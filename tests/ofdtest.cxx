@@ -1,11 +1,56 @@
-#include <iostream>
+#include <iostream> 
 #include <assert.h>
 #include "OFDPackage.h"
 #include "OFDDocument.h"
 #include "OFDPage.h"
+#include <fpdfview.h>
+#include <fpdf_text.h>
+#include <locale>
+#include <codecvt>
 #include "logger.h"
 
 using namespace ofd;
+
+void test_pdftextinfo(int argc, char* argv[]){
+     int n_pages = 0; 
+     n_pages =1;
+     FPDF_InitLibrary(); 
+     FPDF_DOCUMENT doc = FPDF_LoadDocument(argv[1],""); 
+     if(doc){ 
+
+         n_pages = FPDF_GetPageCount(doc); 
+          LOG(INFO) << "Loading " << n_pages << " pages."; 
+         for(int i=0;i<n_pages;i++){ 
+             LOG(INFO) << "Load page "<< i <<" page";
+             FPDF_PAGE page = FPDF_LoadPage(doc,i); 
+             if(page){ 
+                 FPDF_TEXTPAGE text_page = FPDFText_LoadPage(page); 
+                 if(text_page){ 
+                     std::string content;
+                     int n_chars = FPDFText_CountChars(text_page); 
+                     std::string utf8_text; 
+                     LOG(INFO) << "page text characters " << n_chars; 
+                     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+                     for(int j = 0;j<n_chars;j++){ 
+                         wchar_t CharUnicode = FPDFText_GetUnicode(text_page,j); 
+                         content.append(conv.to_bytes(CharUnicode));
+                     }
+                     LOG(INFO)<<content;
+                     FPDFText_ClosePage(text_page);
+                 } 
+                 FPDF_ClosePage(page);
+                 page = NULL;
+             } 
+
+
+         } 
+
+
+         FPDF_CloseDocument(doc); 
+     } 
+
+
+ } 
 
 void test_libofd(int argc, char *argv[]){
     OFDPackage package;
@@ -148,7 +193,8 @@ int main(int argc, char *argv[]){
 
     LOG(INFO) << "Start " << argv[0];
 
-    test_libofd(argc, argv);
+    test_pdftextinfo(argc,argv);
+    //test_libofd(argc, argv);
     //test_freetype(argc, argv);
 
     LOG(INFO) << "Done.";

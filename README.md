@@ -29,6 +29,10 @@ libicu-dev
 
 libfreetype6-dev
 
+libpdfium https://github.com/klokantech/pdfium 
+
+(需要修改mac编译.pdfium.xcodeproj工程,-stdlib=libstdc++ 修改  -stdlib=libc++)
+
 ## Build
 
 ```
