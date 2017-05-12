@@ -111,6 +111,16 @@ char Subpath::GetFlag(size_t idx) const{
     return m_flags[idx];
 }
 
+void Subpath::Transform(double *ctm){
+    std::for_each(m_points.begin(), m_points.end(), 
+            [=](Point_t& point){
+                double x = point.X;
+                double y = point.Y;
+                point.X = x * ctm[0] + y * ctm[2] + ctm[4];
+                point.Y = x * ctm[1] + y * ctm[3] + ctm[5];
+            });
+}
+
 // **************** class Path ****************
 
 Path::Path() :
@@ -405,3 +415,9 @@ PathPtr Path::FromPathData(const std::string &pathData){
     return path;
 }
 
+void Path::Transform(double *ctm){
+    std::for_each(m_subpaths.begin(), m_subpaths.end(),
+            [=](SubpathPtr subPath){
+                subPath->Transform(ctm);
+            });
+}

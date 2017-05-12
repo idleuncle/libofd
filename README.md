@@ -1,4 +1,4 @@
-# libofd
+#libofd
 The first open-source C++ development library for OFD.
 
 "Electronic files storage and exchange formats - Fixed layout documents", referred to as OFD (Open Fixed-Layout Document), is China's independent research and development of fixed-layout format standard, is an important part of the national standard system of electronic documents.  
@@ -8,6 +8,9 @@ October 13, 2016, the official release of the OFDnational standard, the standard
 The libofd is the first open-source C++ development library for OFD. It was established in October 20, 2016, only 1 week later than the standard release time. 
 
 ## Release Notes
+
+### pre v0.8
+Branch poppler-shading-actions Output poppler cairo shading actions in order to study draw detail.
 
 ### v0.7
 2017.05.06

@@ -359,11 +359,13 @@ void OFDOutputDev::updateFillColorStop(GfxState *state, double offset){
         m_fillColor.g << ", " <<
         m_fillColor.b;
 
-    std::stringstream ssCairoLog;
-    ssCairoLog << "- updateColorStop - " << " offset:" << offset << " color:(" << m_fillColor.r << ", " << m_fillColor.g << ", " << m_fillColor.b << ") " << " fillOpacity:" << m_fillOpacity;
+    if ( offset < 0.01 || offset > 0.98 ){
+        std::stringstream ssCairoLog;
+        ssCairoLog << "- updateColorStop - " << " offset:" << offset << " color:(" << m_fillColor.r << ", " << m_fillColor.g << ", " << m_fillColor.b << ") " << " fillOpacity:" << m_fillOpacity;
 
-    std::string cairoLog = ssCairoLog.str() + "\n";
-    cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+        std::string cairoLog = ssCairoLog.str() + "\n";
+        cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+    }
 }
 
 void OFDOutputDev::updateBlendMode(GfxState *state){

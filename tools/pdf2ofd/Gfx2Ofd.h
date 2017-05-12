@@ -5,7 +5,7 @@
 #include "GfxState.h"
 #include "ofd/Common.h"
 
-ofd::PathPtr GfxPath_to_OfdPath(GfxState *state);
+ofd::PathPtr GfxPath_to_OfdPath(GfxState *state, bool bTransform = false);
 ofd::FontPtr GfxFont_to_OfdFont(GfxFont *gfxFont, XRef *xref);
 ofd::ColorPtr GfxColor_to_OfdColor(GfxRGB *gfxColor);
 

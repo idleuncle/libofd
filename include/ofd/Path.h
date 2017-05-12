@@ -38,6 +38,8 @@ namespace ofd{
             char GetFlag(size_t idx) const;
             Boundary CalculateBoundary() const;
 
+            void Transform(double *ctm);
+
         private:
             std::vector<Point_t> m_points;
             std::vector<char> m_flags;
@@ -76,6 +78,8 @@ namespace ofd{
 
             const Point_t& GetStartPoint() const {return m_startPoint;};
             Boundary CalculateBoundary() const;
+
+            void Transform(double *ctm);
 
         private:
             bool m_bJustMoved;

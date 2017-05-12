@@ -169,7 +169,7 @@ OFDOutputDev::OFDOutputDev(ofd::PackagePtr package) :
     m_strokePathClip = nullptr;
     m_groupColorSpaceStack = nullptr;
     m_maskStack = nullptr;
-    //m_clipPath = nullptr;
+    m_clipPath = nullptr;
 
     if ( package != nullptr ){
         m_document = package->AddNewDocument();
@@ -332,10 +332,6 @@ void OFDOutputDev::ProcessDoc(PDFDocPtr pdfDoc){
     // FIXME
     for ( auto pg = firstPage ; pg <= numPages; pg++ ){
 
-        // Cairo log file
-        std::string cairoLogFileName = "/tmp/Page_" + std::to_string(pg) + ".cairo";
-        cairoLogFile.open(cairoLogFileName.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
-
         // -------- Page widht and height.
         double pg_w, pg_h;
         std::tie(pg_w, pg_h) = getPageSize(pdfDoc, pg, firstPage);
@@ -348,6 +344,11 @@ void OFDOutputDev::ProcessDoc(PDFDocPtr pdfDoc){
         const DrawState &drawState = m_cairoRender->GetDrawState();
         //// FIXME debug 涠变色缺陷调试
         if ( drawState.Debug.Enabled && drawState.Debug.PageDrawing != (size_t)pg ) continue;
+
+        // Cairo log file
+        std::string cairoLogFileName = "/tmp/Page_" + std::to_string(pg) + ".cairo";
+        cairoLogFile.open(cairoLogFileName.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+
 
         // -------- beforeDocument()
         if ( pg == firstPage ){

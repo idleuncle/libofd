@@ -633,7 +633,9 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
 
     // TODO 调试绘制某个特定的PathObject。
     const DrawState &drawState = m_cairoRender->GetDrawState();
-    if ( drawState.Debug.Enabled && drawState.Debug.PathObjectID != pathObject->ID){
+    if ( drawState.Debug.Enabled && 
+            drawState.Debug.PathObjectID != 0 && 
+            drawState.Debug.PathObjectID != pathObject->ID){
         //LOG(DEBUG) << "Debug missing path object. ID=" < drawState.Debug.PathObjectID;
         return;
     }
