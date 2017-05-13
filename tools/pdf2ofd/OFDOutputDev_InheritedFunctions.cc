@@ -391,8 +391,9 @@ void OFDOutputDev::saveState(GfxState *state){
         //m_textPage->updateFont(state);
     //}
 
+    m_numSaveState++;
     LOG(INFO) << "[imageSurface] SaveState";
-
+    
     cairo_save(m_cairo);
     if ( m_cairoShape != nullptr ){
         cairo_save(m_cairoShape);
@@ -418,7 +419,8 @@ void OFDOutputDev::restoreState(GfxState *state){
     //if ( m_textPage != nullptr ){
         //m_textPage->updateFont(state);
     //}
-
+    m_numSaveState--;
+    assert(m_numSaveState >= 0);
     LOG(INFO) << "[imageSurface] RestoreState";
 
     cairo_restore(m_cairo);

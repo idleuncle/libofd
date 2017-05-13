@@ -64,9 +64,13 @@ cairo_pattern_t *RadialShading::CreateFillPattern(cairo_t *cr){
         const ColorPtr color = cs.Color;
         double pos = cs.Offset;
 
-        double r = color->Value.RGB.Red / 255.0;
+        //double r = color->Value.RGB.Red / 255.0;
+        //double g = color->Value.RGB.Green / 255.0;
+        //double b = color->Value.RGB.Blue / 255.0;
+        double b = color->Value.RGB.Red / 255.0;
         double g = color->Value.RGB.Green / 255.0;
-        double b = color->Value.RGB.Blue / 255.0;
+        double r = color->Value.RGB.Blue / 255.0;
+
         double a = color->Alpha / 255.0;
         cairo_pattern_add_color_stop_rgba(fillPattern, pos, r, g, b, a);
     } 

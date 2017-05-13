@@ -45,6 +45,7 @@ struct FontInfo
 
 class OFDOutputDev : public OutputDev {
     private:
+        int m_numSaveState;
 
 public:
     void OnWord(TextWord *word, GfxState *state);

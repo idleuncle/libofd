@@ -81,6 +81,7 @@ void OFDOutputDev::OnWord(TextWord *word, GfxState *state){
 
 // ======== OFDOutputDev::OFDOutputDev() ========
 OFDOutputDev::OFDOutputDev(ofd::PackagePtr package) :
+    m_numSaveState(0),
     m_pdfDoc(nullptr),
     m_xref(nullptr), m_textPage(nullptr), 
     m_actualText(nullptr),

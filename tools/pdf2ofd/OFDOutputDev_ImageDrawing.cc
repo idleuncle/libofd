@@ -305,7 +305,7 @@ bool SaveImageStream(const std::string &filename, Stream *str, int widthA, int h
     while ( n++ < heightA ){
 
         int readedChars = str->doGetChars(lineSize, buffer);
-        LOG(DEBUG) << "Write image data file. readedChars:" << readedChars << " lineSize:" <<  lineSize;
+        //LOG(DEBUG) << "Write image data file. readedChars:" << readedChars << " lineSize:" <<  lineSize;
         if ( readedChars > 0 ){
             datFile.write((const char *)buffer, readedChars);
         }

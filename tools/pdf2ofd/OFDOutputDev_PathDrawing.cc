@@ -205,7 +205,9 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
     PathObjectPtr pathObject = nullptr;
 
 
-    PathPtr ofdPath = GfxPath_to_OfdPath(state);
+    // FIXME
+    bool bTransform = true;
+    PathPtr ofdPath = GfxPath_to_OfdPath(state, bTransform);
     if ( ofdPath != nullptr ){
         //double ctm[6];
         //ctm[0] = m_matrix.xx;
@@ -217,14 +219,18 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
 
         //ofdPath->Transform(ctm);
 
-        if ( m_clipPath == nullptr ){
-            m_clipPath = std::make_shared<ofd::Path>();
-        } else {
-            //m_clipPath->Transform(&ctm[0]);
+        if ( m_clipPath != nullptr ){
+            ofdPath = m_clipPath;
         }
-        m_clipPath->Append(ofdPath);
 
-        {
+        //if ( m_clipPath == nullptr ){
+            ////m_clipPath = std::make_shared<ofd::Path>();
+        //} else {
+            ////m_clipPath->Transform(&ctm[0]);
+        //}
+        ////m_clipPath->Append(ofdPath);
+
+        if ( m_clipPath != nullptr ){
             std::stringstream ssCairoLog;
             std::string objectString = m_clipPath->to_string();
             ssCairoLog << "[imageSurface] createPathObject():\n" << objectString;
@@ -235,6 +241,10 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
         pathObject = std::make_shared<PathObject>(m_currentOFDPage->GetBodyLayer());
         //pathObject->SetPath(m_clipPath);
         pathObject->SetPath(ofdPath);
+
+        if ( m_clipPath != nullptr ){
+            pathObject->Rule = ofd::PathRule::EvenOdd;
+        }
 
         LOG(DEBUG) <<  "fill color in fill(): " << m_fillColor.r << ", " << m_fillColor.g << ", " <<  m_fillColor.b;
         ColorPtr fillColor = GfxColor_to_OfdColor(&m_fillColor);
@@ -280,6 +290,8 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
         pathObject->CTM[4] = objMatrix.x0;
         pathObject->CTM[5] = objMatrix.y0;
 
+    } else {
+        LOG(WARNING) << "createPathObject() return nullptr.";
     }
 
     m_clipPath = nullptr;
@@ -305,27 +317,33 @@ void OFDOutputDev::fill(GfxState *state) {
     //LOG(INFO) << "[imageSurface] DrawPathObject m_matrix=(" << m_matrix.xx << "," << m_matrix.yx << "," << m_matrix.xy << "," << m_matrix.yy << "," << m_matrix.x0 << "," << m_matrix.y0 << ")";
 
     //showCairoMatrix(m_cairo, "imageSurface", "DrawPathObject cairo_matrix");
+    PathObjectPtr pathObject = nullptr;
+    //if ( m_currentOFDPage->GetBodyLayer()->GetNumObjects() < 75 )
+    {
+        std::stringstream ssCairoLog;
 
-    std::stringstream ssCairoLog;
+        // Add PathObject
 
-    // Add PathObject
+        ssCairoLog << "- Draw PathObject - ";
+        pathObject = createPathObject(state);
+        if ( pathObject != nullptr ){
+            m_currentOFDPage->AddObject(pathObject);
 
-    ssCairoLog << "- Draw PathObject - ";
-    PathObjectPtr pathObject = createPathObject(state);
-    if ( pathObject != nullptr ){
-        m_currentOFDPage->AddObject(pathObject);
+            LOG(DEBUG) << "---- createPathObject in fill() ID=" << pathObject->ID;
 
-        if ( m_cairoRender != nullptr ){
-            ObjectPtr object = std::shared_ptr<ofd::Object>(pathObject);
-            m_cairoRender->DrawObject(object);
+            if ( m_cairoRender != nullptr ){
+                ObjectPtr object = std::shared_ptr<ofd::Object>(pathObject);
+                m_cairoRender->DrawObject(object);
 
-            std::string objectString = pathObject->to_string();
-            ssCairoLog << objectString;
+                std::string objectString = pathObject->to_string();
+                ssCairoLog << objectString;
+            }
         }
-    }
 
-    std::string cairoLog = ssCairoLog.str() + "\n";
-    cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+        std::string cairoLog = ssCairoLog.str() + "\n";
+        cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+    }
+    if ( pathObject == nullptr ) return;
 
     // FIXME 渐变色缺陷调试
     //PathPtr path = pathObject->GetPath();
@@ -344,7 +362,9 @@ void OFDOutputDev::fill(GfxState *state) {
             //}
         //}
     //}
-    //if ( pathObject->ID != 71 ) return;
+    if ( pathObject->ID == 71 ){
+        LOG(DEBUG) << "Draw path object ID = 71.";
+    }
 
     // TODO 调试绘制某个特定的PathObject。
     const DrawState &drawState = m_cairoRender->GetDrawState();
@@ -644,19 +664,21 @@ void OFDOutputDev::clip(GfxState *state) {
         cairo_clip(m_cairoShape);
     }
 
-    bool bTransform = false;
+    bool bTransform = true;
     PathPtr clipPath = GfxPath_to_OfdPath(state, bTransform);
-    if ( m_clipPath == nullptr ){
-        m_clipPath = std::make_shared<ofd::Path>();
-    }
-    m_clipPath->Append(clipPath);
 
-    {
-    std::stringstream ssCairoLog;
-    std::string objectString = clipPath->to_string();
-    ssCairoLog << "[imageSurface] clip0():\n" << objectString;
-    std::string cairoLog = ssCairoLog.str();
-    cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+    if ( m_numSaveState > 0 ){
+        m_clipPath = clipPath;
+    }
+
+    if ( clipPath != nullptr ){
+        std::stringstream ssCairoLog;
+        std::string objectString = clipPath->to_string();
+        ssCairoLog << "[imageSurface] clip():\n" << objectString;
+        std::string cairoLog = ssCairoLog.str();
+        cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+
+        LOG(INFO) << "[imageSurface] Clip clipPath=" << objectString;
     }
 
     //{
@@ -698,6 +720,20 @@ void OFDOutputDev::eoClip(GfxState *state) {
         cairo_set_fill_rule(m_cairoShape, CAIRO_FILL_RULE_EVEN_ODD);
         cairo_clip(m_cairoShape);
     }
+
+    //bool bTransform = false;
+    //PathPtr clipPath = GfxPath_to_OfdPath(state, bTransform);
+    //m_clipPath = clipPath;
+
+    //if ( clipPath != nullptr ){
+    //std::stringstream ssCairoLog;
+    //std::string objectString = clipPath->to_string();
+    //ssCairoLog << "[imageSurface] eoclip():\n" << objectString;
+    //std::string cairoLog = ssCairoLog.str();
+    //cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
+
+    //LOG(INFO) << "[imageSurface] EOClip clipPath=" << objectString;
+    //}
 }
 
 void OFDOutputDev::clipToStrokePath(GfxState *state){

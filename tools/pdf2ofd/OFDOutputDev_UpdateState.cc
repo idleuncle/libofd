@@ -354,10 +354,10 @@ void OFDOutputDev::updateFillColorStop(GfxState *state, double offset){
 
     m_colorStops.push_back(ofd::ColorStopArray::value_type(color, offset));
 
-    LOG(DEBUG) << "fill color stop: " << offset << " (" <<
-        m_fillColor.r << ", " <<
-        m_fillColor.g << ", " <<
-        m_fillColor.b;
+    //LOG(DEBUG) << "fill color stop: " << offset << " (" <<
+        //m_fillColor.r << ", " <<
+        //m_fillColor.g << ", " <<
+        //m_fillColor.b;
 
     if ( offset < 0.01 || offset > 0.98 ){
         std::stringstream ssCairoLog;

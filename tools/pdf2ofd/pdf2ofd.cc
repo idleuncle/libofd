@@ -90,6 +90,7 @@ int main(int argc, char *argv[]){
 
     // Init poppler.
     globalParams = new GlobalParams(nullptr);
+    //globalParams->setPrintCommands(gTrue);
 
     std::shared_ptr<PDFDoc> pdfDoc = OpenPDFFile(pdfFilename, ownerPassword, userPassword);
     if ( pdfDoc != nullptr ){

@@ -1148,7 +1148,8 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
     matrix.yy = pathObject->CTM[3];
     matrix.x0 = pathObject->CTM[4];
     matrix.y0 = pathObject->CTM[5];
-    cairo_transform(cr, &matrix);
+    // FIXME
+    //cairo_transform(cr, &matrix);
 
     showCairoMatrix(cr, "CairoRender", "DrawPathObject");
 
@@ -1170,8 +1171,7 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
         cairo_stroke(cr);
     } else {
         if ( pathObject->FillShading != nullptr ){
-            //UpdateFillPattern(pathObject->FillShading);
-            return;
+            UpdateFillPattern(pathObject->FillShading);
         } else {
             ColorPtr fillColor = pathObject->GetFillColor();
             if ( fillColor != nullptr ){
@@ -1185,19 +1185,40 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
 
     cairo_set_source(cr, m_fillPattern);
 
-    if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
-        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+    if ( pathObject->FillShading != nullptr ){
+        //if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+            EoClip(path);
+        //} else {
+            //cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+            //Clip(path);
+        //}
+
+            Boundary boundary = path->CalculateBoundary(); 
+            double xMin = boundary.XMin;
+            double yMin = boundary.YMin;
+            double xMax = boundary.XMax;
+            double yMax = boundary.YMax;
+            cairo_move_to(cr, xMin, yMin);
+            cairo_line_to(cr, xMin, yMax);
+            cairo_line_to(cr, xMax, yMax);
+            cairo_line_to(cr, xMax, yMin);
+            cairo_close_path(cr);
+            cairo_fill(cr);
     } else {
-        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+        if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+            cairo_fill(cr);
+            EoClip(path);
+        } else {
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+            cairo_fill(cr);
+            Clip(path);
+        }
+
     }
 
-    cairo_fill(cr);
 
-    if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
-        EoClip(path);
-    } else {
-        Clip(path);
-    }
 }
 
     //ofd::RadialShading *shading = (ofd::RadialShading*)m_shading.get();
