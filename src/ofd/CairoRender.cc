@@ -1134,22 +1134,24 @@ void directDoPath(cairo_t *cairo){
 }
 void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject){
         //if ( pathObject->FillShading != nullptr )
-    cairo_matrix_t matrix;
-    matrix.xx = pathObject->CTM[0];
+    //cairo_matrix_t matrix;
+    //matrix.xx = pathObject->CTM[0];
 
-    matrix.yx = pathObject->CTM[1];
-    matrix.xy = pathObject->CTM[2];
+    //matrix.yx = pathObject->CTM[1];
+    //matrix.xy = pathObject->CTM[2];
 
     //// FIXME
-    //matrix.yx = 0;//pathObject->CTM[2];
-    //matrix.xy = 0;//pathObject->CTM[1];
+    ////matrix.yx = 0;//pathObject->CTM[2];
+    ////matrix.xy = 0;//pathObject->CTM[1];
 
 
-    matrix.yy = pathObject->CTM[3];
-    matrix.x0 = pathObject->CTM[4];
-    matrix.y0 = pathObject->CTM[5];
-    // FIXME
-    //cairo_transform(cr, &matrix);
+    //matrix.yy = pathObject->CTM[3];
+    //matrix.x0 = pathObject->CTM[4];
+    //matrix.y0 = pathObject->CTM[5];
+    //// FIXME
+    //if ( pathObject->FillShading == nullptr ){
+        //cairo_transform(cr, &matrix);
+    //}
 
     showCairoMatrix(cr, "CairoRender", "DrawPathObject");
 

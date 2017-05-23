@@ -667,7 +667,8 @@ void OFDOutputDev::clip(GfxState *state) {
     bool bTransform = true;
     PathPtr clipPath = GfxPath_to_OfdPath(state, bTransform);
 
-    if ( m_numSaveState > 0 ){
+    //if ( m_numSaveState > 0 ){
+    if ( m_numSaveState == 2 ){
         m_clipPath = clipPath;
     }
 
