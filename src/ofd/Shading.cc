@@ -42,11 +42,12 @@ cairo_pattern_t *RadialShading::CreateFillPattern(cairo_t *cr){
     //
     // As a workaround, scale the pattern by the average of the vertical
     // and horizontal scaling of the current transformation matrix.
+    
     cairo_matrix_t matrix;
     cairo_get_matrix(cr, &matrix);
-    double scale;
-    scale = (sqrt(matrix.xx * matrix.xx + matrix.yx * matrix.yx)
-            + sqrt(matrix.xy * matrix.xy + matrix.yy * matrix.yy)) / 2;
+    double scale = 26.4687;
+    //scale = (sqrt(matrix.xx * matrix.xx + matrix.yx * matrix.yx)
+            //+ sqrt(matrix.xy * matrix.xy + matrix.yy * matrix.yy)) / 2;
     cairo_matrix_init_scale(&matrix, scale, scale);
 
     double sMin = 0;
