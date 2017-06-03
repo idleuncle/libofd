@@ -8,7 +8,8 @@
 
 namespace ofd{
 
-    typedef std::tuple<double, double, double> VisibleParams;
+    // offsetX, offsetY, scaling
+    typedef std::tuple<double, double, double> ViewArea;
 
     // ======== class Render ========
     class Render {
@@ -16,16 +17,18 @@ namespace ofd{
         Render();
         virtual ~Render();
 
-        virtual void DrawPage(PagePtr page, VisibleParams visibleParams);
-        VisibleParams GetVisibleParams() const;
-        void SetVisibleParams(VisibleParams visibleParams);
+        virtual void ClearPage(){};
+        virtual void DrawPage(PagePtr page, ViewArea viewArea);
+        ViewArea GetViewArea() const;
+        void SetViewArea(ViewArea viewArea);
 
         const DrawState& GetDrawState() const {return m_drawState;};
         DrawState& GetDrawState() {return m_drawState;};
         void SetDrawState(const DrawState &drawState){m_drawState = drawState;};
 
+
     private:
-        VisibleParams m_visibleParams;
+        ViewArea m_viewArea;
         DrawState m_drawState;
 
     }; // class Render

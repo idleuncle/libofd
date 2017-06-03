@@ -10,8 +10,8 @@
 #include "ofd/CairoRender.h"
 
 using namespace ofd;
-double g_resolutionX = 144.0;
-double g_resolutionY = 144.0;
+double g_resolutionX = 240.0; // 120, 160, 240
+double g_resolutionY = 240.0;
 double ZOOM_STEP = 0.1;
 double ZOOM_BASE = exp(1.0);
 double X_STEP = 10;
@@ -92,11 +92,11 @@ private:
 
 protected:
     SDL_Surface *m_imageSurface;
-    double m_pixelX;
-    double m_pixelY;
+    double m_offsetX;
+    double m_offsetY;
     double m_scaling;
-    double m_origPixelX;
-    double m_origPixelY;
+    double m_origOffsetX;
+    double m_origOffsetY;
     double m_origScaling;
     double m_zoomFactor;
     bool   m_bHelp;
@@ -108,8 +108,8 @@ SDLApp::SDLApp(const std::string &title, double screenWidth, double screenHeight
     : m_title(title), m_fullscreen(false), 
     m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_screenBPP(screenBPP),
     m_mainWindow(nullptr), m_screenRenderer(nullptr), m_imageSurface(nullptr),
-    m_pixelX(0.0), m_pixelY(0.0), m_scaling(1.0), 
-    m_origPixelX(-1), m_origPixelY(-1), m_origScaling(-1), 
+    m_offsetX(0.0), m_offsetY(0.0), m_scaling(1.0), 
+    m_origOffsetX(-1), m_origOffsetY(-1), m_origScaling(-1), 
     m_zoomFactor(ZOOM_BASE), m_bHelp(false){
     init();
 }
@@ -196,16 +196,16 @@ void SDLApp::Execute(){
                     done = true;
                 } else if ( event.key.keysym.sym == SDLK_h ){
                     // Move window left
-                    m_pixelX += X_STEP;
+                    m_offsetX += X_STEP;
                 } else if ( event.key.keysym.sym == SDLK_l ){
                     // Move window right
-                    m_pixelX -= X_STEP;
+                    m_offsetX -= X_STEP;
                 } else if ( event.key.keysym.sym == SDLK_k ){
                     // Move window up
-                    m_pixelY += Y_STEP;
+                    m_offsetY += Y_STEP;
                 } else if ( event.key.keysym.sym == SDLK_j ){
                     // Move window down 
-                    m_pixelY -= Y_STEP;
+                    m_offsetY -= Y_STEP;
                 } else if ( event.key.keysym.sym == SDLK_i ){
                     // Zoom In
                     m_zoomFactor += ZOOM_STEP;
@@ -215,8 +215,8 @@ void SDLApp::Execute(){
                 } else if ( event.key.keysym.sym == SDLK_f ){
                     // Zoom to Fit 
                     m_zoomFactor = ZOOM_BASE;
-                    m_pixelX = 0;
-                    m_pixelY = 0;
+                    m_offsetX = 0;
+                    m_offsetY = 0;
                 } else if ( event.key.keysym.sym == SDLK_h ){
                     // Help 
                     m_bHelp = !m_bHelp;
@@ -422,13 +422,13 @@ void MySDLApp::OnRender(cairo_surface_t *surface){
                 //std::unique_ptr<OFDCairoRender> m_cairoRender(new OFDCairoRender(m_screenWidth, m_screenHeight, g_resolutionX, g_resolutionY));
 
                 /***
-                 * visibleParams {pixelX, pixelY, scaling}
-                 * (pixelX, pixelY) 显示窗口左上角坐标与页面原点（左上角）的像素偏移。
+                 * viewArea {offsetX, offsetY, scaling}
+                 * (offsetX, offsetY) 显示窗口左上角坐标与页面原点（左上角）的像素偏移。
                  * scaling - 缩放比例
                  *
                  ***/
-                double pixelX = m_pixelX;
-                double pixelY = m_pixelY;
+                double offsetX = m_offsetX;
+                double offsetY = m_offsetY;
                 double scaling = m_scaling;
 
                 double delta = m_zoomFactor - ZOOM_BASE;
@@ -444,11 +444,11 @@ void MySDLApp::OnRender(cairo_surface_t *surface){
                 //LOG(DEBUG) << "delta: " << delta << " factor: " << factor << " scaling=" << scaling << " offset=(" << pixelX << "," << pixelY << ")";
 
                 m_cairoRender->SaveState();
-                //if ( pixelX != m_origPixelX || pixelY != m_origPixelY || scaling != m_origScaling ){
-                    ofd::VisibleParams visibleParams = std::make_tuple(pixelX, pixelY, scaling);
-                    m_cairoRender->DrawPage(page, visibleParams);
-                    m_origPixelX = pixelY;
-                    m_origPixelY = pixelY;
+                //if ( pixelX != m_origOffsetX || pixelY != m_origOffsetY || scaling != m_origScaling ){
+                    ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
+                    m_cairoRender->DrawPage(page, viewArea);
+                    m_origOffsetX = offsetY;
+                    m_origOffsetY = offsetY;
                     m_origScaling = scaling;
                 //}
                 m_cairoRender->Paint(surface);

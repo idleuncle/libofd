@@ -30,7 +30,8 @@ namespace ofd{
         cairo_surface_t *GetCairoSurface() const;
         cairo_t *GetCairoContext() const;
 
-        virtual void DrawPage(PagePtr page, VisibleParams visibleParams) override;
+        virtual void ClearPage() override;
+        virtual void DrawPage(PagePtr page, ViewArea viewArea) override;
         void DrawObject(ObjectPtr object);
 
         void SetLineWidth(double lineWidth);

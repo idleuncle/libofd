@@ -44,7 +44,7 @@ public:
 
     void Rebuild(double pixelWidth, double pixelHeight, double resolutionX, double resolutionY);
     //void SetCairoSurface(cairo_surface_t *surface);
-    void DrawPage(PagePtr page, VisibleParams visibleParams);
+    void DrawPage(PagePtr page, ViewArea viewArea);
     void DrawObject(ObjectPtr object);
 
     void Paint(cairo_surface_t *surface);
@@ -60,6 +60,10 @@ public:
     void RestoreState();
     void Clip(PathPtr clipPath);
     void EoClip(PathPtr clipPath);
+
+    void SetMillimeterBase();
+    void SetPointBase();
+    void ClearPage();
 
 private:
     void Destroy();
@@ -110,34 +114,56 @@ CairoRender::ImplCls::ImplCls(CairoRender *cairoRender, double pixelWidth, doubl
     Rebuild(pixelWidth, pixelHeight, resolutionX, resolutionY);
 }
 
-void setDefaultCTM(cairo_t *cr){
-    cairo_matrix_t matrix0;
-    matrix0.xx = 1.0;
-    matrix0.yx = 0.0;
-    matrix0.xy = 0.0;
-    matrix0.yy = -1.0;
+//void setDefaultCTM(cairo_t *cr){
+    //cairo_matrix_t matrix0;
+    //matrix0.xx = 1.0;
+    //matrix0.yx = 0.0;
+    //matrix0.xy = 0.0;
     //matrix0.yy = -1.0;
-    matrix0.x0 = -0.0;
-    //matrix0.y0 = 0.0;
-    matrix0.y0 = 841.89;
-    cairo_transform(cr, &matrix0);
+    ////matrix0.yy = -1.0;
+    //matrix0.x0 = -0.0;
+    ////matrix0.y0 = 0.0;
+    //matrix0.y0 = 841.89;
+    //cairo_transform(cr, &matrix0);
+//}
+
+//void clearCTM(cairo_t *cr){
+    //cairo_identity_matrix(cr);
+    ////cairo_matrix_t matrix0;
+    ////matrix0.xx = 1.0;
+    ////matrix0.yx = 0.0;
+    ////matrix0.xy = 0.0;
+    ////matrix0.yy = -1.0;
+    ////matrix0.x0 = 0.0;
+    ////matrix0.y0 = 0.0;
+    ////cairo_transform(cr, &matrix0);
+//}
+
+// 毫米转换成像素：pixel = mm * dpi / 72，缩放比例为 dpi / 72。
+void CairoRender::ImplCls::SetMillimeterBase(){
+    cairo_identity_matrix(m_cr);
+    cairo_scale(m_cr, m_resolutionX/ 25.4, m_resolutionY / 25.4);
 }
 
-void clearCTM(cairo_t *cr){
-    cairo_matrix_t matrix0;
-    matrix0.xx = 1.0;
-    matrix0.yx = 0.0;
-    matrix0.xy = 0.0;
-    matrix0.yy = -1.0;
-    matrix0.x0 = 0.0;
-    matrix0.y0 = 0.0;
-    cairo_transform(cr, &matrix0);
+// 点转换成像素：pixel = point * dpi / 72，缩放比例为 dpi / 72。
+void CairoRender::ImplCls::SetPointBase(){
+    cairo_identity_matrix(m_cr);
+    cairo_scale(m_cr, m_resolutionX/ 72.0, m_resolutionY / 72.0);
+}
+
+void CairoRender::ImplCls::ClearPage(){
+    cairo_set_source_rgb(m_cr, 1., 1., 1.);
+    cairo_paint(m_cr);
 }
 
 void CairoRender::ImplCls::Rebuild(double pixelWidth, double pixelHeight, double resolutionX, double resolutionY){
     Destroy();
 
-    m_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, m_pixelWidth, m_pixelHeight);
+    m_pixelHeight = pixelHeight;
+    m_pixelWidth = pixelWidth;
+    m_resolutionX = resolutionX;
+    m_resolutionY = resolutionY;
+    m_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pixelWidth, pixelHeight);
     if ( m_surface == nullptr ){
         LOG(ERROR) << "create_image_surface() failed. ";
         return;
@@ -148,11 +174,13 @@ void CairoRender::ImplCls::Rebuild(double pixelWidth, double pixelHeight, double
     m_fillPattern = cairo_pattern_create_rgb(0., 0., 0.);
     m_strokePattern = cairo_pattern_reference(m_fillPattern);
 
-    cairo_scale(m_cr, m_resolutionX/ 72.0, m_resolutionY / 72.0);
+    // 以点(Point)为坐标单位，pdf文件缺省。
+    SetPointBase();
+    // 以毫米(Millimeter)为坐标单位，ofd文件缺省。
+    //SetMicroMeterBase();
 
-    // Repaint background
-    cairo_set_source_rgb(m_cr, 1., 1., 1.);
-    cairo_paint(m_cr);
+    // 页面刷白
+    ClearPage();
 
     // FIXME
     //setDefaultCTM(m_cr);
@@ -210,8 +238,73 @@ CairoRender::ImplCls::~ImplCls(){
     //cairo_scale(m_cr, m_resolutionX/ 72.0, m_resolutionY / 72.0);
 //}
 
+// ======== CairoRender::ImplCls::Draw() ========
+void CairoRender::ImplCls::DrawPage(PagePtr page, ViewArea viewArea){
+    assert(page != nullptr);
+    assert(m_surface != nullptr);
+    assert(page->GetDocument() != nullptr);
+    assert(page->GetDocument()->GetDocumentRes() != nullptr);
+
+    const LayerPtr bodyLayer = page->GetBodyLayer(); 
+    if ( bodyLayer == nullptr ) {
+        LOG(WARNING) << "page->GetBodyLayer() return nullptr. Maybe NULL content.";
+        return;
+    }
+    size_t numObjects = bodyLayer->GetNumObjects();
+    if ( numObjects == 0 ){
+        return;
+    }
+
+    ClearPage();
+
+    // 二级显示转换矩阵，按用户指定的偏移和缩放比例绘制页面。
+    double offsetX, offsetY, scaling;
+    std::tie(offsetX, offsetY, scaling) = m_cairoRender->GetViewArea();
+    cairo_translate(m_cr, -offsetX, -offsetY);
+    cairo_scale(m_cr, scaling, scaling);
+
+    for ( size_t i = 0 ; i < numObjects ; i++ ){
+        const ObjectPtr object = bodyLayer->GetObject(i);
+        assert(object != nullptr);
+        DrawObject(object);
+    }
+
+}
+
+void CairoRender::ImplCls::DrawObject(ObjectPtr object){
+    cairo_t *cr = m_cr;
+
+    SaveState();{
+
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+
+        if ( object->Type == ofd::ObjectType::TEXT ) {
+            TextObject *textObject = (TextObject*)object.get();
+            DrawTextObject(cr, textObject);
+        } else if ( object->Type == ofd::ObjectType::PATH ){
+            PathObject *pathObject = (PathObject*)object.get();
+            DrawPathObject(cr, pathObject);
+        } else if ( object->Type == ofd::ObjectType::IMAGE ){
+            ImageObject *imageObject = (ImageObject*)object.get();
+            DrawImageObject(cr, imageObject);
+        } else if ( object->Type == ofd::ObjectType::VIDEO ){
+            VideoObject *videoObject = (VideoObject*)object.get();
+            DrawVideoObject(cr, videoObject);
+        } else if ( object->Type == ofd::ObjectType::COMPOSITE ){
+            CompositeObject *compositeObject = (CompositeObject*)object.get();
+            DrawCompositeObject(cr, compositeObject);
+        }
+
+    } RestoreState();
+}
+
 void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr, cairo_font_face_t *font_face,
-        const cairo_matrix_t *font_matrix, const cairo_matrix_t *ctm, const cairo_font_options_t *font_options, cairo_pattern_t *strokePattern){
+        const cairo_matrix_t *font_matrix, const cairo_matrix_t *ctm, cairo_pattern_t *strokePattern){
+
+
+    cairo_font_options_t *font_options = cairo_font_options_create();
+    cairo_get_font_options(cr, font_options);
+    cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_DEFAULT);
 
     cairo_scaled_font_t *scaled_font = cairo_scaled_font_create(font_face, font_matrix, ctm, font_options);
 
@@ -246,8 +339,8 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
         return;
     }
 
-    cairo_font_extents_t font_extents;
-    cairo_scaled_font_extents(scaled_font, &font_extents);
+    //cairo_font_extents_t font_extents;
+    //cairo_scaled_font_extents(scaled_font, &font_extents);
     //LOG(DEBUG) << "======== cairo_scaled_font_extents ========\n"
         //<< " ascent: " << font_extents.ascent << "\n"
         //<< " descent: " << font_extents.descent << "\n"
@@ -256,8 +349,8 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
         //<< " max_y_advance: " << font_extents.max_y_advance << "\n";
 
     
-    cairo_text_extents_t text_extents;
-    cairo_scaled_font_text_extents(scaled_font, text.c_str(), &text_extents);
+    //cairo_text_extents_t text_extents;
+    //cairo_scaled_font_text_extents(scaled_font, text.c_str(), &text_extents);
     //LOG(DEBUG) << "-------- cairo_scaled_font_text_extents --------\n"
         //<< " x_bearing: " << text_extents.x_bearing << "\n"
         //<< " y_bearing: " << text_extents.y_bearing << "\n"
@@ -301,8 +394,8 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
         return;
     }
 
-    cairo_text_extents_t glyph_extents;
-    cairo_scaled_font_glyph_extents(scaled_font, glyphs, num_glyphs, &glyph_extents);
+    //cairo_text_extents_t glyph_extents;
+    //cairo_scaled_font_glyph_extents(scaled_font, glyphs, num_glyphs, &glyph_extents);
     //LOG(DEBUG) << "-------- cairo_scaled_font_glyph_extents --------\n"
         //<< " x_bearing: " << glyph_extents.x_bearing << "\n"
         //<< " y_bearing: " << glyph_extents.y_bearing << "\n"
@@ -331,135 +424,13 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
     }
 
     cairo_scaled_font_destroy(scaled_font);
+    cairo_font_options_destroy(font_options);
 }
 
-// ======== CairoRender::ImplCls::Draw() ========
-void CairoRender::ImplCls::DrawPage(PagePtr page, VisibleParams visibleParams){
-    if ( page == nullptr ) return;
-    if ( m_surface == nullptr ) return;
-    double pixelX;
-    double pixelY;
-    double scaling;
-    std::tie(pixelX, pixelY, scaling) = m_cairoRender->GetVisibleParams();
-
-    const LayerPtr bodyLayer = page->GetBodyLayer(); 
-    if ( bodyLayer == nullptr ) {
-        LOG(WARNING) << "page->GetBodyLayer() return nullptr. Maybe NULL content.";
-        return;
-    }
-    size_t numObjects = bodyLayer->GetNumObjects();
-    if ( numObjects == 0 ){
-        return;
-    }
-
-    cairo_set_source_rgb(m_cr, 1.0, 1.0, 1.0);
-    cairo_paint(m_cr);
-
-    cairo_translate(m_cr, -pixelX, -pixelY);
-    cairo_scale(m_cr, scaling, scaling);
-
-    //cairo_set_source_rgb(m_cr, 0.0, 0.0, 0.0);
-    //cairo_rectangle(m_cr, 0, 0 + 0.5, 18.1944, 18.1944 + 0.5);
-    //cairo_stroke(m_cr);
-
-    assert(page->GetDocument() != nullptr);
-    assert(page->GetDocument()->GetDocumentRes() != nullptr);
-    // FIXME
-    // -------- default font --------
-    //FontPtr defaultFont = page->GetOFDDocument()->GetDocumentRes()->GetFont(0);
-    //assert(defaultFont != nullptr);
-
-    for ( size_t i = 0 ; i < numObjects ; i++ ){
-        const ObjectPtr object = bodyLayer->GetObject(i);
-        assert(object != nullptr);
-
-        // FIXME
-        //uint64_t id = object->ID;
-        //if ( id <= 5 ){
-            ////if ( id == 0 ){
-                ////continue;
-            ////} else if (id == 1 ){
-                ////continue;
-            ////} else if (id == 2 ){
-                ////continue;
-            ////} else if (id == 3 ){
-                ////continue;
-            ////} else if (id == 4 ){
-                ////continue;
-            ////} else { 
-                ////continue;
-            ////}
-
-        //} else if (id >= 38 && id <= 42 ){
-            //continue;
-        //} else {
-        //}
-
-        DrawObject(object);
-    }
-
-}
-
-void CairoRender::ImplCls::DrawObject(ObjectPtr object){
-    cairo_t *cr = m_cr;
-
-    //LOG(INFO) << "DrawObject() *************************************";
-
-    SaveState();
-
-    // FIXME
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    //cairo_rectangle(cr, 0, 0 + 0.5, 18.1944, 18.1944 + 0.5);
-    //cairo_stroke(cr);
-
-    if ( object->Type == ofd::ObjectType::TEXT ) {
-        TextObject *textObject = (TextObject*)object.get();
-        DrawTextObject(cr, textObject);
-    } else if ( object->Type == ofd::ObjectType::PATH ){
-        PathObject *pathObject = (PathObject*)object.get();
-        DrawPathObject(cr, pathObject);
-    } else if ( object->Type == ofd::ObjectType::IMAGE ){
-        ImageObject *imageObject = (ImageObject*)object.get();
-        DrawImageObject(cr, imageObject);
-    } else if ( object->Type == ofd::ObjectType::VIDEO ){
-        VideoObject *videoObject = (VideoObject*)object.get();
-        DrawVideoObject(cr, videoObject);
-    } else if ( object->Type == ofd::ObjectType::COMPOSITE ){
-        CompositeObject *compositeObject = (CompositeObject*)object.get();
-        DrawCompositeObject(cr, compositeObject);
-    }
-
-    RestoreState();
-}
-
-void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
-    if ( textObject == nullptr ) return;
-
-    //setDefaultCTM(cr);
-
-    //cairo_matrix_t matrix0;
-    //matrix0.xx = 1.0;
-    //matrix0.yx = 0.0;
-    //matrix0.xy = 0.0;
-    //matrix0.yy = -1.0;
-    ////matrix0.yy = -1.0;
-    //matrix0.x0 = -0.0;
-    ////matrix0.y0 = 0.0;
-    //matrix0.y0 = 841.89;
-    // Transform(&matrix0);
-    ////cairo_transform(cr, &matrix0);
-
-    showCairoMatrix(cr, "CairoRender", "DrawTextObject");
-
-    //double dpi = 150;
-
-    // -------- Font Face --------
-    // FIXME
-    //cairo_select_font_face(cr, "Simsun", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+void doDrawTextObject(cairo_t *cr, TextObject *textObject){
+    assert(cr != nullptr && textObject != nullptr);
 
     FontPtr font = textObject->GetFont();
-
-    // FIXME
     // fondID:
     //     2 - 标题等
     //     3 - 正文等
@@ -467,103 +438,168 @@ void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
     //     5 - 数字（显示位置右下偏移）
     //     10 - 13 - 字体未载入
     //     16 - 19 18- 黑体小标题 19 - 黑体顿号、小括号
-    //FontPtr defaultFont = textObject->GetPage()->GetOFDDocument()->GetDocumentRes()->GetFont(4);
-    //assert(defaultFont != nullptr);
-    //font = defaultFont;
-
-
-    //assert(font != nullptr);
-    //LOG(DEBUG) << "DrawTextObject using font (ID=" << font->ID << ")";
-    //assert(font->IsLoaded());
-
-    //if ( font->ID != 3 ) {
-        //return;
-    //}
 
     cairo_font_face_t *font_face = nullptr;
     if ( font != nullptr && font->IsLoaded() ){
         font_face = font->GetCairoFontFace();
         assert(font_face != nullptr);
-
         cairo_set_font_face(cr, font_face);
     } else {
         return;
     }
 
-    // -------- fontMatrix --------
-    double ctm[6] = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0};
-    __attribute__((unused)) double xx = ctm[0];
-    __attribute__((unused)) double xy = ctm[1];
-
-    // FIXME
-    __attribute__((unused)) double yx = ctm[2];
-    __attribute__((unused)) double yy = ctm[3];
-
-    __attribute__((unused)) double x0 = ctm[4];
-    __attribute__((unused)) double y0 = ctm[5];
-
     cairo_matrix_t fontMatrix;
-    cairo_get_font_matrix(cr, &fontMatrix);
     double fontSize = textObject->GetFontSize();
-    // FIXME
-    //double fontPixels = dpi * fontSize / 72;
-    double fontPixels = fontSize;
-
-    fontMatrix.xx = fontPixels * xx;
-    fontMatrix.yy = fontPixels * yy;
-    fontMatrix.x0 = x0;
-    fontMatrix.y0 = y0;
+    cairo_matrix_init_scale(&fontMatrix, fontSize, fontSize);
     cairo_set_font_matrix(cr, &fontMatrix);
 
     // -------- Draw Text --------
     const Text::TextCode &textCode = textObject->GetTextCode(0);
     double X = textCode.X;
     double Y = textCode.Y;
-    //double Y = 841.89 - textCode.Y;
     std::string text = textCode.Text;
 
-    // FIXME
-    //double X1 = X * dpi / 72;
-    //double Y1 = Y * dpi / 72;
-    double X1 = X;
-    double Y1 = Y;
-    //double Y1 = Y - 500;// * dpi / 72;
-
-    //double fontSize = textObject->GetFontSize();
-    //double fontPixels = dpi * fontSize / 72;
-    cairo_matrix_t font_matrix = {fontPixels, 0.0, 0.0, fontPixels, 0.0, 0.0};
+    cairo_matrix_t font_matrix = {fontSize, 0.0, 0.0, fontSize, 0.0, 0.0};
     cairo_matrix_t font_ctm = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0}; 
-    cairo_font_options_t *font_options = cairo_font_options_create();
-    cairo_get_font_options(cr, font_options);
-    cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_DEFAULT);
+    DrawFreeTypeString(X, Y, text, cr, font_face,
+            &font_matrix, &font_ctm, nullptr/*m_strokePattern*/);
+}
 
-
-    ColorPtr fillColor = textObject->GetFillColor();
-    if ( fillColor != nullptr ){
-        const ColorRGB &rgb = fillColor->Value.RGB;
-        double r = (double)rgb.Red / 255.0;
-        double g = (double)rgb.Green / 255.0;
-        double b = (double)rgb.Blue / 255.0;
-        double alpha = (double)textObject->Alpha / 255.0;
-        //UpdateFillPattern(r, g, b, alpha);
-        //LOG(DEBUG) << "textObject->FillColor=(" << r << "," << g << "," << b << "," << alpha << ")";
-        cairo_set_source_rgba(cr, b, g, r, alpha);
-    }
-
-    //cairo_set_source (cr, m_fillPattern);
-    DrawFreeTypeString(X1, Y1, text, cr, font_face,
-            //DrawFreeTypeString(X1, Y1, text, cr, 
-            &font_matrix, &font_ctm, font_options, m_strokePattern);
-            cairo_font_options_destroy(font_options);
-
-            //cairo_text_extents_t te;
-            //cairo_text_extents(cr, text.c_str(), &te);
-            //cairo_move_to(cr, X1 + 0.5 - te.width / 2 - te.x_bearing, Y1 + 0.5 - te.height / 2 - te.y_bearing);
-            //cairo_show_text(cr, text.c_str());
-            ////LOG(DEBUG) << "X: " << X1 << " Y: " << Y1 << " Text: " << text;
-
-
+void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
+    doDrawTextObject(cr, textObject);
     return;
+
+    //if ( textObject == nullptr ) return;
+
+    ////setDefaultCTM(cr);
+
+    ////cairo_matrix_t matrix0;
+    ////matrix0.xx = 1.0;
+    ////matrix0.yx = 0.0;
+    ////matrix0.xy = 0.0;
+    ////matrix0.yy = -1.0;
+    //////matrix0.yy = -1.0;
+    ////matrix0.x0 = -0.0;
+    //////matrix0.y0 = 0.0;
+    ////matrix0.y0 = 841.89;
+    //// Transform(&matrix0);
+    //////cairo_transform(cr, &matrix0);
+
+    //showCairoMatrix(cr, "CairoRender", "DrawTextObject");
+
+    ////double dpi = 150;
+
+    //// -------- Font Face --------
+    //// FIXME
+    ////cairo_select_font_face(cr, "Simsun", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+
+    //FontPtr font = textObject->GetFont();
+
+    //// FIXME
+    //// fondID:
+    ////     2 - 标题等
+    ////     3 - 正文等
+    ////     4 - 标点符号（不显示）  
+    ////     5 - 数字（显示位置右下偏移）
+    ////     10 - 13 - 字体未载入
+    ////     16 - 19 18- 黑体小标题 19 - 黑体顿号、小括号
+    ////FontPtr defaultFont = textObject->GetPage()->GetOFDDocument()->GetDocumentRes()->GetFont(4);
+    ////assert(defaultFont != nullptr);
+    ////font = defaultFont;
+
+
+    ////assert(font != nullptr);
+    ////LOG(DEBUG) << "DrawTextObject using font (ID=" << font->ID << ")";
+    ////assert(font->IsLoaded());
+
+    ////if ( font->ID != 3 ) {
+        ////return;
+    ////}
+
+    //cairo_font_face_t *font_face = nullptr;
+    //if ( font != nullptr && font->IsLoaded() ){
+        //font_face = font->GetCairoFontFace();
+        //assert(font_face != nullptr);
+
+        //cairo_set_font_face(cr, font_face);
+    //} else {
+        //return;
+    //}
+
+    //// -------- fontMatrix --------
+    //double ctm[6] = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+    //__attribute__((unused)) double xx = ctm[0];
+    //__attribute__((unused)) double xy = ctm[1];
+
+    //// FIXME
+    //__attribute__((unused)) double yx = ctm[2];
+    //__attribute__((unused)) double yy = ctm[3];
+
+    //__attribute__((unused)) double x0 = ctm[4];
+    //__attribute__((unused)) double y0 = ctm[5];
+
+    //cairo_matrix_t fontMatrix;
+    //cairo_get_font_matrix(cr, &fontMatrix);
+    //double fontSize = textObject->GetFontSize();
+    //// FIXME
+    ////double fontPixels = dpi * fontSize / 72;
+    //double fontPixels = fontSize;
+
+    //fontMatrix.xx = fontPixels * xx;
+    //fontMatrix.yy = fontPixels * yy;
+    //fontMatrix.x0 = x0;
+    //fontMatrix.y0 = y0;
+    //cairo_set_font_matrix(cr, &fontMatrix);
+
+    //// -------- Draw Text --------
+    //const Text::TextCode &textCode = textObject->GetTextCode(0);
+    //double X = textCode.X;
+    //double Y = textCode.Y;
+    ////double Y = 841.89 - textCode.Y;
+    //std::string text = textCode.Text;
+
+    //// FIXME
+    ////double X1 = X * dpi / 72;
+    ////double Y1 = Y * dpi / 72;
+    //double X1 = X;
+    //double Y1 = Y;
+    ////double Y1 = Y - 500;// * dpi / 72;
+
+    ////double fontSize = textObject->GetFontSize();
+    ////double fontPixels = dpi * fontSize / 72;
+    //cairo_matrix_t font_matrix = {fontPixels, 0.0, 0.0, fontPixels, 0.0, 0.0};
+    //cairo_matrix_t font_ctm = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0}; 
+    //cairo_font_options_t *font_options = cairo_font_options_create();
+    //cairo_get_font_options(cr, font_options);
+    //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_DEFAULT);
+
+
+    //ColorPtr fillColor = textObject->GetFillColor();
+    //if ( fillColor != nullptr ){
+        //const ColorRGB &rgb = fillColor->Value.RGB;
+        //double r = (double)rgb.Red / 255.0;
+        //double g = (double)rgb.Green / 255.0;
+        //double b = (double)rgb.Blue / 255.0;
+        //double alpha = (double)textObject->Alpha / 255.0;
+        ////UpdateFillPattern(r, g, b, alpha);
+        ////LOG(DEBUG) << "textObject->FillColor=(" << r << "," << g << "," << b << "," << alpha << ")";
+        //cairo_set_source_rgba(cr, b, g, r, alpha);
+    //}
+
+    ////cairo_set_source (cr, m_fillPattern);
+    //DrawFreeTypeString(X1, Y1, text, cr, font_face,
+            ////DrawFreeTypeString(X1, Y1, text, cr, 
+            //&font_matrix, &font_ctm, m_strokePattern);
+    //cairo_font_options_destroy(font_options);
+
+            ////cairo_text_extents_t te;
+            ////cairo_text_extents(cr, text.c_str(), &te);
+            ////cairo_move_to(cr, X1 + 0.5 - te.width / 2 - te.x_bearing, Y1 + 0.5 - te.height / 2 - te.y_bearing);
+            ////cairo_show_text(cr, text.c_str());
+            //////LOG(DEBUG) << "X: " << X1 << " Y: " << Y1 << " Text: " << text;
+
+
+    //return;
 }
 
 void DoCairoPath(cairo_t *cr, PathPtr path){
@@ -1030,9 +1066,14 @@ cairo_t *CairoRender::GetCairoContext() const{
 }
 
 // ======== CairoRender::DrawPage() ========
-void CairoRender::DrawPage(PagePtr page, VisibleParams visibleParams){
-    Render::DrawPage(page, visibleParams);
-    m_impl->DrawPage(page, visibleParams);
+void CairoRender::ClearPage(){
+    m_impl->ClearPage();
+}
+
+// ======== CairoRender::DrawPage() ========
+void CairoRender::DrawPage(PagePtr page, ViewArea viewArea){
+    Render::DrawPage(page, viewArea);
+    m_impl->DrawPage(page, viewArea);
 }
 
 void CairoRender::DrawObject(ObjectPtr object){
@@ -1667,3 +1708,4 @@ void CairoRender::ImplCls::doRadialShFill(cairo_t *cr, PathObject *pathObject){
         //}
     }
 }
+    // 
