@@ -34,8 +34,8 @@ void OFDOutputDev::beginString(GfxState *state, GooString *s){
         updateFont(state);
     }
 
-    if (!m_currentFont)
-        return;
+    //if (!m_embeddedFont)
+        //return;
 
     m_cairoGlyphs = (cairo_glyph_t *) gmallocn (len, sizeof (cairo_glyph_t));
     m_glyphsCount = 0;
@@ -52,8 +52,8 @@ void OFDOutputDev::endString(GfxState *state){
 
     int render;
 
-    if (!m_currentFont)
-        return;
+    //if (!m_embeddedFont)
+        //return;
 
     // endString can be called without a corresponding beginString. If this
     // happens glyphs will be null so don't draw anything, just return.
@@ -254,12 +254,20 @@ void OFDOutputDev::drawChar(GfxState *state, double x, double y,
         ofd::ObjectPtr object = std::shared_ptr<ofd::Object>(textObject);
         m_currentOFDPage->AddObject(object);
 
-        //m_actualText->addChar(state, x, y, dx, dy, code, nBytes, u, uLen);
+        m_actualText->addChar(state, x, y, dx, dy, code, nBytes, u, uLen);
     }
 
 
-    if ( m_currentFont != nullptr ) {
-        m_cairoGlyphs[m_glyphsCount].index = m_currentFont->GetGlyph (code, u, uLen);
+    // FIXME
+
+    GfxFont *gfxFont = state->getFont();
+    Ref *ref = gfxFont->getID();
+    uint64_t fontID = ref->num;
+    auto iter = m_embeddedFonts.find(fontID);
+    if (iter != m_embeddedFonts.end()){
+        ofd::FontPtr embeddedFont = iter->second;
+    //if ( m_embeddedFont != nullptr ){
+        m_cairoGlyphs[m_glyphsCount].index = embeddedFont->GetGlyph (code, u, uLen);
         m_cairoGlyphs[m_glyphsCount].x = x - originX;
         m_cairoGlyphs[m_glyphsCount].y = y - originY;
         m_glyphsCount++;

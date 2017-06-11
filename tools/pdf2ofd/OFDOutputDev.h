@@ -304,7 +304,9 @@ public:
     int m_utf8Count;
     int m_utf8Max;
     bool m_textMatrixValid;
-    ofd::FontPtr m_currentFont;
+    //ofd::FontPtr m_embeddedFont;
+    ofd::FontMap m_embeddedFonts;
+    //ofd::FontPtr m_currentFont;
     double m_currentFontSize;
     double *m_currentCTM;
     cairo_pattern_t *m_fillPattern, *m_strokePattern;

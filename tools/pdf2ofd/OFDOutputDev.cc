@@ -88,7 +88,8 @@ OFDOutputDev::OFDOutputDev(ofd::PackagePtr package) :
     //m_imageSurface(nullptr),
     m_cairoRender(nullptr),
     m_package(package), m_document(nullptr), m_currentOFDPage(nullptr),
-    m_currentFont(nullptr), m_currentFontSize(14.0), m_currentCTM(nullptr) {
+    //m_embeddedFont(nullptr), //m_currentFont(nullptr),
+    m_currentFontSize(14.0), m_currentCTM(nullptr) {
 
     utils::ffw_init(false);
     cur_mapping.resize(0x10000);
