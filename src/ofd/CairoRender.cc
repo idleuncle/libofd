@@ -720,6 +720,10 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
 
     //directDoPath(cr);
     //doRadialShFill(cr, pathObject);
+    //char buf[1];
+    //for ( int i = 0 ; i < 10 ; i++ ){
+        //buf[i] = 3;
+    //}
     doDrawPathObject(cr, pathObject);
     return;
 
