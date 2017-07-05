@@ -283,6 +283,8 @@ public:
     cairo_path_t *m_textClipPath;
     GfxRGB m_strokeColor;
     GfxRGB m_fillColor;
+    GfxRGB m_clipFillColor;
+    GfxRGB m_clipStrokeColor;
     double m_lineWidth;
     double m_strokeOpacity;
     double m_fillOpacity;
@@ -384,6 +386,7 @@ private:
     std::vector<int> width_list; // width of each char
     ofd::ColorStopArray m_colorStops; // Color stops for shading
     ofd::PathPtr m_clipPath;
+    cairo_matrix_t m_clipMatrix;
 
 
     void doRadialShFill(GfxState *state);

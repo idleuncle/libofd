@@ -28,6 +28,8 @@
 
 using namespace ofd;
 
+const double CAIRO_OFFSET = 0.5;
+
 void showCairoMatrix(cairo_t *cr, const std::string &title, const std::string &msg){
     //cairo_matrix_t matrix;
     //cairo_get_matrix(cr, &matrix);
@@ -383,7 +385,7 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
     //ucLen = ucPos;
 
     //status = cairo_scaled_font_text_to_glyphs(scaled_font, X, Y, (const char *)&unic[0], ucLen,
-    status = cairo_scaled_font_text_to_glyphs(scaled_font, X, Y, text.c_str(), text.length(),
+    status = cairo_scaled_font_text_to_glyphs(scaled_font, X + CAIRO_OFFSET, Y + CAIRO_OFFSET, text.c_str(), text.length(),
             &glyphs, &num_glyphs, 
             &clusters, &num_clusters, &cluster_flags
             //nullptr, nullptr, nullptr
@@ -626,19 +628,21 @@ void DoCairoPath(cairo_t *cr, PathPtr path){
         if ( numPoints < 2 ) continue;
 
         const Point_t &p0 = subpath->GetPoint(0);
-        cairo_move_to(cr, p0.X, p0.Y);
+        cairo_move_to(cr, p0.X + CAIRO_OFFSET, p0.Y + CAIRO_OFFSET);
 
         for ( size_t n = 1 ; n < numPoints ; n++ ){
             char flag = subpath->GetFlag(n);
             if ( flag == 'L' ){
                 const Point_t &p = subpath->GetPoint(n);
-                cairo_line_to(cr, p.X, p.Y);
+                cairo_line_to(cr, p.X + CAIRO_OFFSET, p.Y + CAIRO_OFFSET);
             } else if ( flag == 'B' ){
                 // 三次贝塞尔曲线
                 const Point_t &p1 = subpath->GetPoint(n);
                 const Point_t &p2 = subpath->GetPoint(n+1);
                 const Point_t &p3 = subpath->GetPoint(n+2);
-                cairo_curve_to(cr, p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y);
+                cairo_curve_to(cr, p1.X + CAIRO_OFFSET, p1.Y + CAIRO_OFFSET, 
+                        p2.X + CAIRO_OFFSET, p2.Y + CAIRO_OFFSET, 
+                        p3.X + CAIRO_OFFSET, p3.Y + CAIRO_OFFSET);
                 //cairo_line_to(cr, p1.X, p1.Y);
                 //cairo_line_to(cr, p2.X, p2.Y);
                 //cairo_line_to(cr, p3.X, p3.Y);
@@ -660,7 +664,9 @@ void DoCairoPath(cairo_t *cr, PathPtr path){
                 p_3[2].X = (2.0/(2+1)) * p_2[1].X  + ((2+1-2)/(2+1)) * p_2[2].X;
                 p_3[2].Y = (2.0/(2+1)) * p_2[1].Y  + ((2+1-2)/(2+1)) * p_2[2].Y;
 
-                cairo_curve_to(cr, p_3[0].X, p_3[0].Y, p_3[1].X, p_3[1].Y, p_3[2].X, p_3[2].Y);
+                cairo_curve_to(cr, p_3[0].X + CAIRO_OFFSET, p_3[0].Y + CAIRO_OFFSET, 
+                        p_3[1].X + CAIRO_OFFSET, p_3[1].Y + CAIRO_OFFSET, 
+                        p_3[2].X + CAIRO_OFFSET, p_3[2].Y + CAIRO_OFFSET);
             }
         }
         if ( subpath->IsClosed() ){
@@ -673,6 +679,7 @@ void DoCairoPath(cairo_t *cr, PathPtr path){
     }
 }
 
+//std::set<uint64_t> pathObjects;
 void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
     if ( pathObject == nullptr ) return;
 
@@ -684,7 +691,33 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
         //LOG(DEBUG) << "Debug missing path object. ID=" < drawState.Debug.PathObjectID;
         return;
     }
-    //LOG(DEBUG) << pathObject->to_string();
+
+    //if ( pathObject->FillShading == nullptr ) return;
+
+    //uint64_t ID = pathObject->ID;
+    //if (ID != 0 && ID != 1) return;
+    //if ( ID > 5 ) return;
+    //if ( pathObjects.find(ID) == pathObjects.end() ){
+        //pathObjects.insert(ID);
+    //}
+    //for ( auto a : pathObjects){
+        //LOG(DEBUG) << std::to_string(a);
+    //}
+    ////if ( ID >= 39 && ID <= 43 ){
+        ////return;
+    ////}
+    ////if ( ID != 5 && ID != 1 && !(ID >= 39 && ID <= 43)){
+        ////return;
+    ////}
+    ////if ( !(ID >= 21 && ID <= 30 )){
+        ////return;
+    ////}
+    //if ( ID != 5 ){
+        //return;
+    //}
+
+    //LOG(DEBUG) << "*** " << pathObject->to_string() << " ***";
+
     //directDoPath(cr);
     //doRadialShFill(cr, pathObject);
     doDrawPathObject(cr, pathObject);
@@ -1199,9 +1232,9 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
     matrix.x0 = pathObject->CTM[4];
     matrix.y0 = pathObject->CTM[5];
     // FIXME
-    if ( pathObject->FillShading == nullptr ){
+    //if ( pathObject->FillShading == nullptr ){
         cairo_transform(cr, &matrix);
-    }
+    //}
 
     showCairoMatrix(cr, "CairoRender", "DrawPathObject");
 

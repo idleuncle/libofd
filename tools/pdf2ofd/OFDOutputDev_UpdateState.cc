@@ -220,31 +220,33 @@ void OFDOutputDev::updateLineWidth(GfxState *state){
 }
 
 void OFDOutputDev::updateFillColor(GfxState *state){
-    GfxRGB color = m_fillColor;
+    state->getFillRGB(&m_fillColor);
+    GfxRGB fillColor = m_fillColor;
+
+    GfxRGB color = fillColor;
 
     if ( m_uncoloredPattern ) return;
 
-    state->getFillRGB(&m_fillColor);
     if (cairo_pattern_get_type(m_fillPattern) != CAIRO_PATTERN_TYPE_SOLID ||
-            color.r != m_fillColor.r ||
-            color.g != m_fillColor.g ||
-            color.b != m_fillColor.b)
+            color.r != fillColor.r ||
+            color.g != fillColor.g ||
+            color.b != fillColor.b)
     {
         cairo_pattern_destroy(m_fillPattern);
-        m_fillPattern = cairo_pattern_create_rgba(colToDbl(m_fillColor.r),
-                colToDbl(m_fillColor.g),
-                colToDbl(m_fillColor.b),
+        m_fillPattern = cairo_pattern_create_rgba(colToDbl(fillColor.r),
+                colToDbl(fillColor.g),
+                colToDbl(fillColor.b),
                 m_fillOpacity);
 
         if ( m_cairoRender != nullptr ){
-            m_cairoRender->UpdateFillPattern(colToDbl(m_fillColor.r), colToDbl(m_fillColor.g),
-                colToDbl(m_fillColor.b), m_fillOpacity);
+            m_cairoRender->UpdateFillPattern(colToDbl(fillColor.r), colToDbl(fillColor.g),
+                colToDbl(fillColor.b), m_fillOpacity);
         }
-        LOG(INFO) <<  "[imageSurface] fill color: " << m_fillColor.r << ", " <<  m_fillColor.g << ", " << m_fillColor.b;
+        LOG(INFO) <<  "[imageSurface] fill color: " << fillColor.r << ", " <<  fillColor.g << ", " << fillColor.b;
 
 
         std::stringstream ssCairoLog;
-        ssCairoLog << "- updateFillColor - " << " fillColor:(" << m_fillColor.r << ", " <<  m_fillColor.g << ", " << m_fillColor.b << ") ";
+        ssCairoLog << "- updateFillColor - " << " fillColor:(" << fillColor.r << ", " <<  fillColor.g << ", " << fillColor.b << ") ";
 
         std::string cairoLog = ssCairoLog.str() + "\n";
         cairoLogFile.write(cairoLog.c_str(), cairoLog.length());

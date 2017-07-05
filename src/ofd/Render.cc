@@ -9,7 +9,7 @@ Render::Render() : m_viewArea(std::make_tuple(0.0, 0.0, 1.0)){
     // 针对sample2仅绘制第6页的ID=71的PathObject(国网标志，径向渐变）
 
     //m_drawState.Debug.Enabled = true;
-    //m_drawState.Debug.PageDrawing = 1; // 36 6
+    //m_drawState.Debug.PageDrawing = 2;  //36 6
     //m_drawState.Debug.PathObjectID = 71;
 
 }

@@ -45,7 +45,7 @@ cairo_pattern_t *RadialShading::CreateFillPattern(cairo_t *cr){
     
     cairo_matrix_t matrix;
     cairo_get_matrix(cr, &matrix);
-    double scale = 26.4687;
+    double scale = 13;//26.4687;
     //scale = (sqrt(matrix.xx * matrix.xx + matrix.yx * matrix.yx)
             //+ sqrt(matrix.xy * matrix.xy + matrix.yy * matrix.yy)) / 2;
     cairo_matrix_init_scale(&matrix, scale, scale);
@@ -212,6 +212,23 @@ cairo_pattern_t *AxialShading::CreateFillPattern(cairo_t *cr){
     double tMax = 1;
     fillPattern = cairo_pattern_create_linear (x0 + tMin * dx, y0 + tMin * dy,
             x0 + tMax * dx, y0 + tMax * dy);
+
+    for ( size_t i = 0 ; i < ColorSegments.size() ; i++ ){
+
+        const ColorStop_t &cs = ColorSegments[i];
+        const ColorPtr color = cs.Color;
+        double pos = cs.Offset;
+
+        //double r = color->Value.RGB.Red / 255.0;
+        //double g = color->Value.RGB.Green / 255.0;
+        //double b = color->Value.RGB.Blue / 255.0;
+        double b = color->Value.RGB.Red / 255.0;
+        double g = color->Value.RGB.Green / 255.0;
+        double r = color->Value.RGB.Blue / 255.0;
+
+        double a = color->Alpha / 255.0;
+        cairo_pattern_add_color_stop_rgba(fillPattern, pos, r, g, b, a);
+    } 
 
     if ( Extend ){
         cairo_pattern_set_extend(fillPattern, CAIRO_EXTEND_PAD);
