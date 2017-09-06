@@ -24,6 +24,7 @@ namespace utils {
         bool AddFile(const std::string &filename, const std::string &text);
         bool AddFile(const std::string &filename, const char *buf, size_t bufSize);
         bool AddDir(const std::string &dirName);
+        bool IsFileExist(const std::string &filename) const;
 
     private:
         class ImplCls;

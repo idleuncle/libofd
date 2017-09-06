@@ -36,6 +36,7 @@ public:
     bool FromResXML(const std::string &strResXML);
 
     void AddImage(ImagePtr image);
+    void AddImage(uint64_t imageID, const std::string imageFile, const std::string imageFormat);
     const ImageMap &GetImages() const {return m_images;};
     const ImagePtr GetImage(uint64_t imageID) const;
 
@@ -51,6 +52,7 @@ private:
     bool FromColorSpacesXML(utils::XMLElementPtr colorSpacesElement);
     bool FromFontsXML(utils::XMLElementPtr fontsElement);
     bool FromImagesXML(utils::XMLElementPtr fontsElement);
+    bool FromMultiMediasXML(utils::XMLElementPtr multimediasElemnt);
 
     // -------- Private Attributes --------
 public:
@@ -311,11 +313,27 @@ bool Resource::ImplCls::LoadFonts(){
 }
 
 void Resource::ImplCls::AddImage(ImagePtr image){
+
     uint64_t imageID = image->ID;
 
     std::string imageFile = image->GenerateImageFileName();
     std::string imageFilePath = GenerateResourceFilePath(imageFile);
     image->SetImageFilePath(imageFilePath);
+
+    if ( m_images.find(imageID) != m_images.end() ){
+        m_images[imageID] = image;
+    } else {
+        m_images.insert(ImageMap::value_type(imageID, image));
+    }
+}
+
+void Resource::ImplCls::AddImage(uint64_t imageID, const std::string imageFile, const std::string imageFormat){
+
+    ImagePtr image = std::make_shared<Image>();
+
+    image->ID = imageID;
+    std::string imageFilePath = GenerateResourceFilePath(imageFile);
+    image->SetImageFilePath(imageFilePath); 
 
     if ( m_images.find(imageID) != m_images.end() ){
         m_images[imageID] = image;
@@ -378,12 +396,67 @@ bool Resource::ImplCls::FromImagesXML(utils::XMLElementPtr imagesElement){
     bool ok = false;
 
     utils::XMLElementPtr childElement = imagesElement->GetFirstChildElement();
+
     while ( childElement != nullptr ){
 
         ImagePtr image = std::make_shared<Image>();
         if ( image->FromXML(childElement) ){
             AddImage(image);
             ok = true;
+        }
+
+        childElement = childElement->GetNextSiblingElement();
+    }
+
+    return ok;
+}
+
+bool Resource::ImplCls::FromMultiMediasXML(utils::XMLElementPtr multimediasElemnt){
+    bool ok = false;
+
+    utils::XMLElementPtr childElement = multimediasElemnt->GetFirstChildElement();
+
+    while ( childElement != nullptr ){
+        std::string childName = childElement->GetName();
+
+        if ( childName == "MultiMedia" ){
+            uint64_t mmID = 0;
+            bool exist = false;
+            std::tie(mmID, exist) = childElement->GetIntAttribute("ID");
+            if ( !exist ){
+                LOG(ERROR) << "Attribute ID is required in MultiMedia";
+                return false;
+            }
+
+            std::string mmType;
+            std::tie(mmType, exist) = childElement->GetStringAttribute("Type");
+            if ( !exist ){
+                LOG(ERROR) << "Attribute Type is required in MultiMedia";
+                return false;
+            }
+
+            std::string mmFormat;
+            std::tie(mmFormat, exist) = childElement->GetStringAttribute("Format");
+
+            utils::XMLElementPtr mediaFileElement = childElement->GetFirstChildElement();
+            if ( mediaFileElement == nullptr ){
+                LOG(ERROR) << "Child element MediaFile is required in MultiMedia";
+                return false;
+            }
+
+            std::string mediaFile;
+            std::tie(mediaFile, exist) = mediaFileElement->GetStringValue();
+            if ( !exist ){
+                LOG(ERROR) << "MediaFile value is required in MultiMedia";
+                return false;
+            }
+
+            if ( mmType == "Image" ){
+                ImagePtr image = std::make_shared<Image>();
+                AddImage(mmID, mediaFile, mmFormat);
+                ok = true;
+            }
+
         }
 
         childElement = childElement->GetNextSiblingElement();
@@ -429,15 +502,16 @@ bool Resource::ImplCls::FromResXML(const std::string &strResXML){
                     // Optional
                     FromFontsXML(childElement);
 
+                    // FIXME
                 } else if ( childName == "Images" ){
                     // -------- <Images>
                     // Optional
                     FromImagesXML(childElement);
 
-                //} else if ( childName == "MultiMedias" ){
-                    // TODO
+                } else if ( childName == "MultiMedias" ){
                     // -------- <MultiMedias>
                     // Optional
+                    FromMultiMediasXML(childElement);
 
                 //} else if ( childName == "CompositeGraphicUnits" ){
                     // TODO

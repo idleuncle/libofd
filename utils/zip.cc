@@ -20,6 +20,7 @@ public:
     bool AddFileString(const std::string &filename, const std::string &text);
     bool AddFileRaw(const std::string &filename, const char *buf, size_t bufSize);
     bool AddDir(const std::string &dirName);
+    bool IsFileExist(const std::string &fileinzip) const;
 
 public:
     Zip *m_zip;
@@ -169,6 +170,14 @@ bool Zip::ImplCls::AddDir(const std::string &dirName) {
 }
 
 
+bool Zip::ImplCls::IsFileExist(const std::string &fileinzip) const{
+    if ( m_archive != nullptr ){
+        return zip_name_locate(m_archive, fileinzip.c_str(), 0) != -1;
+    } else {
+        return false;
+    }
+}
+
 // **************** class Zip ****************
 
 Zip::Zip(){
@@ -211,4 +220,8 @@ bool Zip::AddFile(const std::string &filename, const char *buf, size_t bufSize) 
 bool Zip::AddDir(const std::string &dirName) {
     LOG(DEBUG) << "Zip::AddDir(). dirame: " << dirName;
     return m_impl->AddDir(dirName);
+}
+
+bool Zip::IsFileExist(const std::string &fileinzip) const{
+    return m_impl->IsFileExist(fileinzip);
 }

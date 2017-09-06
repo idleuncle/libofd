@@ -372,6 +372,15 @@ std::tuple<char*, size_t, bool> Package::ReadZipFileRaw(const std::string &filei
     return std::make_tuple(buf, buflen, ok);
 }
 
+// ======== Package::IsZipFileExist() ========
+bool Package::IsZipFileExist(const std::string &fileinzip) const{
+    if ( m_zip != nullptr ){
+        return m_zip->IsFileExist(fileinzip);
+    } else {
+        return false;
+    }
+}
+
 // -------- Package::fromOFDXML() --------
 // OFD (section 7.4) P6. OFD.xsd
 bool Package::fromOFDXML(const std::string &strOFDXML){

@@ -316,7 +316,9 @@ bool Font::Load(PackagePtr package, bool reload){
         char *fontData = nullptr;
         size_t fontDataSize = 0;
         bool readOK = false;
-        std::tie(fontData, fontDataSize, readOK) = package->ReadZipFileRaw(fontFilePath);
+        if ( package->IsZipFileExist(fontFilePath) ){
+            std::tie(fontData, fontDataSize, readOK) = package->ReadZipFileRaw(fontFilePath);
+        }
         if ( readOK ){
             if ( CreateFromData(fontData, fontDataSize) ){
                 LOG(INFO) << "Font " << FontName << "(ID=" << ID << ") loaded.";

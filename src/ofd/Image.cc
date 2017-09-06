@@ -67,6 +67,24 @@ void PNGStream::Reset(){
 void PNGStream::Close(){
 }
 
+#include "JPEGStream.h"
+std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char *data, size_t dataSize){
+    ImageDataHead imageDataHead;
+    char *imageData = nullptr;
+    size_t imageDataSize = 0;
+    int width = 0;
+    int height = 0;
+    int components = 0;
+    std::tie(imageData, imageDataSize, width, height, components) = jpeg2rgb((unsigned char*)data, dataSize);
+
+    imageDataHead.Width = width;
+    imageDataHead.Height = height;
+    imageDataHead.Components = components; // default 4
+    imageDataHead.Bits = 8;
+
+    return std::make_tuple(imageDataHead, imageData, imageDataSize);
+}
+
 std::tuple<ImageDataHead, char*, size_t> LoadPNGData(char* data, size_t dataSize){
     ImageDataHead imageDataHead;
     char *imageData = nullptr;
@@ -230,7 +248,8 @@ bool Image::Load(PackagePtr package, bool reload){
     std::tie(pngData, pngDataSize, readOK) = package->ReadZipFileRaw(imageFilePath);
     if ( pngDataSize > 0 ){
         ImageDataHead imageDataHead;
-        std::tie(imageDataHead, imageData, imageDataSize) = LoadPNGData(pngData, pngDataSize);
+        //std::tie(imageDataHead, imageData, imageDataSize) = LoadPNGData(pngData, pngDataSize);
+        std::tie(imageDataHead, imageData, imageDataSize) = LoadJPEGData(pngData, pngDataSize);
         if ( imageDataSize > 0 ){
             width = imageDataHead.Width;
             height = imageDataHead.Height;

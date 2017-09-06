@@ -56,7 +56,7 @@ bool Page::Open(){
     if ( package == nullptr ) return false;
 
     std::string docRoot = document->GetDocRoot();
-    std::string pageXMLFile = docRoot + "/" + BaseLoc + "/Content.xml";
+    std::string pageXMLFile = docRoot + "/" + BaseLoc; 
     LOG(INFO) << "Try to open zipfile " << pageXMLFile;
 
     bool ok = false;

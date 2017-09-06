@@ -281,8 +281,8 @@ void CairoRender::ImplCls::DrawObject(ObjectPtr object){
         cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 
         if ( object->Type == ofd::ObjectType::TEXT ) {
-            TextObject *textObject = (TextObject*)object.get();
-            DrawTextObject(cr, textObject);
+            //TextObject *textObject = (TextObject*)object.get();
+            //DrawTextObject(cr, textObject);
         } else if ( object->Type == ofd::ObjectType::PATH ){
             PathObject *pathObject = (PathObject*)object.get();
             DrawPathObject(cr, pathObject);
@@ -718,7 +718,6 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
 
     //LOG(DEBUG) << "*** " << pathObject->to_string() << " ***";
 
-    //directDoPath(cr);
     //doRadialShFill(cr, pathObject);
     //char buf[1];
     //for ( int i = 0 ; i < 10 ; i++ ){
@@ -726,70 +725,6 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
     //}
     doDrawPathObject(cr, pathObject);
     return;
-
-    //cairo_matrix_t matrix;
-    //matrix.xx = pathObject->CTM[0];
-
-    //matrix.yx = pathObject->CTM[1];
-    //matrix.xy = pathObject->CTM[2];
-
-    ////// FIXME
-    ////matrix.yx = 0;//pathObject->CTM[2];
-    ////matrix.xy = 0;//pathObject->CTM[1];
-
-
-    //matrix.yy = pathObject->CTM[3];
-    //matrix.x0 = pathObject->CTM[4];
-    //matrix.y0 = pathObject->CTM[5];
-    //cairo_transform(cr, &matrix);
-
-    //showCairoMatrix(cr, "CairoRender", "DrawPathObject");
-
-
-    //PathPtr path = pathObject->GetPath();
-    //DoCairoPath(cr, path);
-
-    //cairo_set_line_width(cr, pathObject->LineWidth);
-
-    //ColorPtr strokeColor = pathObject->GetStrokeColor();
-    //if ( strokeColor != nullptr ){
-        //double r, g, b, a;
-        //std::tie(r, g, b, a) = strokeColor->GetRGBA();
-        //UpdateStrokePattern(r, g, b, a);
-        ////LOG(DEBUG) << "DrawPathObject() rgb = (" << r << "," << g << "," << b << ")";
-
-        //cairo_set_source(cr, m_strokePattern);
-        //cairo_stroke(cr);
-    //} else {
-        //// FIXME 渐变色缺陷
-        //if ( pathObject->FillShading != nullptr ){
-            //UpdateFillPattern(pathObject->FillShading);
-        //} else {
-            //ColorPtr fillColor = pathObject->GetFillColor();
-            //if ( fillColor != nullptr ){
-                //double r, g, b, a;
-                //std::tie(r, g, b, a) = fillColor->GetRGBA();
-                //UpdateFillPattern(r, g, b, a);
-                ////LOG(DEBUG) << "DrawPathObject() rgb = (" << r << "," << g << "," << b << ")";
-            //}
-        //}
-        //cairo_set_source(cr, m_fillPattern);
-
-        //if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
-            //cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
-        //} else {
-            //cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
-        //}
-
-        //cairo_fill(cr);
-
-        //if ( pathObject->Rule == ofd::PathRule::EvenOdd ){
-            //EoClip(path);
-        //} else {
-            //Clip(path);
-        //}
-    //}
-
 }
 
 //// Defined in CairoRender_Poppler.cc
@@ -927,8 +862,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
         cairo_restore(cr);
         return;
     }
-    std::string pngFileName = "/tmp/Image_draw_" + std::to_string(image->ID) + ".png";
-    cairo_surface_write_to_png(imageSurface, pngFileName.c_str());
+    //std::string pngFileName = "/tmp/Image_draw_" + std::to_string(image->ID) + ".png";
+    //cairo_surface_write_to_png(imageSurface, pngFileName.c_str());
 
     int width = cairo_image_surface_get_width (imageSurface);
     int height = cairo_image_surface_get_height (imageSurface);
@@ -1198,54 +1133,23 @@ void CairoRender::Rebuild(double pixelWidth, double pixelHeight, double resoluti
 
 //GfxRadialShading *shading
 
-void directDoPath(cairo_t *cairo){
-    cairo_new_path(cairo);
-
-    std::vector<ofd::_Point> points;
-    points.push_back(ofd::_Point(-0.379, -1.202));
-    points.push_back(ofd::_Point(-0.379, 0.467));
-    points.push_back(ofd::_Point(1.206, 0.467));
-    points.push_back(ofd::_Point(1.206, -1.202));
-    points.push_back(ofd::_Point(-0.379, -1.202));
-
-    double x, y;
-    x = points[0].X;
-    y = points[0].Y;
-    cairo_move_to(cairo, x, y);
-    for (size_t i = 1 ; i < points.size() ; i++){
-        x = points[i].X;
-        y = points[i].Y;
-        cairo_line_to(cairo, x, y);
-    }
-    cairo_close_path(cairo);
-}
-void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject){
-        //if ( pathObject->FillShading != nullptr )
+void doTransformObject(ofd::Object *object, cairo_t *cr){
     cairo_matrix_t matrix;
-    matrix.xx = pathObject->CTM[0];
- 
-    matrix.yx = pathObject->CTM[1];
-    matrix.xy = pathObject->CTM[2];
+    matrix.xx = object->CTM[0];
+    matrix.yx = object->CTM[1];
+    matrix.xy = object->CTM[2];
+    matrix.yy = object->CTM[3];
+    matrix.x0 = object->CTM[4];
+    matrix.y0 = object->CTM[5];
 
-    // FIXME
-    //matrix.yx = 0;//pathObject->CTM[2];
-    //matrix.xy = 0;//pathObject->CTM[1];
+    cairo_transform(cr, &matrix);
+}
 
-
-    matrix.yy = pathObject->CTM[3];
-    matrix.x0 = pathObject->CTM[4];
-    matrix.y0 = pathObject->CTM[5];
-    // FIXME
-    //if ( pathObject->FillShading == nullptr ){
-        cairo_transform(cr, &matrix);
-    //}
-
-    showCairoMatrix(cr, "CairoRender", "DrawPathObject");
-
+void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject){
+    doTransformObject(pathObject, cr);
 
     PathPtr path = pathObject->GetPath();
     DoCairoPath(cr, path);
-    //directDoPath(cr);
 
     cairo_set_line_width(cr, pathObject->LineWidth);
 

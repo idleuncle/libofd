@@ -6,6 +6,7 @@
 #include "utils/xml.h"
 #include "utils/uuid.h"
 #include "utils/logger.h"
+#include "utils/utils.h"
 
 using namespace ofd;
 using namespace utils;
@@ -50,23 +51,33 @@ bool Document::Open(){
     if ( m_opened ) return true;
 
     if ( m_commonData.PublicRes != nullptr ){
-        std::string strResXML;
-        std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(m_docBody.DocRoot + "/" + m_commonData.PublicRes->GetResDescFile());
-        if ( !m_commonData.PublicRes->FromResXML(strResXML) ){
-            LOG(ERROR) << "m_commonData.PublicRes.FromResXML() failed.";
-            return false;
+        std::string publicResFileName = m_docBody.DocRoot + "/" + m_commonData.PublicRes->GetResDescFile();
+        if ( m_package.lock()->IsZipFileExist(publicResFileName) ){
+            std::string strResXML;
+            std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(publicResFileName);
+            if ( !m_commonData.PublicRes->FromResXML(strResXML) ){
+                LOG(ERROR) << "m_commonData.PublicRes.FromResXML() failed.";
+                return false;
+            }
+        } else {
+            LOG(INFO) << "Public resource file " << publicResFileName << " is not exist.";
         }
     }
 
     if ( m_commonData.DocumentRes != nullptr ){
-        std::string strResXML;
-        std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(m_docBody.DocRoot + "/" + m_commonData.DocumentRes->GetResDescFile());
-        if ( !m_commonData.DocumentRes->FromResXML(strResXML) ){
-            LOG(ERROR) << "m_commonData.DocumentRes.FromResXML() failed.";
-            return false;
+        std::string documentResFileName = m_docBody.DocRoot + "/" + m_commonData.DocumentRes->GetResDescFile();
+        if ( m_package.lock()->IsZipFileExist(documentResFileName) ){
+            std::string strResXML;
+            std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(documentResFileName);
+            if ( !m_commonData.DocumentRes->FromResXML(strResXML) ){
+                LOG(ERROR) << "m_commonData.DocumentRes.FromResXML() failed.";
+                return false;
+            } else {
+                m_commonData.DocumentRes->LoadFonts();
+                m_commonData.DocumentRes->LoadImages();
+            }
         } else {
-            m_commonData.DocumentRes->LoadFonts();
-            m_commonData.DocumentRes->LoadImages();
+            LOG(WARNING) << "Document resource file " << documentResFileName << " is not exist.";
         }
     }
     m_opened = true;
@@ -217,7 +228,7 @@ void Document::generatePagesXML(XMLWriter &writer) const{
 
                 // -------- <Page BaseLoc="">
                 // Required.
-                writer.WriteAttribute("BaseLoc", std::string("Pages/Page_") + std::to_string(idx));
+                writer.WriteAttribute("BaseLoc", std::string("Pages/Page_") + std::to_string(idx) + "/Content.xml");
 
                 idx++;
             } writer.EndElement();

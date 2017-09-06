@@ -32,6 +32,7 @@ namespace ofd{
 
             std::tuple<std::string, bool> ReadZipFileString(const std::string &fileinzip) const;
             std::tuple<char*, size_t, bool> ReadZipFileRaw(const std::string &fileinzip) const;
+            bool IsZipFileExist(const std::string &fileinzip) const;
 
             // ---------------- Private Attributes ----------------
         public:

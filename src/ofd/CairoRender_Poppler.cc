@@ -3,6 +3,9 @@
 #include "CairoRescaleBox.h"
 #include <GfxState.h>
 #include <OutputDev.h>
+
+// poppler/poppler/CairoOutputDev.cc
+
 class RescaleDrawImage : public CairoRescaleBox {
 private:
   ImageStream *imgStr;
