@@ -292,14 +292,14 @@ void OFDOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxIma
 
 bool SaveImageStream(const std::string &filename, Stream *str, int widthA, int heightA, int nComps, int nBits){
 
-    ofd::ImageDataHead imageDataHead(widthA, heightA, nComps, nBits);
+    utils::ImageDataHead imageDataHead(widthA, heightA, nComps, nBits);
     int lineSize = imageDataHead.GetLineSize();
     uint8_t *buffer = new uint8_t[lineSize];
 
     std::ofstream datFile;
     datFile.open(filename.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
 
-    datFile.write((const char*)&imageDataHead, sizeof(ofd::ImageDataHead));
+    datFile.write((const char*)&imageDataHead, sizeof(utils::ImageDataHead));
     str->reset();
     int n = 0;
     while ( n++ < heightA ){

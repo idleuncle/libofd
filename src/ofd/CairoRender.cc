@@ -281,14 +281,14 @@ void CairoRender::ImplCls::DrawObject(ObjectPtr object){
         cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 
         if ( object->Type == ofd::ObjectType::TEXT ) {
-            //TextObject *textObject = (TextObject*)object.get();
-            //DrawTextObject(cr, textObject);
+            TextObject *textObject = (TextObject*)object.get();
+            DrawTextObject(cr, textObject);
         } else if ( object->Type == ofd::ObjectType::PATH ){
             PathObject *pathObject = (PathObject*)object.get();
             DrawPathObject(cr, pathObject);
         } else if ( object->Type == ofd::ObjectType::IMAGE ){
-            ImageObject *imageObject = (ImageObject*)object.get();
-            DrawImageObject(cr, imageObject);
+            //ImageObject *imageObject = (ImageObject*)object.get();
+            //DrawImageObject(cr, imageObject);
         } else if ( object->Type == ofd::ObjectType::VIDEO ){
             VideoObject *videoObject = (VideoObject*)object.get();
             DrawVideoObject(cr, videoObject);

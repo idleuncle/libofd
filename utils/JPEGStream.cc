@@ -11,7 +11,11 @@
 // jpeg库头文件必须放到stdio.h后面  
 #include "jpeglib.h"  
 #include "jerror.h"  
+
+#include "JPEGStream.h"
+using namespace utils;
   
+// 参考 libjpeg学习2：内存篇 http://blog.csdn.net/subfate/article/details/46700675
 // poppler/poppler/JPEG2000Stream.cc
 
 struct my_error_mgr{
@@ -137,3 +141,24 @@ int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsi
   
     return 0;  
 }  
+
+namespace utils {
+
+std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char *data, size_t dataSize){
+    ImageDataHead imageDataHead;
+    char *imageData = nullptr;
+    size_t imageDataSize = 0;
+    int width = 0;
+    int height = 0;
+    int components = 0;
+    std::tie(imageData, imageDataSize, width, height, components) = jpeg2rgb((unsigned char*)data, dataSize);
+
+    imageDataHead.Width = width;
+    imageDataHead.Height = height;
+    imageDataHead.Components = components; // default 4
+    imageDataHead.Bits = 8;
+
+    return std::make_tuple(imageDataHead, imageData, imageDataSize);
+}
+
+}; // namespace utils

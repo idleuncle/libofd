@@ -69,28 +69,32 @@ std::tuple<std::string, bool> Zip::ImplCls::ReadFileString(const std::string &fi
     std::string fileContent;
 
     if ( m_archive != nullptr ){
-        struct zip_stat st;
-        zip_stat_init(&st);
-        zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
-        LOG(DEBUG) << "zip_stat:" << st.valid;
+        if ( IsFileExist(fileinzip) ){
+            struct zip_stat st;
+            zip_stat_init(&st);
+            zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
+            LOG(DEBUG) << "zip_stat:" << st.valid;
 
-        size_t filesize = st.size;
-        __attribute__((unused)) size_t compsize = st.comp_size;
+            size_t filesize = st.size;
+            __attribute__((unused)) size_t compsize = st.comp_size;
 
-        zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
-        char *content = new char[filesize + 1];
-        size_t did_read = zip_fread(file, content, filesize);
-        LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
-        if (did_read != filesize ) {
-            LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
-            delete[] content;
+            zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
+            char *content = new char[filesize + 1];
+            size_t did_read = zip_fread(file, content, filesize);
+            LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
+            if (did_read != filesize ) {
+                LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
+                delete[] content;
+            } else {
+                content[filesize] = '\0';
+                fileContent = std::string(content);
+                ok = true;
+                delete[] content;
+            }
+            zip_fclose(file);
         } else {
-            content[filesize] = '\0';
-            fileContent = std::string(content);
-            ok = true;
-            delete[] content;
+            LOG(WARNING) << "File " << fileinzip << " does not in archive.";
         }
-        zip_fclose(file);
     }
 
     return std::make_tuple(fileContent, ok);
@@ -102,25 +106,29 @@ std::tuple<char*, size_t, bool> Zip::ImplCls::ReadFileRaw(const std::string &fil
     size_t filesize = 0;
 
     if ( m_archive != nullptr ) {
-        struct zip_stat st;
-        zip_stat_init(&st);
-        zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
-        LOG(DEBUG) << "zip_stat:" << st.valid;
+        if ( IsFileExist(fileinzip) ){
+            struct zip_stat st;
+            zip_stat_init(&st);
+            zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
+            LOG(DEBUG) << "zip_stat:" << st.valid;
 
-        filesize = st.size;
-        __attribute__((unused)) size_t compsize = st.comp_size;
+            filesize = st.size;
+            __attribute__((unused)) size_t compsize = st.comp_size;
 
-        zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
-        content = new char[filesize];
-        size_t did_read = zip_fread(file, content, filesize);
-        LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
-        if (did_read != filesize ) {
-            LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
-            delete[] content;
+            zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
+            content = new char[filesize];
+            size_t did_read = zip_fread(file, content, filesize);
+            LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
+            if (did_read != filesize ) {
+                LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
+                delete[] content;
+            } else {
+                ok = true;
+            }
+            zip_fclose(file);
         } else {
-            ok = true;
+            LOG(WARNING) << "File " << fileinzip << " does not in archive.";
         }
-        zip_fclose(file);
     }
 
     return std::make_tuple(content, filesize, ok);

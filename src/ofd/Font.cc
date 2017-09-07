@@ -27,6 +27,8 @@ namespace ofd{
         LOG(DEBUG) << "------- getFontFileName() fontID:" << fontID << " filename=" << std::string(buf);
         return std::string(buf);
     }
+
+    std::map<std::string, std::string> Font::FontFiles;
 }
 
 // **************** class FreetypeInitiator ****************
@@ -50,6 +52,44 @@ private:
     static bool ft_lib_initialized;
 };
 
+static struct {
+  const char *name;
+  const char *t1FileName;
+  const char *ttFileName;
+} linuxDefaultFonts[] __attribute__((unused)) = {
+  {"Courier",               "n022003l.pfb", "cour.ttf"},
+  {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},
+  {"Courier-BoldOblique",   "n022024l.pfb", "courbi.ttf"},
+  {"Courier-Oblique",       "n022023l.pfb", "couri.ttf"},
+  {"Helvetica",             "n019003l.pfb", "arial.ttf"},
+  {"Helvetica-Bold",        "n019004l.pfb", "arialbd.ttf"},
+  {"Helvetica-BoldOblique", "n019024l.pfb", "arialbi.ttf"},
+  {"Helvetica-Oblique",     "n019023l.pfb", "ariali.ttf"},
+  {"Symbol",                "s050000l.pfb", nullptr},
+  {"Times-Bold",            "n021004l.pfb", "timesbd.ttf"},
+  {"Times-BoldItalic",      "n021024l.pfb", "timesbi.ttf"},
+  {"Times-Italic",          "n021023l.pfb", "timesi.ttf"},
+  {"Times-Roman",           "n021003l.pfb", "times.ttf"},
+  {"ZapfDingbats",          "d050000l.pfb", nullptr},
+  {nullptr}
+};
+
+static struct{
+    const char *name;
+    const char *relatedPath;
+} ofdDefaultFonts[] = {
+    {"宋体", "fonts/SimSun.ttf"},
+    {"黑体", "fonts/SimHei.ttf"},
+    {"楷体", "fonts/Kaiti.ttf"},
+    {"仿宋", "fonts/Fangsong.ttf"},
+    {"华文楷体", "fonts/华文楷体.ttf"},
+    {"方正小标宋_GBK", "fonts/方正小标宋_GBK.ttf"},
+    {"Calibri", "fonts/Calibri.ttf"},
+    {nullptr}
+};
+
+std::vector<std::string>  SystemFontDirs;
+
 bool FreetypeInitiator::InitializeFreetype(){
     if ( ft_lib_initialized ) return true;
 
@@ -58,6 +98,18 @@ bool FreetypeInitiator::InitializeFreetype(){
         LOG(ERROR) << "FT_Init_FreeType() in OFDRes::InitializeFreetype() failed.";
     } else {
         ft_lib_initialized = true;
+    }
+
+    if ( ft_lib_initialized ){
+        // 自动搜索自带字休和系统字体
+        for (int i = 0; ofdDefaultFonts[i].name; ++i) {
+            std::string fontName = ofdDefaultFonts[i].name;
+            std::string fontFilePath = ofdDefaultFonts[i].relatedPath;
+
+            if ( Font::FontFiles.find(fontName) != Font::FontFiles.end() ){
+                Font::FontFiles.insert(std::map<std::string, std::string>::value_type(fontName, fontFilePath));
+            }
+        }
     }
 
     return ft_lib_initialized;
@@ -130,6 +182,15 @@ Font::~Font(){
     if ( m_fontData != nullptr ){
         delete m_fontData;
         m_fontData = nullptr;
+    }
+}
+
+// ======== Font::LocateFontFile() ========
+std::string Font::LocateFontFile(const std::string& fontName){
+    if ( Font::FontFiles.find(fontName) != Font::FontFiles.end() ){
+        return Font::FontFiles[fontName];
+    } else {
+        return "";
     }
 }
 
@@ -273,12 +334,14 @@ bool Font::FromXML(XMLElementPtr fontElement){
             // Optional
             std::tie(FixedWidth, std::ignore) = fontElement->GetBooleanAttribute("FixedWidth");
 
+            std::string fontFilePath;
             XMLElementPtr fontFileElement = fontElement->GetFirstChildElement();
             if ( fontFileElement != nullptr && fontFileElement->GetName() == "FontFile" ){
-                std::string fontFilePath;
                 std::tie(fontFilePath, std::ignore) = fontFileElement->GetStringValue();
-                SetFontFilePath(fontFilePath);
+            } else {
+                fontFilePath = Font::LocateFontFile(FontName);
             }
+            SetFontFilePath(fontFilePath);
 
             ok = true;
         } else {
@@ -292,6 +355,7 @@ bool Font::FromXML(XMLElementPtr fontElement){
 bool Font::Load(PackagePtr package, bool reload){
     if ( m_bLoaded && !reload ) return true;
 
+        
     // FIXME
     //if ( ID > 0 ){
 

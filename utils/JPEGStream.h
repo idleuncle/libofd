@@ -3,6 +3,8 @@
 
 #include <tuple>
 
+#include "utils/ImageStream.h"
+
 /** 
  * 利用libjpeg将缓冲区的JPEG转换成RGB 解压JPEG 
  *  
@@ -38,5 +40,12 @@
  *         jpeg_buffer为二级指针，无须调用者申请空间，由libjpeg申请，但调用者要自行释放 
  */  
 int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsigned char** jpeg_buffer, unsigned long* jpeg_size);  
+
+
+namespace utils{
+
+std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char* data, size_t dataSize);
+
+}; // namespace utils
 
 #endif // __UTILS_JPEGSTREAM_H__

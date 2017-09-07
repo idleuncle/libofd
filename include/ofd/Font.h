@@ -2,6 +2,7 @@
 #define __OFD_FONT_H__
 
 #include <string>
+#include <map>
 #include <memory>
 #include "ofd/Common.h"
 
@@ -27,6 +28,10 @@ namespace ofd{
     };
 
     class Font {
+
+        public:
+            static std::map<std::string, std::string> FontFiles;
+            static std::string LocateFontFile(const std::string& fontName);
 
         public:
             Font();
