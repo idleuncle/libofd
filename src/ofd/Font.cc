@@ -85,6 +85,7 @@ static struct{
     {"华文楷体", "fonts/华文楷体.ttf"},
     {"方正小标宋_GBK", "fonts/方正小标宋_GBK.ttf"},
     {"Calibri", "fonts/Calibri.ttf"},
+    {"Times New Roman", "fonts/Times New Roman.ttf"},
     {nullptr}
 };
 

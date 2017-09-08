@@ -419,8 +419,8 @@ bool Page::fromContentXML(XMLElementPtr contentElement){
 }
 
 double Page::GetFitScaling(double screenWidth, double screenHeight, double resolutionX, double resolutionY){
-    double pageWidth = Area.ApplicationBox.Width * resolutionX / 72.0;
-    double pageHeight = Area.ApplicationBox.Height * resolutionY / 72.0;
+    double pageWidth = Area.PhysicalBox.Width * resolutionX / 72.0;
+    double pageHeight = Area.PhysicalBox.Height * resolutionY / 72.0;
     double scalingX = screenWidth / pageWidth;
     double scalingY = screenHeight / pageHeight;
     double scaling = scalingX <= scalingY ? scalingX : scalingY;

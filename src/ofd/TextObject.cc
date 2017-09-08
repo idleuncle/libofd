@@ -156,11 +156,17 @@ bool TextObject::FromAttributesXML(utils::XMLElementPtr objectElement){
         return false;
     } else {
         const ResourcePtr documentRes = GetDocumentRes();
-        assert(documentRes != nullptr);
-        const FontPtr font = documentRes->GetFont(fontID);
+        //assert(documentRes != nullptr);
+        FontPtr font = documentRes->GetFont(fontID);
         if ( font == nullptr ){
-            LOG(ERROR) << "Font ID = " << fontID << " not found in documentRes.";
-            return false;
+            LOG(WARNING) << "Font ID = " << fontID << " not found in DocumentRes.";
+            const ResourcePtr publicRes = GetPublicRes();
+            font = publicRes->GetFont(fontID);
+            if ( font == nullptr ){
+                LOG(ERROR) << "Font ID = " << fontID << " not found in PublicRes.";
+                return false;
+            } else {
+            }
         } else {
             Font = font;
         }

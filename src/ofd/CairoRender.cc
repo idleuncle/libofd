@@ -177,9 +177,9 @@ void CairoRender::ImplCls::Rebuild(double pixelWidth, double pixelHeight, double
     m_strokePattern = cairo_pattern_reference(m_fillPattern);
 
     // 以点(Point)为坐标单位，pdf文件缺省。
-    SetPointBase();
+    //SetPointBase();
     // 以毫米(Millimeter)为坐标单位，ofd文件缺省。
-    //SetMicroMeterBase();
+    SetMillimeterBase();
 
     // 页面刷白
     ClearPage();
@@ -261,7 +261,8 @@ void CairoRender::ImplCls::DrawPage(PagePtr page, ViewArea viewArea){
 
     // 二级显示转换矩阵，按用户指定的偏移和缩放比例绘制页面。
     double offsetX, offsetY, scaling;
-    std::tie(offsetX, offsetY, scaling) = m_cairoRender->GetViewArea();
+    //std::tie(offsetX, offsetY, scaling) = m_cairoRender->GetViewArea();
+    std::tie(offsetX, offsetY, scaling) = viewArea;
     cairo_translate(m_cr, -offsetX, -offsetY);
     cairo_scale(m_cr, scaling, scaling);
 
@@ -457,8 +458,8 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
 
     // -------- Draw Text --------
     const Text::TextCode &textCode = textObject->GetTextCode(0);
-    double X = textCode.X;
-    double Y = textCode.Y;
+    double X = textCode.X + textObject->Boundary.XMin;
+    double Y = textCode.Y + textObject->Boundary.YMin;
     std::string text = textCode.Text;
 
     cairo_matrix_t font_matrix = {fontSize, 0.0, 0.0, fontSize, 0.0, 0.0};
