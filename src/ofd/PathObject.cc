@@ -201,7 +201,7 @@ bool PathObject::IterateElementsXML(XMLElementPtr childElement){
             std::tie(strokeColor, exist) = Color::ReadColorXML(childElement);
             if ( exist ){
                 StrokeColor = strokeColor;
-                LOG(DEBUG) << "Readed stroke color = (" << strokeColor->Value.RGB.Red << "," << strokeColor->Value.RGB.Green << "," << strokeColor->Value.RGB.Blue << ")";
+                //LOG(DEBUG) << "Readed stroke color = (" << strokeColor->Value.RGB.Red << "," << strokeColor->Value.RGB.Green << "," << strokeColor->Value.RGB.Blue << ")";
             }
         } else if ( childName == "AbbreviatedData" ){
             std::string pathData;

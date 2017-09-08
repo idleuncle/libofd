@@ -106,7 +106,7 @@ bool FreetypeInitiator::InitializeFreetype(){
             std::string fontName = ofdDefaultFonts[i].name;
             std::string fontFilePath = ofdDefaultFonts[i].relatedPath;
 
-            if ( Font::FontFiles.find(fontName) != Font::FontFiles.end() ){
+            if ( Font::FontFiles.find(fontName) == Font::FontFiles.end() ){
                 Font::FontFiles.insert(std::map<std::string, std::string>::value_type(fontName, fontFilePath));
             }
         }
@@ -382,6 +382,12 @@ bool Font::Load(PackagePtr package, bool reload){
         bool readOK = false;
         if ( package->IsZipFileExist(fontFilePath) ){
             std::tie(fontData, fontDataSize, readOK) = package->ReadZipFileRaw(fontFilePath);
+        } else {
+            if ( utils::FileExist(fontFilePath) ){
+                std::tie(fontData, fontDataSize, readOK) = utils::ReadFileData(fontFilePath);
+            } else {
+                LOG(WARNING) << "Font file " << fontFilePath << " is not exist in the archive or folder.";
+            }
         }
         if ( readOK ){
             if ( CreateFromData(fontData, fontDataSize) ){

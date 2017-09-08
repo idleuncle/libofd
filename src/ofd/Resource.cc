@@ -162,8 +162,11 @@ Resource::ImplCls::~ImplCls(){
 void Resource::ImplCls::AddFont(FontPtr font){
     uint64_t fontID = font->ID;
 
-    std::string fontFile = font->GenerateFontFileName();
-    std::string fontFilePath = GenerateResourceFilePath(fontFile);
+    std::string fontFilePath = font->GetFontFilePath();
+    if ( fontFilePath.empty() ) {
+        std::string fontFile = font->GenerateFontFileName();
+        fontFilePath = GenerateResourceFilePath(fontFile);
+    }
     font->SetFontFilePath(fontFilePath);
 
     if ( m_fonts.find(fontID) != m_fonts.end() ){
