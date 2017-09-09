@@ -1150,7 +1150,12 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
     doTransformObject(pathObject, cr);
 
     PathPtr path = pathObject->GetPath();
-    DoCairoPath(cr, path);
+
+    PathPtr drawPath = std::make_shared<Path>();
+    drawPath->Append(path);
+    drawPath->Offset(pathObject->Boundary.XMin, pathObject->Boundary.YMin);
+
+    DoCairoPath(cr, drawPath);
 
     cairo_set_line_width(cr, pathObject->LineWidth);
 
@@ -1189,10 +1194,10 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
         //}
 
             Boundary boundary = path->CalculateBoundary(); 
-            double xMin = boundary.XMin;
-            double yMin = boundary.YMin;
-            double xMax = boundary.XMax;
-            double yMax = boundary.YMax;
+            double xMin = boundary.XMin + pathObject->Boundary.XMin;
+            double yMin = boundary.YMin + pathObject->Boundary.YMin;
+            double xMax = boundary.XMax + pathObject->Boundary.XMin;
+            double yMax = boundary.YMax + pathObject->Boundary.YMin;
             cairo_move_to(cr, xMin, yMin);
             cairo_line_to(cr, xMin, yMax);
             cairo_line_to(cr, xMax, yMax);
