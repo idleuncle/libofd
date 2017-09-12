@@ -8,107 +8,7 @@
 #include "ofd/Image.h"
 #include "ofd/CairoRender.h"
 #include "utils/logger.h"
-
-
-//static inline int splashRound(SplashCoord x) {
-  //return (int)floor(x + 0.5);
-//}
-
-//static inline int splashCeil(SplashCoord x) {
-  //return (int)ceil(x);
-//}
-
-//static inline int splashFloor(SplashCoord x) {
-  //return (int)floor(x);
-//}
-
-//[> Taken from cairo/doc/tutorial/src/singular.c <]
-//static void get_singular_values (const cairo_matrix_t *matrix,
-			 //double               *major,
-			 //double               *minor) {
-    //double xx = matrix->xx, xy = matrix->xy;
-    //double yx = matrix->yx, yy = matrix->yy;
-
-    //double a = xx*xx+yx*yx;
-    //double b = xy*xy+yy*yy;
-    //double k = xx*xy+yx*yy;
-
-    //double f = (a+b) * .5;
-    //double g = (a-b) * .5;
-    //double delta = sqrt (g*g + k*k);
-
-    //if (major)
-        //*major = sqrt (f + delta);
-    //if (minor)
-        //*minor = sqrt (f - delta);
-//}
-
-//void OFDOutputDev::getImageScaledSize(const cairo_matrix_t *matrix,
-                                   //int                   orig_width,
-				   //int                   orig_height,
-				   //int                  *scaledWidth,
-				   //int                  *scaledHeight) {
-    //double xScale;
-    //double yScale;
-    //if (orig_width > orig_height)
-        //get_singular_values(matrix, &xScale, &yScale);
-    //else
-        //get_singular_values (matrix, &yScale, &xScale);
-
-    //int tx, tx2, ty, ty2; [> the integer co-oridinates of the resulting image <]
-    //if (xScale >= 0) {
-        //tx = splashRound(matrix->x0 - 0.01);
-        //tx2 = splashRound(matrix->x0 + xScale + 0.01) - 1;
-    //} else {
-        //tx = splashRound(matrix->x0 + 0.01) - 1;
-        //tx2 = splashRound(matrix->x0 + xScale - 0.01);
-    //}
-    //*scaledWidth = abs(tx2 - tx) + 1;
-    ////scaledWidth = splashRound(fabs(xScale));
-    //if (*scaledWidth == 0) {
-        //// technically, this should draw nothing, but it generally seems
-        //// better to draw a one-pixel-wide stripe rather than throwing it
-        //// away
-        //*scaledWidth = 1;
-    //}
-    //if (yScale >= 0) {
-        //ty = splashFloor(matrix->y0 + 0.01);
-        //ty2 = splashCeil(matrix->y0 + yScale - 0.01);
-    //} else {
-        //ty = splashCeil(matrix->y0 - 0.01);
-        //ty2 = splashFloor(matrix->y0 + yScale + 0.01);
-    //}
-    //*scaledHeight = abs(ty2 - ty);
-    //if (*scaledHeight == 0) {
-        //*scaledHeight = 1;
-    //}
-//}
-
-//cairo_filter_t OFDOutputDev::getFilterForSurface(cairo_surface_t *image, GBool interpolate) {
-    //if (interpolate)
-        //return CAIRO_FILTER_BILINEAR;
-
-    //int orig_width = cairo_image_surface_get_width(image);
-    //int orig_height = cairo_image_surface_get_height(image);
-    //if (orig_width == 0 || orig_height == 0)
-        //return CAIRO_FILTER_NEAREST;
-
-    //[> When printing, don't change the interpolation. <]
-    //if ( m_printing )
-        //return CAIRO_FILTER_NEAREST;
-
-    //cairo_matrix_t matrix;
-    //cairo_get_matrix(m_cairo, &matrix);
-    //int scaled_width, scaled_height;
-    //getImageScaledSize(&matrix, orig_width, orig_height, &scaled_width, &scaled_height);
-
-    //[> When scale factor is >= 400% we don't interpolate. See bugs #25268, #9860 <]
-    //if (scaled_width / orig_width >= 4 || scaled_height / orig_height >= 4)
-        //return CAIRO_FILTER_NEAREST;
-
-    //return CAIRO_FILTER_BILINEAR;
-//}
-
+#include "utils/utils.h"
 
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
@@ -317,6 +217,11 @@ bool SaveImageStream(const std::string &filename, Stream *str, int widthA, int h
     return true;
 
 }
+
+// Defined in CairoRender_Poppler.cc
+namespace ofd{
+    cairo_surface_t *createImageSurface(Stream *str, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
+} // namespace ofd
 
 ofd::ObjectPtr OFDOutputDev::CreateNewImageObject(GfxState *state, ofd::ImagePtr image){
     // Add image object into current page.
@@ -911,14 +816,14 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
     int scaledHeight;
     int scaledWidth;
     if (xScale >= 0) {
-        tx = ofd::splashRound(matrix.x0 - 0.01);
-        tx2 = ofd::splashRound(matrix.x0 + xScale + 0.01) - 1;
+        tx = utils::splashRound(matrix.x0 - 0.01);
+        tx2 = utils::splashRound(matrix.x0 + xScale + 0.01) - 1;
     } else {
-        tx = ofd::splashRound(matrix.x0 + 0.01) - 1;
-        tx2 = ofd::splashRound(matrix.x0 + xScale - 0.01);
+        tx = utils::splashRound(matrix.x0 + 0.01) - 1;
+        tx2 = utils::splashRound(matrix.x0 + xScale - 0.01);
     }
     scaledWidth = abs(tx2 - tx) + 1;
-    //scaledWidth = splashRound(fabs(xScale));
+    //scaledWidth = utils::splashRound(fabs(xScale));
     if (scaledWidth == 0) {
         // technically, this should draw nothing, but it generally seems
         // better to draw a one-pixel-wide stripe rather than throwing it
@@ -926,11 +831,11 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
         scaledWidth = 1;
     }
     if (yScale >= 0) {
-        ty = ofd::splashFloor(matrix.y0 + 0.01);
-        ty2 = ofd::splashCeil(matrix.y0 + yScale - 0.01);
+        ty = utils::splashFloor(matrix.y0 + 0.01);
+        ty2 = utils::splashCeil(matrix.y0 + yScale - 0.01);
     } else {
-        ty = ofd::splashCeil(matrix.y0 - 0.01);
-        ty2 = ofd::splashFloor(matrix.y0 + yScale + 0.01);
+        ty = utils::splashCeil(matrix.y0 - 0.01);
+        ty2 = utils::splashFloor(matrix.y0 + yScale + 0.01);
     }
     scaledHeight = abs(ty2 - ty);
     if (scaledHeight == 0) {
@@ -947,7 +852,7 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
        We compute total_pad to make (height+total_pad)/scaledHeight as close to height/yScale as possible */
     int head_pad = 0;
     int tail_pad = 0;
-    int total_pad = ofd::splashRound(height*(scaledHeight/fabs(yScale)) - height);
+    int total_pad = utils::splashRound(height*(scaledHeight/fabs(yScale)) - height);
 
     /* compute the two pieces of padding */
     if (total_pad > 0) {
@@ -955,7 +860,7 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
         float tail_error = fabs(matrix.y0 - ty);
         float head_error = fabs(ty2 - (matrix.y0 + yScale));
         float tail_fraction = tail_error/(tail_error + head_error);
-        tail_pad = ofd::splashRound(total_pad*tail_fraction);
+        tail_pad = utils::splashRound(total_pad*tail_fraction);
         head_pad = total_pad - tail_pad;
     } else {
         tail_pad = 0;
@@ -1091,7 +996,7 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
                     pixAcc0 += pixBuf[xSrc + i*width + j];
                 }
             }
-            buffer[y * row_stride + x] = ofd::splashFloor(pixAcc0 / (origN*m));
+            buffer[y * row_stride + x] = utils::splashFloor(pixAcc0 / (origN*m));
             xSrc += xStep;
             x1 += 1;
         }

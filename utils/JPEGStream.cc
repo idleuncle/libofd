@@ -86,13 +86,14 @@ std::tuple<char*, size_t, int, int, int> jpeg2rgb(unsigned char* jpeg_buffer, in
                 cinfo.image_width,   
                 cinfo.image_height,  
                 row_stride);  
-    tmp_buffer = imageData;  
+    tmp_buffer = imageData + (cinfo.image_height - 1) * row_stride;  
     while (cinfo.output_scanline < cinfo.output_height) // 解压每一行  
     {  
         jpeg_read_scanlines(&cinfo, buffer, 1);  
         // 复制到内存  
         memcpy(tmp_buffer, buffer[0], row_stride);  
-        tmp_buffer += row_stride;  
+        //tmp_buffer += row_stride;  
+        tmp_buffer -= row_stride;  
     }  
   
     jpeg_finish_decompress(&cinfo);  
@@ -106,7 +107,6 @@ int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsi
     struct jpeg_compress_struct cinfo;  
     struct jpeg_error_mgr jerr;  
     int row_stride = 0;  
-    JSAMPROW row_pointer[1];  
   
     if (jpeg_buffer == NULL)  
     {  
@@ -126,12 +126,12 @@ int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsi
     cinfo.in_color_space = JCS_RGB;  
   
     jpeg_set_defaults(&cinfo);  
-    jpeg_set_quality(&cinfo, quality, 1);  // todo 1 == true  
+    jpeg_set_quality(&cinfo, quality, (boolean)1);  // todo 1 == true  
     jpeg_start_compress(&cinfo, TRUE);  
     row_stride = width * cinfo.input_components;  
   
-    while (cinfo.next_scanline < cinfo.image_height)  
-    {  
+    while (cinfo.next_scanline < cinfo.image_height)  {  
+        JSAMPROW row_pointer[1];  
         row_pointer[0] = &rgb_buffer[cinfo.next_scanline * row_stride];  
         jpeg_write_scanlines(&cinfo, row_pointer, 1);  
     }  

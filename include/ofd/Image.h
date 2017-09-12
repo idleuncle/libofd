@@ -8,30 +8,9 @@
 
 namespace ofd{
 
-    typedef float SplashCoord;
 
-    static inline int splashRound(SplashCoord x) {
-        return (int)floor(x + 0.5);
-    }
-
-    static inline int splashCeil(SplashCoord x) {
-        return (int)ceil(x);
-    }
-
-    static inline int splashFloor(SplashCoord x) {
-        return (int)floor(x);
-    }
-
-    // Defined in Image.cc
-    void getImageScaledSize(const cairo_matrix_t *matrix,
-            int                   orig_width,
-            int                   orig_height,
-            int                  *scaledWidth,
-            int                  *scaledHeight); 
-
-    // Defined in Image.cc
     cairo_filter_t getFilterForSurface(cairo_surface_t *image, cairo_t *cr, bool interpolate); 
-
+    void getImageScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight); 
 
     std::string generateImageFileName(uint64_t imageID);
 

@@ -288,8 +288,8 @@ void CairoRender::ImplCls::DrawObject(ObjectPtr object){
             PathObject *pathObject = (PathObject*)object.get();
             DrawPathObject(cr, pathObject);
         } else if ( object->Type == ofd::ObjectType::IMAGE ){
-            //ImageObject *imageObject = (ImageObject*)object.get();
-            //DrawImageObject(cr, imageObject);
+            ImageObject *imageObject = (ImageObject*)object.get();
+            DrawImageObject(cr, imageObject);
         } else if ( object->Type == ofd::ObjectType::VIDEO ){
             VideoObject *videoObject = (VideoObject*)object.get();
             DrawVideoObject(cr, videoObject);
@@ -728,9 +728,6 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
     return;
 }
 
-//// Defined in CairoRender_Poppler.cc
-//cairo_surface_t *createImageSurface(Stream *str, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
-
 namespace ofd{
 class MemStream : public Stream{
     public:
@@ -819,6 +816,14 @@ class MemStream : public Stream{
 }; // class MemStream
 }
 
+// Defined in CairoRender_Poppler.cc
+namespace ofd{
+    cairo_surface_t *createImageSurface(Stream *str, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
+
+//cairo_filter_t getFilterForSurface(cairo_surface_t *image, cairo_t *cr, bool interpolate); 
+//void getImageScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight); 
+} // namespace ofd
+
 void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject){
     if ( imageObject == nullptr ) return;
 
@@ -850,8 +855,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
     objMatrix.yx = imageObject->CTM[1];
     objMatrix.xy = imageObject->CTM[2];
     objMatrix.yy = imageObject->CTM[3];
-    objMatrix.x0 = imageObject->CTM[4];
-    objMatrix.y0 = imageObject->CTM[5];
+    objMatrix.x0 = imageObject->CTM[4] + imageObject->Boundary.XMin;
+    objMatrix.y0 = imageObject->CTM[5] + imageObject->Boundary.YMin;
     cairo_transform(cr, &objMatrix);
 
     cairo_get_matrix(cr, &matrix);
@@ -904,8 +909,11 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
 
 
     cairo_set_source(cr, pattern);
+    //cairo_set_source_rgb(cr, 0, 0, 0);
     //if (!m_printing)
-    cairo_rectangle(cr, 0., 0., 1., 1.);
+    //cairo_rectangle(cr, 0., 0., 1., 1.);
+    cairo_rectangle(cr, 0., 0., 1.0, 1.0);
+    //cairo_rectangle(cr, 0., 0., width, height);
 
     if (maskPattern != nullptr ) {
         //if (!m_printing)
@@ -918,6 +926,7 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
             //cairo_paint(cr);
         //else
             cairo_fill(cr);
+            //cairo_stroke(cr);
     }
     cairo_restore(cr);
 

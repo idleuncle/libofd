@@ -58,6 +58,9 @@ bool Document::Open(){
             if ( !m_commonData.PublicRes->FromResXML(strResXML) ){
                 LOG(ERROR) << "m_commonData.PublicRes.FromResXML() failed.";
                 return false;
+            } else {
+                m_commonData.PublicRes->LoadFonts();
+                m_commonData.PublicRes->LoadImages();
             }
         } else {
             LOG(INFO) << "Public resource file " << publicResFileName << " is not exist.";

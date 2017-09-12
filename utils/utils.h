@@ -45,6 +45,21 @@ namespace utils{
     bool FileExist(const std::string &fileName); 
     bool MkdirIfNotExist(const std::string &dirName); 
 
+
+    typedef float SplashCoord;
+
+    static inline int splashRound(SplashCoord x) {
+        return (int)floor(x + 0.5);
+    }
+
+    static inline int splashCeil(SplashCoord x) {
+        return (int)ceil(x);
+    }
+
+    static inline int splashFloor(SplashCoord x) {
+        return (int)floor(x);
+    }
+
 }
 
 #ifndef likely

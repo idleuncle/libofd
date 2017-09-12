@@ -166,6 +166,7 @@ bool TextObject::FromAttributesXML(utils::XMLElementPtr objectElement){
                 LOG(ERROR) << "Font ID = " << fontID << " not found in PublicRes or DocumentRes.";
                 return false;
             } else {
+                Font = font;
             }
         } else {
             Font = font;
