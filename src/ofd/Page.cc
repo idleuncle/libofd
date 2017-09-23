@@ -48,12 +48,16 @@ std::string Page::to_string() const{
 
 bool Page::Open(){
     if ( m_opened ) return true;
-    if ( BaseLoc.empty() ) return false;
+    if ( BaseLoc.empty() ) {
+        LOG(WARNING) << "BaseLoc.empty()" << std::endl;
+        return false;
+    }
+
     DocumentPtr document = m_document.lock();
-    if ( document == nullptr ) return false;
+    assert(document != nullptr);
 
     const PackagePtr  package = document->GetPackage();     
-    if ( package == nullptr ) return false;
+    assert(package!=nullptr);
 
     std::string docRoot = document->GetDocRoot();
     std::string pageXMLFile = docRoot + "/" + BaseLoc; 
@@ -419,11 +423,11 @@ bool Page::fromContentXML(XMLElementPtr contentElement){
 }
 
 double Page::GetFitScaling(double screenWidth, double screenHeight, double resolutionX, double resolutionY){
-    double pageWidth = Area.PhysicalBox.Width * resolutionX / 72.0;
-    double pageHeight = Area.PhysicalBox.Height * resolutionY / 72.0;
+    double pageWidth = Area.PhysicalBox.Width * resolutionX / 25.4;
+    double pageHeight = Area.PhysicalBox.Height * resolutionY / 25.4;
     double scalingX = screenWidth / pageWidth;
     double scalingY = screenHeight / pageHeight;
-    double scaling = scalingX <= scalingY ? scalingX : scalingY;
+    double scaling = scalingX >= scalingY ? scalingX : scalingY;
     //LOG(DEBUG) << "Page::GetFitScaling() page size (" << pageWidth << "," << pageHeight << ") screen size (" << screenWidth << "," << screenHeight << ") scalingX=" << scalingX << " scalingY=" << scalingY << " scaling=" << scaling;
     return scaling;
 }

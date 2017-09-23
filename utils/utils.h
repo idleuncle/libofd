@@ -25,6 +25,22 @@ namespace utils{
     typedef std::vector<double> DoubleArray;
     typedef std::vector<std::string> StringArray;
 
+    enum class ColorOrder{
+        RGB,
+        BGR
+    };
+
+    struct GlobalParameters{
+        static ColorOrder colorOrder;
+    };
+
+    __attribute__((unused)) static bool IsColorRGB(){
+        return GlobalParameters::colorOrder == ColorOrder::RGB;
+    }
+    __attribute__((unused)) static bool IsColorBGR(){
+        return GlobalParameters::colorOrder == ColorOrder::BGR;
+    }
+
     std::vector<std::string> SplitString(const std::string& content);
 
     void SetStringStreamPrecision(std::stringstream &ss, int precision);

@@ -1,4 +1,5 @@
 #include <sstream>
+#include <assert.h>
 #include "ofd/Package.h"
 #include "ofd/Document.h"
 #include "ofd/Page.h"
@@ -41,6 +42,7 @@ std::string Document::to_string() const{
 
 // ======== Document::CreateNewDocument() ========
 DocumentPtr Document::CreateNewDocument(PackagePtr package, const std::string &docRoot){
+    assert(package != nullptr);
     DocumentPtr document = std::shared_ptr<Document>(new Document(package, docRoot));
     document->m_commonData.PublicRes = Resource::CreateNewResource(package);
     document->m_commonData.DocumentRes = Resource::CreateNewResource(document->GetSelf()); 

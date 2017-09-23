@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/">
+        <file preprocess="xml-stripblanks">ui/app.ui</file>
+        <file preprocess="xml-stripblanks">ui/menus.ui</file>
+        <file>themes/OSX-Arc-White/gtk-3.22/gtk-light.css</file>
+        <file>themes/OSX-Arc-White/gtk-3.22/gtk-darker.css</file>
+        <file>themes/OSX-Arc-White/gtk-3.22/gtk-dark.css</file>
+        <file>themes/Adwaita/gtk-3.22/gtk-light.css</file>
+        <file>themes/Adwaita/gtk-3.22/gtk-dark.css</file>  
+    </gresource>
+</gresources>

@@ -13,6 +13,7 @@
 #include "jerror.h"  
 
 #include "JPEGStream.h"
+#include "utils.h"
 using namespace utils;
   
 // 参考 libjpeg学习2：内存篇 http://blog.csdn.net/subfate/article/details/46700675
@@ -90,9 +91,16 @@ std::tuple<char*, size_t, int, int, int> jpeg2rgb(unsigned char* jpeg_buffer, in
     while (cinfo.output_scanline < cinfo.output_height) // 解压每一行  
     {  
         jpeg_read_scanlines(&cinfo, buffer, 1);  
-        // 复制到内存  
-        memcpy(tmp_buffer, buffer[0], row_stride);  
-        //tmp_buffer += row_stride;  
+        //// 复制到内存  
+        if (utils::IsColorBGR()){
+            memcpy(tmp_buffer, buffer[0], row_stride);  
+        } else {
+            for ( auto n = 0 ; n < row_stride ; n += imageComponents ){
+                for ( auto k = 0 ; k < imageComponents ; k++ ){
+                    tmp_buffer[n+k] = buffer[0][n+imageComponents-k-1]; 
+                }
+            }
+        }
         tmp_buffer -= row_stride;  
     }  
   

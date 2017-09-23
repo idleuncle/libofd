@@ -1,18 +1,33 @@
+GTKOFD=./build/bin/gtkofd
+IMOFD=./build/bin/imofd
 OFDVIEWER=./build/bin/ofdviewer
 OFDTEST=./build/bin/ofdtest
 PDF2OFD=./build/bin/pdf2ofd
 
-.PHONY: build run sample0 sample1 sample2
+.PHONY: build cmake run sample0 sample1 sample2
 
 build:
-	mkdir -p build && cd build && cmake .. && make 
+	ninja -C build all
+
+cmake:
+	mkdir -p build && cd build && cmake -G Ninja ..
+	#mkdir -p build && cd build && cmake .. 
+
+install: 
+	@echo ${PREFIX}
 
 ${PDF2OFD}: build
 ${OFDVIEWER}: build
 ${OFDTEST}: build
 
-run: ${OFDVIEWER}
-	${OFDVIEWER} ./data/sample0.ofd --v=1
+run: ${IMOFD}
+	${IMOFD} ./data/1.ofd --v=1
+
+run-gtkofd: ${GTKOFD}
+	${GTKOFD} ./data/1.ofd --v=1
+
+debug: ${IMOFD}
+	lldb -- ${IMOFD} ./data/1.ofd --v=1
 
 #pdf2ofd: ${PDF2OFD}
 	#rm -fr sample0.ofd sample0
@@ -95,4 +110,5 @@ pull:
 	rsync --auvz --progress --exclude-from rsync.exclude lastzorg@lastz.org:./uucloud/syncRepo/libofd/ .
 
 clean:
-	cd build && make clean
+	#cd build && make clean
+	cd build && ninja clean

@@ -141,7 +141,7 @@ CairoRender::ImplCls::ImplCls(CairoRender *cairoRender, double pixelWidth, doubl
     ////cairo_transform(cr, &matrix0);
 //}
 
-// 毫米转换成像素：pixel = mm * dpi / 72，缩放比例为 dpi / 72。
+// 毫米转换成像素：pixel = mm * dpi / 25.4，缩放比例为 dpi / 25.4。
 void CairoRender::ImplCls::SetMillimeterBase(){
     cairo_identity_matrix(m_cr);
     cairo_scale(m_cr, m_resolutionX/ 25.4, m_resolutionY / 25.4);
@@ -474,8 +474,12 @@ void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
     if ( fillColor != nullptr ){
         double r, g, b, a;
         std::tie(r, g, b, a) = fillColor->GetRGBA();
-        cairo_set_source_rgba(cr, b, g, r, a);
-        //UpdateFillPattern(r, g, b, a);
+        //cairo_set_source_rgba(cr, b, g, r, a);
+        if (utils::IsColorBGR()){
+            cairo_set_source_rgba(cr, b, g, r, a);
+        } else {
+            cairo_set_source_rgba(cr, r, g, b, a);
+        }
     }
 
     doDrawTextObject(cr, textObject);
@@ -595,7 +599,13 @@ void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
         //double alpha = (double)textObject->Alpha / 255.0;
         ////UpdateFillPattern(r, g, b, alpha);
         ////LOG(DEBUG) << "textObject->FillColor=(" << r << "," << g << "," << b << "," << alpha << ")";
-        //cairo_set_source_rgba(cr, b, g, r, alpha);
+        //
+                
+        //if (utils::IsColorBGR()){
+            //cairo_set_source_rgba(cr, b, g, r, alpha);
+        //} else {
+            //cairo_set_source_rgba(cr, r, g, b, alpha);
+        //}
     //}
 
     ////cairo_set_source (cr, m_fillPattern);
@@ -968,7 +978,12 @@ void CairoRender::ImplCls::UpdateStrokePattern(double r, double g, double b, dou
         m_strokePattern = nullptr;
     }
     //LOG(DEBUG) << "UpdateStrokePattern() rgba = (" << r << "," << g << "," << b << "," << a << ")";
-    m_strokePattern = cairo_pattern_create_rgba(b, g, r, a);
+
+    if (utils::IsColorBGR()){
+        m_strokePattern = cairo_pattern_create_rgba(b, g, r, a);
+    } else {
+        m_strokePattern = cairo_pattern_create_rgba(r, g, b, a);
+    }
 }
 
 void CairoRender::ImplCls::UpdateFillPattern(double r, double g, double b, double a){
@@ -976,7 +991,11 @@ void CairoRender::ImplCls::UpdateFillPattern(double r, double g, double b, doubl
         cairo_pattern_destroy(m_fillPattern);
         m_fillPattern = nullptr;
     }
-    m_fillPattern = cairo_pattern_create_rgba(b, g, r, a);
+    if (utils::IsColorBGR()){
+        m_fillPattern = cairo_pattern_create_rgba(b, g, r, a);
+    } else {
+        m_fillPattern = cairo_pattern_create_rgba(r, g, b, a);
+    }
 }
 
 void CairoRender::ImplCls::UpdateFillPattern(ShadingPtr fillShading){
@@ -1172,6 +1191,7 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
     if ( strokeColor != nullptr ){
         double r, g, b, a;
         std::tie(r, g, b, a) = strokeColor->GetRGBA();
+
         UpdateStrokePattern(r, g, b, a);
         //LOG(DEBUG) << "DrawPathObject() rgb = (" << r << "," << g << "," << b << ")";
 

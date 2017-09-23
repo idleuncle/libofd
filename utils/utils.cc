@@ -9,6 +9,8 @@
 
 namespace utils{
 
+    ColorOrder GlobalParameters::colorOrder = ColorOrder::RGB;
+
     std::vector<std::string> SplitString(const std::string& content){
         std::istringstream iss(content);
         std::vector<std::string> tokens{std::istream_iterator<std::string>{iss}, 
@@ -20,8 +22,6 @@ namespace utils{
         ss.setf(std::ios::fixed, std::ios::floatfield); \
             ss.precision(precision);
     }
-
-
 
     std::tuple<char*, size_t, bool> ReadFileData(const std::string &filename){
         bool ok = false;

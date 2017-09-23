@@ -1,5 +1,7 @@
 PROJECT(libofd)
 
+ADD_SUBDIRECTORY(gtkofd)
+ADD_SUBDIRECTORY(imofd)
 ADD_SUBDIRECTORY(ofdviewer)
 ADD_SUBDIRECTORY(pdf2ofd)
 

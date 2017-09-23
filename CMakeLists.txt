@@ -10,6 +10,7 @@ INCLUDE_DIRECTORIES(
 )
 
 LINK_DIRECTORIES(
+    ./build/lib
     /usr/local/lib
     ./tools/poppler/poppler/.libs
 )
@@ -30,9 +31,18 @@ INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
 FIND_PACKAGE(Harfbuzz REQUIRED)
 INCLUDE_DIRECTORIES(${HARFBUZZ_INCLUDE_DIRS})
 
+# -------- Darwin Libraries --------
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    SET(LIBDARWIN "-framework Cocoa -framework IOKit")
+endif ()
+
 # -------- CXX Compile Options --------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -Wall -Werror -Wno-c++11-extensions")
-SET(LIBOFD_DEPENDICES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu poppler poppler-cairo stdc++)
+SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu poppler poppler-cairo stdc++)
+
+# -------- LD_FLAGS Options --------
+# -lbfd  backward add line and code snipts.
+SET(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} -lbfd")
 
 # -std=c++11
 SET(CMAKE_CXX_STANDARD 11)
