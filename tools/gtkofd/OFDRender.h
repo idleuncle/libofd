@@ -23,6 +23,17 @@ public:
     virtual void UpdateScreenRenderer();
     virtual void UpdateScreen();
 
+    void MoveUp();
+    void MoveDown();
+    void MoveLeft();
+    void MoveRight();
+    void ZoomIn();
+    void ZoomOut();
+    void ZoomFitBest();
+    void SetOffsetX(double offsetX){m_offsetX = offsetX;};
+    void SetOffsetY(double offsetY){m_offsetY = offsetY;};
+    void SetScaling(double scaling){m_scaling = scaling;};
+
 protected:
     int m_screenWidth = -1;
     int m_screenHeight = 0;

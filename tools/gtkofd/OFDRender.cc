@@ -7,8 +7,41 @@
 double g_resolutionX = 240.0; // 120, 160, 240
 double g_resolutionY = 240.0;
 double ZOOM_BASE = exp(1.0);
+double ZOOM_STEP = 0.1;
+double X_STEP = 10;
+double Y_STEP = 10;
 
 using namespace ofd;
+
+void OFDRender::MoveUp(){
+    m_offsetY -= Y_STEP;
+}
+
+void OFDRender::MoveDown(){
+    m_offsetY += Y_STEP;
+}
+
+void OFDRender::MoveLeft(){
+    m_offsetX -= X_STEP;
+}
+
+void OFDRender::MoveRight(){
+    m_offsetX += X_STEP;
+}
+
+void OFDRender::ZoomIn(){
+    m_zoomFactor += ZOOM_STEP;
+}
+
+void OFDRender::ZoomOut(){
+    m_zoomFactor -= ZOOM_STEP;
+}
+
+void OFDRender::ZoomFitBest(){
+    m_zoomFactor = ZOOM_BASE;
+    m_offsetX = 0;
+    m_offsetY = 0;
+}
 
 OFDRender::OFDRender(int screenWidth, int screenHeight, int screenBPP) :
     m_screenWidth(screenWidth), m_screenHeight(screenHeight),
@@ -71,15 +104,15 @@ void OFDRender::RenderBackgroundImage(DocumentPtr document, size_t pageIndex){
 
                 double fitScaling = page->GetFitScaling(m_screenWidth, m_screenHeight, g_resolutionX, g_resolutionY);
 
-                //double factor = 1.0;
-                //double delta = m_zoomFactor - ZOOM_BASE;
-                //if ( delta >= 0.0 ){
-                    //factor = log(m_zoomFactor);
-                //} else {
-                    //factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
-                //}
-                //scaling = fitScaling * factor;
-                scaling = fitScaling;
+                double factor = 1.0;
+                double delta = m_zoomFactor - ZOOM_BASE;
+                if ( delta >= 0.0 ){
+                    factor = log(m_zoomFactor);
+                } else {
+                    factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
+                }
+                scaling = fitScaling * factor;
+                //scaling = fitScaling;
                 m_scaling = scaling;
 
                 //LOG(DEBUG) << "delta: " << delta << " factor: " << factor << " scaling=" << scaling << " offset=(" << pixelX << "," << pixelY << ")";

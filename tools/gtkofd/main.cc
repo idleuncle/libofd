@@ -17,6 +17,7 @@ extern "C"{
 #include "ofd/CairoRender.h"
 using namespace ofd;
 
+GtkWindow *m_mainWindow;
 
 class GtkRender : public ofd::OFDRender{
 public:
@@ -159,6 +160,58 @@ static GResource *resource = nullptr;
 static GtkWidget *drawingArea = nullptr;
 static GtkWidget *infobar = nullptr;
 static GtkWidget *message = nullptr;
+static GtkWindow *renderingWindow = nullptr;
+
+static void redraw_page(){
+    gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
+}
+
+static void first_page(){
+    if (m_document == nullptr) return;
+    size_t total_pages = m_document->GetNumPages();
+    m_pageIndex = 0;
+    m_ofdRender->SetOffsetX(0.0);
+    m_ofdRender->SetOffsetY(0.0);
+    redraw_page();
+    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+}
+
+static void last_page(){
+    if (m_document == nullptr) return;
+    size_t total_pages = m_document->GetNumPages();
+    m_pageIndex = total_pages - 1;
+    m_ofdRender->SetOffsetX(0.0);
+    m_ofdRender->SetOffsetY(0.0);
+    redraw_page();
+    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+}
+static void next_page(){
+    if (m_document == nullptr) return;
+    size_t total_pages = m_document->GetNumPages();
+    if (m_pageIndex < total_pages - 1){
+        m_pageIndex++;
+    } else {
+        m_pageIndex = 0;
+    }
+    m_ofdRender->SetOffsetX(0.0);
+    m_ofdRender->SetOffsetY(0.0);
+    redraw_page();
+    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+}
+
+static void prev_page(){
+    if (m_document == nullptr) return;
+    size_t total_pages = m_document->GetNumPages();
+    if (m_pageIndex > 0){
+        m_pageIndex--;
+    } else {
+        m_pageIndex = total_pages - 1;
+    }
+    m_ofdRender->SetOffsetX(0.0);
+    m_ofdRender->SetOffsetY(0.0);
+    redraw_page();
+    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+}
 
 static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
 
@@ -167,6 +220,332 @@ static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpoint
     } else {
         m_ofdRender = std::make_shared<GtkRender>(drawingArea, allocation->width, allocation->height);
     }
+}
+
+static std::string choose_file(){
+    std::string fileName;
+
+    GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File",
+            m_mainWindow,
+            GTK_FILE_CHOOSER_ACTION_OPEN,
+            "_Cancel",
+            GTK_RESPONSE_CANCEL,
+            "_Open",
+            GTK_RESPONSE_ACCEPT,
+            nullptr);
+    gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (res == GTK_RESPONSE_ACCEPT){
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+        char *filename = gtk_file_chooser_get_filename(chooser);
+        fileName = filename;
+        g_free(filename);
+    }
+
+    gtk_widget_destroy(dialog);
+
+    return fileName;
+}
+
+// https://developer.gnome.org/gtk3/3.2/GtkWidget.html#Signal-Details
+
+static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
+    switch (event->keyval){
+    case GDK_KEY_i:
+        m_ofdRender->ZoomIn();
+        redraw_page();
+        break;
+    case GDK_KEY_o:
+        m_ofdRender->ZoomOut();
+        redraw_page();
+        break;
+    case GDK_KEY_f:
+        m_ofdRender->ZoomFitBest();
+        redraw_page();
+        break;
+    case GDK_KEY_h:
+        m_ofdRender->MoveLeft();
+        redraw_page();
+        break;
+    case GDK_KEY_j:
+        m_ofdRender->MoveDown();
+        redraw_page();
+        break;
+    case GDK_KEY_k:
+        m_ofdRender->MoveUp();
+        redraw_page();
+        break;
+    case GDK_KEY_l:
+        m_ofdRender->MoveRight();
+        redraw_page();
+        break;
+    case GDK_KEY_n:
+        next_page();
+        redraw_page();
+        break;
+    case GDK_KEY_p:
+        prev_page();
+        redraw_page();
+        break;
+    default:
+        //LOG(DEBUG) << "Key pressed. keyval:" << event->keyval;
+        return false;
+    }; // switch
+
+    return true;
+}
+
+static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
+    switch (event->keyval){
+    case GDK_KEY_o:
+        if (event->state & GDK_CONTROL_MASK){
+            LOG(DEBUG) << "Key Ctrl+o released. keyval:" << event->keyval;
+            std::string fileName = choose_file();
+            if (!fileName.empty()){
+                DocumentPtr document = open_ofd_document(fileName);
+                if (document != nullptr){
+                    m_document = document;
+                    m_pageIndex = 0;
+                    redraw_page();
+                }
+            }
+        }
+        break;
+    case GDK_KEY_plus:
+        if (event->state & GDK_CONTROL_MASK){
+            // 放大 Ctrl + +
+            m_ofdRender->ZoomIn();
+            redraw_page();
+            LOG(DEBUG) << "Key Ctrl++ released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_minus:
+        if (event->state & GDK_CONTROL_MASK){
+            // 缩小 Ctrl + -
+            m_ofdRender->ZoomOut();
+            redraw_page();
+            LOG(DEBUG) << "Key Ctrl+- released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_1:
+        if (event->state & GDK_CONTROL_MASK){
+            // 原始大小 Ctrl + 1
+            LOG(DEBUG) << "Key Ctrl+1 released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_2:
+        if (event->state & GDK_CONTROL_MASK){
+            // 适合页面 Ctrl + 2
+            m_ofdRender->ZoomFitBest();
+            redraw_page();
+            LOG(DEBUG) << "Key Ctrl+2 released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_3:
+        if (event->state & GDK_CONTROL_MASK){
+            // 适合宽度 Ctrl + 3
+            LOG(DEBUG) << "Key Ctrl+3 released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_4:
+        if (event->state & GDK_CONTROL_MASK){
+            // 适合高度 Ctrl + 4 
+            LOG(DEBUG) << "Key Ctrl+4 released. keyval:" << event->keyval;
+        }
+        break;
+    case GDK_KEY_Home:
+        first_page();
+        break;
+    case GDK_KEY_End:
+        last_page();
+        break;
+    case GDK_KEY_Page_Down:
+        LOG(DEBUG) << "Page Down KEY RELEASED!";
+        next_page();
+        break;
+    case GDK_KEY_Page_Up:
+        LOG(DEBUG) << "Page Up KEY RELEASED!";
+        prev_page();
+        break;
+    case GDK_KEY_Down:
+        LOG(DEBUG) << "Down KEY RELEASED!";
+        break;
+    case GDK_KEY_Up:
+        LOG(DEBUG) << "Up KEY RELEASED!";
+        break;
+    case GDK_KEY_space:
+        LOG(DEBUG) << "SPACE KEY RELEASED!";
+        break;
+    default:
+        //LOG(DEBUG) << "Key released. keyval:" << event->keyval;
+        return false;
+    }; // switch
+
+    return true;
+}
+/*
+struct GdkEventButton {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  gdouble *axes;
+  guint state;
+  guint button;
+  GdkDevice *device;
+  gdouble x_root, y_root;
+};
+ */
+static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
+    if (event->button == GDK_BUTTON_PRIMARY){
+        LOG(DEBUG) << "LEFT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
+        //next_page();
+    } else if (event->button == GDK_BUTTON_SECONDARY){
+        LOG(DEBUG) << "RIGHT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
+        //prev_page();
+    }
+
+    return false;
+}
+
+__attribute__((unused)) static gboolean button_release_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
+    return false;
+}
+
+/*
+struct GdkEventConfigure {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  gint x, y;
+  gint width;
+  gint height;
+};
+ */
+__attribute__((unused)) static gboolean configure_event_cb(GtkWidget *widget, GdkEventConfigure *event, gpointer user_data){
+    return false;
+}
+
+static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpointer user_data){
+    int x, y;
+    GdkModifierType state;
+
+    gdk_window_get_device_position(event->window, event->device, &x, &y, &state);
+
+    //if (state & GDK_BUTTON1_MASK){
+        //LOG(DEBUG) << "MOTION NOTIFY! x:" << x << " y:" << y;
+    //}
+    return true;
+}
+
+/*
+struct GdkEventScroll {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  guint state;
+  GdkScrollDirection direction;
+  GdkDevice *device;
+  gdouble x_root, y_root;
+  gdouble delta_x;
+  gdouble delta_y;
+  guint is_stop : 1;
+};
+ */
+__attribute__((unused)) gboolean scroll_event_cb(GtkWidget *widget, GdkEventScroll *event, gpointer user_data){
+    GdkScrollDirection direction = event->direction;
+
+    LOG(DEBUG) << "Scroll Event. Delta x:" << event->delta_x << " Delta y:" << event->delta_y << " Direction:" << direction;
+
+    if (event->state & GDK_SHIFT_MASK){
+        if (event->direction == GDK_SCROLL_UP){
+            m_ofdRender->ZoomIn();
+            redraw_page();
+        } else if (event->direction == GDK_SCROLL_DOWN){
+            m_ofdRender->ZoomOut();
+            redraw_page();
+        }
+    } else {
+        if (event->direction == GDK_SCROLL_UP){
+            m_ofdRender->MoveUp();
+            redraw_page();
+        } else if (event->direction == GDK_SCROLL_DOWN){
+            m_ofdRender->MoveDown();
+            redraw_page();
+        } else if (event->direction == GDK_SCROLL_LEFT){
+            m_ofdRender->MoveLeft();
+            redraw_page();
+        } else if (event->direction == GDK_SCROLL_RIGHT){
+            m_ofdRender->MoveRight();
+            redraw_page();
+        }
+    }
+
+    return false;
+}
+
+/*
+struct GdkEventCrossing {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  GdkWindow *subwindow;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  gdouble x_root;
+  gdouble y_root;
+  GdkCrossingMode mode;
+  GdkNotifyType detail;
+  gboolean focus;
+  guint state;
+};
+ */
+__attribute__((unused)) static gboolean enter_notify_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
+    LOG(DEBUG) << "ENTER NOTIFY x:" << event->x << " y:" << event->y;
+    return false;
+}
+
+__attribute__((unused)) static gboolean leave_notify_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
+    LOG(DEBUG) << "LEAVE NOTIFY x:" << event->x << " y:" << event->y;
+    return false;
+}
+
+/*
+typedef enum {
+  GTK_DIR_TAB_FORWARD,
+  GTK_DIR_TAB_BACKWARD,
+  GTK_DIR_UP,
+  GTK_DIR_DOWN,
+  GTK_DIR_LEFT,
+  GTK_DIR_RIGHT
+} GtkDirectionType;
+ */
+__attribute__((unused)) static gboolean focus_cb(GtkWidget *widget, GtkDirectionType direction, gpointer user_data){
+    LOG(DEBUG) << "FOCUS direction:" << direction;
+    return false;
+}
+
+/*
+struct GdkEventFocus {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  gint16 in;
+};
+ */
+__attribute__((unused)) static gboolean focus_in_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
+    LOG(DEBUG) << "Keyboard FOCUS in EVENT. Gained keyboard focus:" << event->in;
+    return false;
+}
+
+__attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
+    LOG(DEBUG) << "Keyboard FOCUS out EVENT. Gained keyboard focus:" << event->in;
+    return false;
 }
 
 static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
@@ -288,8 +667,8 @@ static void activate(GApplication *app){
     GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
 
     // -------- mainWindow --------
-    GtkWindow *mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
-    assert(mainWindow != nullptr);
+    m_mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
+    assert(m_mainWindow != nullptr);
 
     // -------- mainToolbar --------
     GtkToolbar *mainToolbar = (GtkToolbar*)gtk_builder_get_object(builder, "mainToolbar");
@@ -381,7 +760,7 @@ static void activate(GApplication *app){
 
     GtkToolItem *toolExit = gtk_tool_button_new(gtk_image_new_from_icon_name("application-exit", TOOL_BUTTON_SIZE), "退出");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolExit, -1);
-    g_signal_connect_swapped(G_OBJECT(mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
+    g_signal_connect_swapped(G_OBJECT(m_mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
     g_signal_connect(G_OBJECT(toolExit), "clicked",G_CALLBACK(gtk_main_quit), nullptr);
 
     // -------- infobar --------
@@ -396,6 +775,10 @@ static void activate(GApplication *app){
     drawingArea = GTK_WIDGET(gtk_builder_get_object(builder, "drawingArea"));
     assert(drawingArea != nullptr);
 
+    // -------- renderingWindow --------
+    renderingWindow = (GtkWindow*)gtk_builder_get_object(builder, "renderingWindow");
+    assert(renderingWindow != nullptr);
+
 
     g_object_unref(builder);
 
@@ -405,25 +788,53 @@ static void activate(GApplication *app){
         //{ "run", activate_run, nullptr, nullptr, nullptr },
         { "bold", activate_about, nullptr, nullptr, nullptr },
     };
-    g_action_map_add_action_entries(G_ACTION_MAP(mainWindow),
-            win_entries, G_N_ELEMENTS(win_entries), mainWindow);
+    g_action_map_add_action_entries(G_ACTION_MAP(m_mainWindow),
+            win_entries, G_N_ELEMENTS(win_entries), m_mainWindow);
     g_signal_connect(drawingArea, "draw", G_CALLBACK(draw_cb), nullptr);
     g_signal_connect(drawingArea, "size-allocate", G_CALLBACK(size_allocate_cb), nullptr);
 
+    gtk_widget_hide(GTK_WIDGET(mainToolbar));
+
+    // -------- Drawing Widget --------
+    GtkWidget *drawingWidget = GTK_WIDGET(drawingArea);
+
+    g_signal_connect(G_OBJECT(m_mainWindow), "key-press-event", G_CALLBACK(key_press_cb), nullptr);
+    g_signal_connect(G_OBJECT(m_mainWindow), "key-release-event", G_CALLBACK(key_release_cb), nullptr);
+
+    g_signal_connect(G_OBJECT(drawingWidget), "button-press-event", G_CALLBACK(button_press_cb), nullptr);
+    g_signal_connect(G_OBJECT(drawingWidget), "motion-notify-event", G_CALLBACK(motion_notify_cb), nullptr);
+    //g_signal_connect(G_OBJECT(drawingWidget), "enter-notify-event", G_CALLBACK(enter_notify_cb), nullptr);
+    //g_signal_connect(G_OBJECT(drawingWidget), "leave-notify-event", G_CALLBACK(leave_notify_cb), nullptr);
+    g_signal_connect(G_OBJECT(drawingWidget), "focus", G_CALLBACK(focus_cb), nullptr);
+    g_signal_connect(G_OBJECT(drawingWidget), "focus-in-event", G_CALLBACK(focus_in_event_cb), nullptr);
+    g_signal_connect(G_OBJECT(drawingWidget), "focus-out-event", G_CALLBACK(focus_out_event_cb), nullptr);
+
+    g_signal_connect(G_OBJECT(drawingWidget), "scroll-event", G_CALLBACK(scroll_event_cb), nullptr);
+
+    gtk_widget_set_events(drawingWidget, gtk_widget_get_events(drawingWidget)
+            | GDK_KEY_PRESS_MASK
+            | GDK_ENTER_NOTIFY_MASK
+            | GDK_LEAVE_NOTIFY_MASK
+            | GDK_BUTTON_PRESS_MASK
+            | GDK_SCROLL_MASK
+            | GDK_POINTER_MOTION_MASK
+            | GDK_POINTER_MOTION_HINT_MASK);
+
     // -------- Main Window --------
-    gtk_window_set_title(mainWindow, "OFD Reader");
+    gtk_window_set_title(m_mainWindow, "OFD Reader");
     // Hide the title bar and the board.
-    //gtk_window_set_decorated(mainWindow, false);
-    adjust_window_size(mainWindow);
-    gtk_window_activate_focus(mainWindow);
+    //gtk_window_set_decorated(m_mainWindow, false);
+    adjust_window_size(m_mainWindow);
+    gtk_window_activate_focus(m_mainWindow);
 
-    //gtk_window_set_opacity(mainWindow, 0.85);
-    //gtk_window_set_focus_on_map(mainWindow, true);
 
-    //gtk_window_set_icon(mainWindow, create_pixbuf("./app.png"));
+    //gtk_window_set_opacity(m_mainWindow, 0.85);
+    //gtk_window_set_focus_on_map(m_mainWindow, true);
 
-    gtk_application_add_window(GTK_APPLICATION(app), mainWindow);
-    gtk_widget_show_all(GTK_WIDGET(mainWindow));
+    //gtk_window_set_icon(m_mainWindow, create_pixbuf("./app.png"));
+
+    gtk_application_add_window(GTK_APPLICATION(app), m_mainWindow);
+    gtk_widget_show_all(GTK_WIDGET(m_mainWindow));
 
     gtk_widget_hide(infobar);
 
@@ -448,6 +859,14 @@ static void activate(GApplication *app){
     //app_set_theme("./themes/Vimix-Theme/VimixDark-Beryl/gtk-3.0/gtk.css");
     
     //app_set_theme("./themes/equilux-theme-v20170913/Equilux/gtk-3.22/gtk.css");
+
+
+    // GdkScrollDirection direction; // GDK_SCROLL_DOWN, GDK_SCROLL_SMOOTH, GDK_SCROLL_LEFT, GDK_SCROLL_RIGHT
+    //g_signal_connect(G_OBJECT(renderingWindow), "keyboard_press", G_CALLBACK(key_press_cb), nullptr);
+    //gtk_window_set_focus_on_map(renderingWindow, true);
+
+    g_signal_emit_by_name(G_OBJECT(drawingArea), "activate");
+    gtk_widget_grab_focus(drawingArea);
 }
 
 static void startup(GApplication *app){
@@ -472,7 +891,7 @@ static void startup(GApplication *app){
     g_object_unref (builder);
 
 
-    std::string filename = "./data/1.ofd";
+    std::string filename = "./data/2.ofd";
     m_document = open_ofd_document(filename);
     if (m_document != nullptr){
         size_t total_pages = m_document->GetNumPages();
