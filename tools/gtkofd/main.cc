@@ -2,6 +2,7 @@
 #include <iostream>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gdk/gdkscreen.h>
 #include <assert.h>
 
 extern "C"{
@@ -22,8 +23,8 @@ GtkWindow *m_mainWindow;
 class GtkRender : public ofd::OFDRender{
 public:
     GtkRender(GtkWidget *drawingArea, int screenWidth, int screenHeight, int screenBPP = 32):
-        ofd::OFDRender(screenWidth, screenHeight, screenBPP), 
-        m_drawingArea(drawingArea)
+        ofd::OFDRender(screenWidth, screenHeight, screenBPP) 
+        //m_drawingArea(drawingArea)
     {}
     virtual ~GtkRender(){};
 
@@ -33,7 +34,7 @@ public:
     }
 
 private:
-    __attribute__((unused)) GtkWidget *m_drawingArea;
+    //__attribute__((unused)) GtkWidget *m_drawingArea;
 }; // class GtkRender
 std::shared_ptr<ofd::OFDRender> m_ofdRender = nullptr;
 
@@ -583,10 +584,17 @@ __attribute__((unused)) static void showInfoBar(GSimpleAction *action, GVariant 
 }
 
 void adjust_window_size(GtkWindow *window){
-    GdkDisplay *display = gdk_display_get_default();
-    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+
     GdkRectangle workArea;
-    gdk_monitor_get_workarea(monitor, &workArea);
+
+    //GdkDisplay *display = gdk_display_get_default();
+    //GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    //gdk_monitor_get_workarea(monitor, &workArea);
+
+    GdkScreen *screen = gdk_screen_get_default();
+    gint monitor_num = gdk_screen_get_primary_monitor(screen);
+    gdk_screen_get_monitor_workarea(screen, monitor_num, &workArea);
+
 
     GtkRequisition minimum_size;
     GtkRequisition natural_size;
@@ -842,8 +850,8 @@ static void activate(GApplication *app){
     //app_set_theme_from_resource("/themes/Adwaita/gtk-3.22/gtk-light.css");
 
     //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-darker.css");
-    app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-dark.css");
-    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-light.css");
+    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-dark.css");
+    app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-light.css");
 
     //app_set_theme("/themes/OSX-Arc-White/gtk-3.22/gtk-light.css");
     ////app_set_theme_from_file("/themes/OSX-Arc-White/gtk-3.22/gtk-darker.css");

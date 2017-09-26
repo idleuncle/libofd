@@ -8,9 +8,9 @@ ADD_CUSTOM_TARGET(
 
 ADD_CUSTOM_COMMAND(TARGET Compile_gtkofd_resources
     PRE_BUILD
-    COMMAND /usr/local/bin/glib-compile-resources --generate --generate-source --target ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd_resources.c --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
-    COMMAND /usr/local/bin/glib-compile-resources --generate --generate-header --target ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd_resources.h --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
-    COMMAND /usr/local/bin/glib-compile-resources --generate-dependencies --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
+    COMMAND glib-compile-resources --generate --generate-source --target ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd_resources.c --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
+    COMMAND glib-compile-resources --generate --generate-header --target ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd_resources.h --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
+    COMMAND glib-compile-resources --generate-dependencies --sourcedir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gtkofd.gresource.xml
 )
 
 AUX_SOURCE_DIRECTORY(. SRC_LIST)
