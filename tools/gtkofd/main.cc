@@ -668,6 +668,13 @@ void app_set_theme_from_resource(const gchar *theme_path) {
 
 #define TOOL_BUTTON_SIZE GTK_ICON_SIZE_SMALL_TOOLBAR
 //#define TOOL_BUTTON_SIZE GTK_ICON_SIZE_DND
+
+GtkWidget* GTK_IMAGE_FROM_RESOURCE(const std::string &iconName){
+    //std::string resourcePath = std::string("/icons/gtkofd/faenza/24/") + iconName + ".png";
+    std::string resourcePath = std::string("/icons/gtkofd/emerald/24/") + iconName + ".svg";
+    return gtk_image_new_from_resource(resourcePath.c_str());
+}
+
 static void activate(GApplication *app){
 
     // -------- Load widgets from resource by GtkBuilder --------
@@ -697,76 +704,79 @@ static void activate(GApplication *app){
     //GtkToolItem *toolWindowNew = gtk_tool_button_new(gtk_image_new_from_icon_name("window-new", TOOL_BUTTON_SIZE), "新建");
     //gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolWindowNew, -1);
 
-    GtkToolItem *toolFileOpen = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open", TOOL_BUTTON_SIZE), "打开");
+    //GtkToolItem *toolFileOpen = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open", TOOL_BUTTON_SIZE), "打开");
+    //GtkToolItem *toolFileOpen = gtk_tool_button_new(gtk_image_new_from_resource("/icons/gtkofd/emerald/24/document-open.svg"), "打开");
+    GtkToolItem *toolFileOpen = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-open"), "打开");
     gtk_tool_item_set_tooltip_text(toolFileOpen, "打开");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileOpen, -1);
 
-    GtkToolItem *toolFileSave = gtk_tool_button_new(gtk_image_new_from_icon_name("document-save", TOOL_BUTTON_SIZE), "保存");
+    //GtkToolItem *toolFileSave = gtk_tool_button_new(gtk_image_new_from_icon_name("document-save", TOOL_BUTTON_SIZE), "保存");
+    GtkToolItem *toolFileSave = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-save"), "保存");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileSave, -1);
 
-    //GtkToolItem *toolFileSaveAs = gtk_tool_button_new(gtk_image_new_from_icon_name("document-save-as", TOOL_BUTTON_SIZE), "另存");
+    //GtkToolItem *toolFileSaveAs = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-save-as"), "另存");
     //gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileSaveAs, -1);
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolGoFirst = gtk_tool_button_new(gtk_image_new_from_icon_name("go-first", TOOL_BUTTON_SIZE), "首页");
+    GtkToolItem *toolGoFirst = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-first"), "首页");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoFirst, -1);
 
-    GtkToolItem *toolGoPrevious = gtk_tool_button_new(gtk_image_new_from_icon_name("go-previous", TOOL_BUTTON_SIZE), "前页");
+    GtkToolItem *toolGoPrevious = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-previous"), "前页");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoPrevious, -1);
 
-    GtkToolItem *toolGoNext = gtk_tool_button_new(gtk_image_new_from_icon_name("go-next", TOOL_BUTTON_SIZE), "后页");
+    GtkToolItem *toolGoNext = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-next"), "后页");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoNext, -1);
 
-    GtkToolItem *toolGoLast = gtk_tool_button_new(gtk_image_new_from_icon_name("go-last", TOOL_BUTTON_SIZE), "尾页");
+    GtkToolItem *toolGoLast = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-last"), "尾页");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoLast, -1);
 
-    GtkToolItem *toolGoJump = gtk_tool_button_new(gtk_image_new_from_icon_name("go-jump", TOOL_BUTTON_SIZE), "跳转");
+    GtkToolItem *toolGoJump = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-jump"), "跳转");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoJump, -1);
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolZoomIn = gtk_tool_button_new(gtk_image_new_from_icon_name("zoom-in", TOOL_BUTTON_SIZE), "放大");
+    GtkToolItem *toolZoomIn = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-in"), "放大");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomIn, -1);
 
-    GtkToolItem *toolZoomOut = gtk_tool_button_new(gtk_image_new_from_icon_name("zoom-out", TOOL_BUTTON_SIZE), "缩小");
+    GtkToolItem *toolZoomOut = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-out"), "缩小");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomOut, -1);
 
-    GtkToolItem *toolZoomFitBest = gtk_tool_button_new(gtk_image_new_from_icon_name("zoom-fit-best", TOOL_BUTTON_SIZE), "合适");
+    GtkToolItem *toolZoomFitBest = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-fit-best"), "合适");
     gtk_tool_item_set_tooltip_text(toolZoomFitBest, "合适大小");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomFitBest, -1);
 
-    GtkToolItem *toolZoomOriginal = gtk_tool_button_new(gtk_image_new_from_icon_name("zoom-original", TOOL_BUTTON_SIZE), "原始");
+    GtkToolItem *toolZoomOriginal = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-original"), "原始");
     gtk_tool_item_set_tooltip_text(toolZoomOriginal, "原始大小");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomOriginal, -1);
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolEditCopy = gtk_tool_button_new(gtk_image_new_from_icon_name("edit-copy", TOOL_BUTTON_SIZE), "拷贝");
+    GtkToolItem *toolEditCopy = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("edit-copy"), "拷贝");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolEditCopy, -1);
 
-    GtkToolItem *toolEditFind = gtk_tool_button_new(gtk_image_new_from_icon_name("edit-find", TOOL_BUTTON_SIZE), "查找");
+    GtkToolItem *toolEditFind = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("edit-find"), "查找");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolEditFind, -1);
 
-    GtkToolItem *toolFileProperties = gtk_tool_button_new(gtk_image_new_from_icon_name("document-properties", TOOL_BUTTON_SIZE), "属性");
+    GtkToolItem *toolFileProperties = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-properties"), "属性");
     gtk_tool_item_set_tooltip_text(toolFileProperties, "文档属性");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileProperties, -1);
 
-    GtkToolItem *toolPageSetup = gtk_tool_button_new(gtk_image_new_from_icon_name("document-page-setup", TOOL_BUTTON_SIZE), "设置");
+    GtkToolItem *toolPageSetup = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-page-setup"), "设置");
     gtk_tool_item_set_tooltip_text(toolPageSetup, "页面设置");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolPageSetup, -1);
 
-    GtkToolItem *toolFilePrint = gtk_tool_button_new(gtk_image_new_from_icon_name("document-print", TOOL_BUTTON_SIZE), "打印");
+    GtkToolItem *toolFilePrint = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-print"), "打印");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFilePrint, -1);
 
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolExit = gtk_tool_button_new(gtk_image_new_from_icon_name("application-exit", TOOL_BUTTON_SIZE), "退出");
+    GtkToolItem *toolExit = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("application-exit"), "退出");
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolExit, -1);
     g_signal_connect_swapped(G_OBJECT(m_mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
     g_signal_connect(G_OBJECT(toolExit), "clicked",G_CALLBACK(gtk_main_quit), nullptr);
@@ -849,9 +859,24 @@ static void activate(GApplication *app){
     //app_set_theme_from_resource("/themes/Adwaita/gtk-3.22/gtk-dark.css");
     //app_set_theme_from_resource("/themes/Adwaita/gtk-3.22/gtk-light.css");
 
-    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-darker.css");
-    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-dark.css");
+    // -------- United-Ubuntu --------
+    //app_set_theme_from_resource("/themes/United-Ubuntu/gtk-3.0/gtk.css");
+    //app_set_theme_from_resource("/themes/United-Ubuntu/gtk-3.0/gtk-dark.css");
+
+    // -------- Gnome OSX-III-1.0 --------
+    //app_set_theme_from_resource("/themes/Gnome OSX-III-1.0/gtk-3.0/gtk.css");
+    //app_set_theme_from_resource("/themes/Gnome OSX-III-1.0/gtk-3.0/gtk-dark.css");
+
+    // -------- Minwaita-OSX --------
+    //app_set_theme_from_resource("/themes/Minwaita-OSX-Dark/gtk-3.0/gtk.css");
+    //app_set_theme_from_resource("/themes/Minwaita-OSX/gtk-3.0/gtk.css");
+    //app_set_theme_from_resource("/themes/Minwaita-OSX/gtk-3.0/gtk-dark.css");
+
+    // -------- OSX-Arc-White --------
     app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-light.css");
+    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-dark.css");
+
+    //app_set_theme_from_resource("/themes/OSX-Arc-White/gtk-3.22/gtk-darker.css");
 
     //app_set_theme("/themes/OSX-Arc-White/gtk-3.22/gtk-light.css");
     ////app_set_theme_from_file("/themes/OSX-Arc-White/gtk-3.22/gtk-darker.css");

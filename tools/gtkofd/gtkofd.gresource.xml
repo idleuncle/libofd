@@ -8,5 +8,55 @@
         <file>themes/OSX-Arc-White/gtk-3.22/gtk-dark.css</file>
         <file>themes/Adwaita/gtk-3.22/gtk-light.css</file>
         <file>themes/Adwaita/gtk-3.22/gtk-dark.css</file>  
+
+        <file>icons/gtkofd/faenza/24/application-exit.png</file>
+        <file>icons/gtkofd/faenza/24/document-new.png</file>
+        <file>icons/gtkofd/faenza/24/document-open.png</file>
+        <file>icons/gtkofd/faenza/24/document-save.png</file>
+        <file>icons/gtkofd/faenza/24/document-page-setup.png</file>
+        <file>icons/gtkofd/faenza/24/document-print.png</file>
+        <file>icons/gtkofd/faenza/24/document-properties.png</file>
+        <file>icons/gtkofd/faenza/24/document-import.png</file>
+        <file>icons/gtkofd/faenza/24/document-export.png</file>
+        <file>icons/gtkofd/faenza/24/go-first.png</file>
+        <file>icons/gtkofd/faenza/24/go-last.png</file>
+        <file>icons/gtkofd/faenza/24/go-previous.png</file>
+        <file>icons/gtkofd/faenza/24/go-next.png</file>
+        <file>icons/gtkofd/faenza/24/go-jump.png</file>
+        <file>icons/gtkofd/faenza/24/zoom-in.png</file>
+        <file>icons/gtkofd/faenza/24/zoom-out.png</file>
+        <file>icons/gtkofd/faenza/24/zoom-fit-best.png</file>
+        <file>icons/gtkofd/faenza/24/zoom-original.png</file>
+        <file>icons/gtkofd/faenza/24/edit-find.png</file>
+        <file>icons/gtkofd/faenza/24/edit-copy.png</file>
+        <file>icons/gtkofd/faenza/24/edit-cut.png</file>
+        <file>icons/gtkofd/faenza/24/edit-paste.png</file>
+        <file>icons/gtkofd/faenza/24/edit-undo.png</file>
+        <file>icons/gtkofd/faenza/24/edit-redo.png</file>
+
+        <file>icons/gtkofd/emerald/24/application-exit.svg</file>
+        <file>icons/gtkofd/emerald/24/document-new.svg</file>
+        <file>icons/gtkofd/emerald/24/document-open.svg</file>
+        <file>icons/gtkofd/emerald/24/document-save.svg</file>
+        <file>icons/gtkofd/emerald/24/document-page-setup.svg</file>
+        <file>icons/gtkofd/emerald/24/document-print.svg</file>
+        <file>icons/gtkofd/emerald/24/document-properties.svg</file>
+        <file>icons/gtkofd/emerald/24/document-import.svg</file>
+        <file>icons/gtkofd/emerald/24/document-export.svg</file>
+        <file>icons/gtkofd/emerald/24/go-first.svg</file>
+        <file>icons/gtkofd/emerald/24/go-last.svg</file>
+        <file>icons/gtkofd/emerald/24/go-previous.svg</file>
+        <file>icons/gtkofd/emerald/24/go-next.svg</file>
+        <file>icons/gtkofd/emerald/24/go-jump.svg</file>
+        <file>icons/gtkofd/emerald/24/zoom-in.svg</file>
+        <file>icons/gtkofd/emerald/24/zoom-out.svg</file>
+        <file>icons/gtkofd/emerald/24/zoom-fit-best.svg</file>
+        <file>icons/gtkofd/emerald/24/zoom-original.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-find.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-copy.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-cut.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-paste.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-undo.svg</file>
+        <file>icons/gtkofd/emerald/24/edit-redo.svg</file>
     </gresource>
 </gresources>
