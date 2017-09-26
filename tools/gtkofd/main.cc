@@ -587,13 +587,13 @@ void adjust_window_size(GtkWindow *window){
 
     GdkRectangle workArea;
 
-    //GdkDisplay *display = gdk_display_get_default();
-    //GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
-    //gdk_monitor_get_workarea(monitor, &workArea);
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    gdk_monitor_get_workarea(monitor, &workArea);
 
-    GdkScreen *screen = gdk_screen_get_default();
-    gint monitor_num = gdk_screen_get_primary_monitor(screen);
-    gdk_screen_get_monitor_workarea(screen, monitor_num, &workArea);
+    //GdkScreen *screen = gdk_screen_get_default();
+    //gint monitor_num = gdk_screen_get_primary_monitor(screen);
+    //gdk_screen_get_monitor_workarea(screen, monitor_num, &workArea);
 
 
     GtkRequisition minimum_size;
