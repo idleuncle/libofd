@@ -58,5 +58,30 @@
         <file>icons/gtkofd/emerald/24/edit-paste.svg</file>
         <file>icons/gtkofd/emerald/24/edit-undo.svg</file>
         <file>icons/gtkofd/emerald/24/edit-redo.svg</file>
+
+        <file>icons/gtkofd/faenza/48/application-exit.png</file>
+        <file>icons/gtkofd/faenza/48/document-new.png</file>
+        <file>icons/gtkofd/faenza/48/document-open.png</file>
+        <file>icons/gtkofd/faenza/48/document-save.png</file>
+        <file>icons/gtkofd/faenza/48/document-page-setup.png</file>
+        <file>icons/gtkofd/faenza/48/document-print.png</file>
+        <file>icons/gtkofd/faenza/48/document-properties.png</file>
+        <file>icons/gtkofd/faenza/48/document-import.png</file>
+        <file>icons/gtkofd/faenza/48/document-export.png</file>
+        <file>icons/gtkofd/faenza/48/go-first.png</file>
+        <file>icons/gtkofd/faenza/48/go-last.png</file>
+        <file>icons/gtkofd/faenza/48/go-previous.png</file>
+        <file>icons/gtkofd/faenza/48/go-next.png</file>
+        <file>icons/gtkofd/faenza/48/go-jump.png</file>
+        <file>icons/gtkofd/faenza/48/zoom-in.png</file>
+        <file>icons/gtkofd/faenza/48/zoom-out.png</file>
+        <file>icons/gtkofd/faenza/48/zoom-fit-best.png</file>
+        <file>icons/gtkofd/faenza/48/zoom-original.png</file>
+        <file>icons/gtkofd/faenza/48/edit-find.png</file>
+        <file>icons/gtkofd/faenza/48/edit-copy.png</file>
+        <file>icons/gtkofd/faenza/48/edit-cut.png</file>
+        <file>icons/gtkofd/faenza/48/edit-paste.png</file>
+        <file>icons/gtkofd/faenza/48/edit-undo.png</file>
+        <file>icons/gtkofd/faenza/48/edit-redo.png</file>
     </gresource>
 </gresources>
