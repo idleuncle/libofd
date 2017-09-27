@@ -109,8 +109,8 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
     };
 
     gtk_show_about_dialog(GTK_WINDOW(gtk_application_get_active_window(app)),
-            "program-name", "OFD Reader",
-            "version", g_strdup_printf ("%s,\nRunning against GTK+ %d.%d.%d",
+            "program-name", "OFD 阅读器",
+            "version", g_strdup_printf ("%s,\n基于GTK+ %d.%d.%d",
                 "1.0.0",
                 gtk_get_major_version (),
                 gtk_get_minor_version (),
@@ -119,10 +119,10 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
             //"license-type", GTK_LICENSE_LGPL_2_1,
             "license-type", GTK_LICENSE_MIT_X11,
             "website", "http://www.lastz.org",
-            "comments", "Program to read OFD files.",
+            "comments", "阅读OFD文件。",
             "authors", authors,
             "logo-icon-name", "gtk3-demo",
-            "title", "About OFD Reader",
+            "title", "关于 OFD 阅读器",
             nullptr);
 }
 
@@ -840,7 +840,7 @@ static void activate(GApplication *app){
             | GDK_POINTER_MOTION_HINT_MASK);
 
     // -------- Main Window --------
-    gtk_window_set_title(m_mainWindow, "OFD Reader");
+    gtk_window_set_title(m_mainWindow, "OFD 阅读器");
     // Hide the title bar and the board.
     //gtk_window_set_decorated(m_mainWindow, false);
     adjust_window_size(m_mainWindow);
