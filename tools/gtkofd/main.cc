@@ -670,9 +670,11 @@ void app_set_theme_from_resource(const gchar *theme_path) {
 //#define TOOL_BUTTON_SIZE GTK_ICON_SIZE_DND
 
 GtkWidget* GTK_IMAGE_FROM_RESOURCE(const std::string &iconName){
+    //std::string resourcePath = std::string("/icons/gtkofd/faenza/16/") + iconName + ".png";
     //std::string resourcePath = std::string("/icons/gtkofd/faenza/24/") + iconName + ".png";
     //std::string resourcePath = std::string("/icons/gtkofd/faenza/48/") + iconName + ".png";
-    std::string resourcePath = std::string("/icons/gtkofd/emerald/24/") + iconName + ".svg";
+    std::string resourcePath = std::string("/icons/gtkofd/emerald/16/") + iconName + ".svg";
+    //std::string resourcePath = std::string("/icons/gtkofd/emerald/24/") + iconName + ".svg";
     return gtk_image_new_from_resource(resourcePath.c_str());
 }
 
