@@ -119,7 +119,7 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
             //"license-type", GTK_LICENSE_LGPL_2_1,
             "license-type", GTK_LICENSE_MIT_X11,
             "website", "http://www.lastz.org",
-            "comments", "阅读OFD文件。",
+            "comments", "阅读OFD文件。", 
             "authors", authors,
             "logo-icon-name", "gtk3-demo",
             "title", "关于 OFD 阅读器",
