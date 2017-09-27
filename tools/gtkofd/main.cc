@@ -256,8 +256,10 @@ static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer use
         redraw_page();
         break;
     case GDK_KEY_o:
-        m_ofdRender->ZoomOut();
-        redraw_page();
+        if (!(event->state & GDK_CONTROL_MASK)){
+            m_ofdRender->ZoomOut();
+            redraw_page();
+        }
         break;
     case GDK_KEY_f:
         m_ofdRender->ZoomFitBest();
@@ -678,6 +680,71 @@ GtkWidget* GTK_IMAGE_FROM_RESOURCE(const std::string &iconName){
     return gtk_image_new_from_resource(resourcePath.c_str());
 }
 
+static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
+    std::string name = gtk_widget_get_name(widget);
+    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    if (name == "document-open"){
+        std::string fileName = choose_file();
+        if (!fileName.empty()){
+            DocumentPtr document = open_ofd_document(fileName);
+            if (document != nullptr){
+                m_document = document;
+                m_pageIndex = 0;
+                redraw_page();
+            }
+        }
+    }
+}
+
+static void on_toolbar_edit_cb(GtkWidget *widget, gpointer user_data){
+    std::string name = gtk_widget_get_name(widget);
+    LOG(DEBUG) << "toolbar clicked. name:" << name;
+}
+
+static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
+    std::string name = gtk_widget_get_name(widget);
+    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    if (name == "go-first"){
+        first_page();
+    } else if (name == "go-previous"){
+        prev_page();
+    } else if (name == "go-next"){
+        next_page();
+    } else if (name == "go-last"){
+        last_page();
+    } else if (name == "go-jump"){
+    }
+}
+
+static void on_toolbar_zoom_cb(GtkWidget *widget, gpointer user_data){
+    std::string name = gtk_widget_get_name(widget);
+    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    if (name == "zoom-in"){
+        m_ofdRender->ZoomIn();
+        redraw_page();
+    } else if (name == "zoom-out"){
+        m_ofdRender->ZoomOut();
+        redraw_page();
+    } else if (name == "zoom-fit-best"){
+        m_ofdRender->ZoomFitBest();
+        redraw_page();
+    } else if (name == "zoom-original"){
+    }
+}
+
+static void insert_toolbar_item(GtkToolbar *toolbar, const std::string &name, const std::string &label, GCallback callback, void *user_data=nullptr, bool enable=true, const std::string &tooltip=""){
+    GtkToolItem *item = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE(name.c_str()), label.c_str());
+    if (tooltip.empty()){
+        gtk_tool_item_set_tooltip_text(item, label.c_str());
+    } else {
+        gtk_tool_item_set_tooltip_text(item, tooltip.c_str());
+    }
+    gtk_toolbar_insert(toolbar, item, -1);
+    gtk_widget_set_name(GTK_WIDGET(item), name.c_str());
+    gtk_widget_set_sensitive(GTK_WIDGET(item), enable);
+    g_signal_connect(G_OBJECT(item), "clicked", G_CALLBACK(callback), user_data);
+}
+
 static void activate(GApplication *app){
 
     // -------- Load widgets from resource by GtkBuilder --------
@@ -687,6 +754,8 @@ static void activate(GApplication *app){
     // -------- mainWindow --------
     m_mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
     assert(m_mainWindow != nullptr);
+
+    g_signal_connect_swapped(G_OBJECT(m_mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
 
     // -------- mainToolbar --------
     GtkToolbar *mainToolbar = (GtkToolbar*)gtk_builder_get_object(builder, "mainToolbar");
@@ -704,85 +773,41 @@ static void activate(GApplication *app){
 
     // https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
     
-    //GtkToolItem *toolWindowNew = gtk_tool_button_new(gtk_image_new_from_icon_name("window-new", TOOL_BUTTON_SIZE), "新建");
-    //gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolWindowNew, -1);
-
-    //GtkToolItem *toolFileOpen = gtk_tool_button_new(gtk_image_new_from_icon_name("document-open", TOOL_BUTTON_SIZE), "打开");
-    //GtkToolItem *toolFileOpen = gtk_tool_button_new(gtk_image_new_from_resource("/icons/gtkofd/emerald/24/document-open.svg"), "打开");
-    GtkToolItem *toolFileOpen = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-open"), "打开");
-    gtk_tool_item_set_tooltip_text(toolFileOpen, "打开");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileOpen, -1);
-
-    //GtkToolItem *toolFileSave = gtk_tool_button_new(gtk_image_new_from_icon_name("document-save", TOOL_BUTTON_SIZE), "保存");
-    GtkToolItem *toolFileSave = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-save"), "保存");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileSave, -1);
-
-    //GtkToolItem *toolFileSaveAs = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-save-as"), "另存");
-    //gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileSaveAs, -1);
+    //insert_toolbar_item(mainToolbar, "document-new", "新建", G_CALLBACK(on_toolbar_document_cb));
+    insert_toolbar_item(mainToolbar, "document-open", "打开", G_CALLBACK(on_toolbar_document_cb));
+    insert_toolbar_item(mainToolbar, "document-save", "保存", G_CALLBACK(on_toolbar_document_cb), nullptr, false);
+    //insert_toolbar_item(mainToolbar, "document-save-as", "另存", G_CALLBACK(on_toolbar_document_cb));
+    insert_toolbar_item(mainToolbar, "document-properties", "属性", G_CALLBACK(on_toolbar_document_cb), nullptr, true, "文档属性");
+    insert_toolbar_item(mainToolbar, "document-page-setup", "设置", G_CALLBACK(on_toolbar_document_cb), nullptr, true, "页面设置");
+    insert_toolbar_item(mainToolbar, "document-print", "打印", G_CALLBACK(on_toolbar_document_cb));
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolGoFirst = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-first"), "首页");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoFirst, -1);
-
-    GtkToolItem *toolGoPrevious = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-previous"), "前页");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoPrevious, -1);
-
-    GtkToolItem *toolGoNext = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-next"), "后页");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoNext, -1);
-
-    GtkToolItem *toolGoLast = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-last"), "尾页");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoLast, -1);
-
-    GtkToolItem *toolGoJump = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("go-jump"), "跳转");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolGoJump, -1);
+    insert_toolbar_item(mainToolbar, "go-first", "首页", G_CALLBACK(on_toolbar_go_cb));
+    insert_toolbar_item(mainToolbar, "go-previous", "上页", G_CALLBACK(on_toolbar_go_cb));
+    insert_toolbar_item(mainToolbar, "go-next", "下页", G_CALLBACK(on_toolbar_go_cb));
+    insert_toolbar_item(mainToolbar, "go-last", "尾页", G_CALLBACK(on_toolbar_go_cb));
+    insert_toolbar_item(mainToolbar, "go-jump", "跳转", G_CALLBACK(on_toolbar_go_cb));
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolZoomIn = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-in"), "放大");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomIn, -1);
-
-    GtkToolItem *toolZoomOut = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-out"), "缩小");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomOut, -1);
-
-    GtkToolItem *toolZoomFitBest = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-fit-best"), "合适");
-    gtk_tool_item_set_tooltip_text(toolZoomFitBest, "合适大小");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomFitBest, -1);
-
-    GtkToolItem *toolZoomOriginal = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("zoom-original"), "原始");
-    gtk_tool_item_set_tooltip_text(toolZoomOriginal, "原始大小");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolZoomOriginal, -1);
+    insert_toolbar_item(mainToolbar, "zoom-in", "放大", G_CALLBACK(on_toolbar_zoom_cb));
+    insert_toolbar_item(mainToolbar, "zoom-out", "缩小", G_CALLBACK(on_toolbar_zoom_cb));
+    insert_toolbar_item(mainToolbar, "zoom-fit-best", "合适", G_CALLBACK(on_toolbar_zoom_cb));
+    insert_toolbar_item(mainToolbar, "zoom-original", "原始", G_CALLBACK(on_toolbar_zoom_cb));
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolEditCopy = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("edit-copy"), "拷贝");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolEditCopy, -1);
-
-    GtkToolItem *toolEditFind = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("edit-find"), "查找");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolEditFind, -1);
-
-    GtkToolItem *toolFileProperties = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-properties"), "属性");
-    gtk_tool_item_set_tooltip_text(toolFileProperties, "文档属性");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFileProperties, -1);
-
-    GtkToolItem *toolPageSetup = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-page-setup"), "设置");
-    gtk_tool_item_set_tooltip_text(toolPageSetup, "页面设置");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolPageSetup, -1);
-
-    GtkToolItem *toolFilePrint = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("document-print"), "打印");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolFilePrint, -1);
-
+    insert_toolbar_item(mainToolbar, "edit-copy", "拷贝", G_CALLBACK(on_toolbar_edit_cb));
+    insert_toolbar_item(mainToolbar, "edit-find", "查找", G_CALLBACK(on_toolbar_edit_cb));
 
     // -------- separator tool item --------
     gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
 
-    GtkToolItem *toolExit = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE("application-exit"), "退出");
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), toolExit, -1);
-    g_signal_connect_swapped(G_OBJECT(m_mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
-    g_signal_connect(G_OBJECT(toolExit), "clicked",G_CALLBACK(gtk_main_quit), nullptr);
+    insert_toolbar_item(mainToolbar, "application-exit", "退出", G_CALLBACK(gtk_main_quit));
 
     // -------- infobar --------
     infobar = GTK_WIDGET(gtk_builder_get_object(builder, "infobar"));
