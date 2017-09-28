@@ -4,6 +4,7 @@
 #include <memory>
 #include "ofd/Common.h"
 #include "ofd/Document.h"
+#include "ofd/Page.h"
 #include "ofd/CairoRender.h"
 
 //struct _cairo_surface;
@@ -11,11 +12,14 @@ namespace ofd{
 
 class OFDRender{
 public:
-    OFDRender(int screenWidth, int screenHeight, int screenBPP);
+    OFDRender(int screenWidth, int screenHeight, int screenBPP = 32);
     virtual ~OFDRender();
 
     bool RebuildBackgroundImage(int screenWidth, int screenHeight, int screenBPP = 32);
     void RenderBackgroundImage(DocumentPtr document, size_t pageIndex);
+    void RenderBackgroundImage(PagePtr page);
+    void RenderBackgroundImage(PagePtr page, double offsetX, double offsetY, double scaling);
+
     std::shared_ptr<ofd::CairoRender> GetCairoRender() const{
         return m_cairoRender;
     }

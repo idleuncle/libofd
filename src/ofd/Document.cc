@@ -113,6 +113,21 @@ PagePtr Document::AddNewPage(){
     return page;
 }
 
+std::tuple<int, int> Document::GetPageMaxPxielSize(double resolutionX, double resolutionY) const{
+    int pageMaxWidth = 0;
+    int pageMaxHeight = 0;
+
+    pageMaxWidth = this->m_commonData.PageArea.PhysicalBox.Width * resolutionX / 25.4;
+    pageMaxHeight = this->m_commonData.PageArea.PhysicalBox.Height * resolutionX / 25.4;
+    //for (auto page : m_pages){
+        //int pageWidth, pageHeight;
+        //std::tie(pageWidth, pageHeight) = page->GetPixelSize(resolutionX, resolutionY);
+        //if (pageWidth > pageMaxWidth) pageMaxWidth = pageWidth;
+        //if (pageHeight > pageMaxHeight) pageMaxHeight = pageHeight;
+    //}
+    return std::make_tuple(pageMaxWidth, pageMaxHeight);
+}
+
 // ======== Document::GenerateDocumentXML() ========
 // Called by ofd::Package::Save().
 std::string Document::GenerateDocumentXML() const{

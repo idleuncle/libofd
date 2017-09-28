@@ -272,6 +272,12 @@ void CairoRender::ImplCls::DrawPage(PagePtr page, ViewArea viewArea){
         DrawObject(object);
     }
 
+    //cairo_t *cr = m_cr;
+    //cairo_set_source_rgb(cr, 0, 0, 1.0);
+    //cairo_move_to(cr, 10, 10);
+    //cairo_line_to(cr, 100, 100);
+    //cairo_stroke(cr);
+
 }
 
 void CairoRender::ImplCls::DrawObject(ObjectPtr object){
@@ -284,12 +290,28 @@ void CairoRender::ImplCls::DrawObject(ObjectPtr object){
         if ( object->Type == ofd::ObjectType::TEXT ) {
             TextObject *textObject = (TextObject*)object.get();
             DrawTextObject(cr, textObject);
+            //cairo_set_source_rgb(cr, 1.0, 0, 0);
+            //cairo_move_to(cr, object->Boundary.XMin, object->Boundary.YMin);
+            //cairo_line_to(cr, object->Boundary.XMax, object->Boundary.YMin);
+            //cairo_line_to(cr, object->Boundary.XMax, object->Boundary.YMax);
+            //cairo_line_to(cr, object->Boundary.XMin, object->Boundary.YMax);
+            //cairo_line_to(cr, object->Boundary.XMin, object->Boundary.YMin);
+            //cairo_close_path(cr);
+            //cairo_stroke(cr);
         } else if ( object->Type == ofd::ObjectType::PATH ){
             PathObject *pathObject = (PathObject*)object.get();
             DrawPathObject(cr, pathObject);
         } else if ( object->Type == ofd::ObjectType::IMAGE ){
             ImageObject *imageObject = (ImageObject*)object.get();
             DrawImageObject(cr, imageObject);
+            //cairo_set_source_rgb(cr, 0, 1.0, 0);
+            //cairo_move_to(cr, object->Boundary.XMin, object->Boundary.YMin);
+            //cairo_line_to(cr, object->Boundary.XMax, object->Boundary.YMin);
+            //cairo_line_to(cr, object->Boundary.XMax, object->Boundary.YMax);
+            //cairo_line_to(cr, object->Boundary.XMin, object->Boundary.YMax);
+            //cairo_line_to(cr, object->Boundary.XMin, object->Boundary.YMin);
+            //cairo_close_path(cr);
+            //cairo_stroke(cr);
         } else if ( object->Type == ofd::ObjectType::VIDEO ){
             VideoObject *videoObject = (VideoObject*)object.get();
             DrawVideoObject(cr, videoObject);

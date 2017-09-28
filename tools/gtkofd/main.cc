@@ -9,6 +9,7 @@ extern "C"{
 #include "gtkofd_resources.h"
 }
 #include "OFDRender.h"
+#include "PageWall.h"
 
 #include "ofd/Package.h"
 #include "ofd/Document.h"
@@ -48,6 +49,8 @@ std::shared_ptr<ofd::OFDRender> m_ofdRender = nullptr;
 ofd::PackagePtr m_package = nullptr; 
 DocumentPtr m_document = nullptr;
 size_t m_pageIndex = 0;
+
+PageWallPtr m_pageWall = nullptr;
 
 DocumentPtr open_ofd_document(const std::string &filename){
     m_package = std::make_shared<ofd::Package>();
@@ -156,12 +159,12 @@ __attribute__((unused)) static void activate_run(GSimpleAction *action, GVariant
         //run_example_for_row (window, model, &iter);
 }
 
-__attribute__((unused)) static GdkPixbuf *frame = nullptr;
-static GResource *resource = nullptr;
-static GtkWidget *drawingArea = nullptr;
-static GtkWidget *infobar = nullptr;
-static GtkWidget *message = nullptr;
-static GtkWindow *renderingWindow = nullptr;
+//__attribute__((unused)) static GdkPixbuf *frame = nullptr;
+GResource *resource = nullptr;
+GtkWidget *drawingArea = nullptr;
+GtkWidget *infobar = nullptr;
+GtkWidget *message = nullptr;
+GtkWindow *renderingWindow = nullptr;
 
 static void redraw_page(){
     gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
@@ -171,8 +174,8 @@ static void first_page(){
     if (m_document == nullptr) return;
     size_t total_pages = m_document->GetNumPages();
     m_pageIndex = 0;
-    m_ofdRender->SetOffsetX(0.0);
-    m_ofdRender->SetOffsetY(0.0);
+    //m_ofdRender->SetOffsetX(0.0);
+    //m_ofdRender->SetOffsetY(0.0);
     redraw_page();
     LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
 }
@@ -181,8 +184,8 @@ static void last_page(){
     if (m_document == nullptr) return;
     size_t total_pages = m_document->GetNumPages();
     m_pageIndex = total_pages - 1;
-    m_ofdRender->SetOffsetX(0.0);
-    m_ofdRender->SetOffsetY(0.0);
+    //m_ofdRender->SetOffsetX(0.0);
+    //m_ofdRender->SetOffsetY(0.0);
     redraw_page();
     LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
 }
@@ -194,8 +197,8 @@ static void next_page(){
     } else {
         m_pageIndex = 0;
     }
-    m_ofdRender->SetOffsetX(0.0);
-    m_ofdRender->SetOffsetY(0.0);
+    //m_ofdRender->SetOffsetX(0.0);
+    //m_ofdRender->SetOffsetY(0.0);
     redraw_page();
     LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
 }
@@ -208,19 +211,10 @@ static void prev_page(){
     } else {
         m_pageIndex = total_pages - 1;
     }
-    m_ofdRender->SetOffsetX(0.0);
-    m_ofdRender->SetOffsetY(0.0);
+    //m_ofdRender->SetOffsetX(0.0);
+    //m_ofdRender->SetOffsetY(0.0);
     redraw_page();
     LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
-}
-
-static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
-
-    if (m_ofdRender != nullptr){
-        m_ofdRender->RebuildBackgroundImage(allocation->width, allocation->height);
-    } else {
-        m_ofdRender = std::make_shared<GtkRender>(drawingArea, allocation->width, allocation->height);
-    }
 }
 
 static std::string choose_file(){
@@ -252,33 +246,40 @@ static std::string choose_file(){
 static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
     switch (event->keyval){
     case GDK_KEY_i:
-        m_ofdRender->ZoomIn();
+        //m_ofdRender->ZoomIn();
+        m_pageWall->ZoomIn();
         redraw_page();
         break;
     case GDK_KEY_o:
         if (!(event->state & GDK_CONTROL_MASK)){
-            m_ofdRender->ZoomOut();
+            //m_ofdRender->ZoomOut();
+            m_pageWall->ZoomOut();
             redraw_page();
         }
         break;
     case GDK_KEY_f:
-        m_ofdRender->ZoomFitBest();
+        //m_ofdRender->ZoomFitBest();
+        m_pageWall->ZoomFitBest();
         redraw_page();
         break;
     case GDK_KEY_h:
-        m_ofdRender->MoveLeft();
+        //m_ofdRender->MoveLeft();
+        m_pageWall->MoveLeft();
         redraw_page();
         break;
     case GDK_KEY_j:
-        m_ofdRender->MoveDown();
+        //m_ofdRender->MoveDown();
+        m_pageWall->MoveDown();
         redraw_page();
         break;
     case GDK_KEY_k:
-        m_ofdRender->MoveUp();
+        //m_ofdRender->MoveUp();
+        m_pageWall->MoveUp();
         redraw_page();
         break;
     case GDK_KEY_l:
-        m_ofdRender->MoveRight();
+        //m_ofdRender->MoveRight();
+        m_pageWall->MoveRight();
         redraw_page();
         break;
     case GDK_KEY_n:
@@ -308,6 +309,8 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
                 if (document != nullptr){
                     m_document = document;
                     m_pageIndex = 0;
+                    m_pageWall->RebuildWall(m_document, 1);
+                    m_pageWall->ZoomFitBest();
                     redraw_page();
                 }
             }
@@ -316,7 +319,8 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_plus:
         if (event->state & GDK_CONTROL_MASK){
             // 放大 Ctrl + +
-            m_ofdRender->ZoomIn();
+            //m_ofdRender->ZoomIn();
+            m_pageWall->ZoomIn();
             redraw_page();
             LOG(DEBUG) << "Key Ctrl++ released. keyval:" << event->keyval;
         }
@@ -324,7 +328,8 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_minus:
         if (event->state & GDK_CONTROL_MASK){
             // 缩小 Ctrl + -
-            m_ofdRender->ZoomOut();
+            //m_ofdRender->ZoomOut();
+            m_pageWall->ZoomOut();
             redraw_page();
             LOG(DEBUG) << "Key Ctrl+- released. keyval:" << event->keyval;
         }
@@ -338,7 +343,8 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_2:
         if (event->state & GDK_CONTROL_MASK){
             // 适合页面 Ctrl + 2
-            m_ofdRender->ZoomFitBest();
+            //m_ofdRender->ZoomFitBest();
+            m_pageWall->ZoomFitBest();
             redraw_page();
             LOG(DEBUG) << "Key Ctrl+2 released. keyval:" << event->keyval;
         }
@@ -402,7 +408,7 @@ struct GdkEventButton {
  */
 static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
     if (event->button == GDK_BUTTON_PRIMARY){
-        LOG(DEBUG) << "LEFT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
+        //LOG(DEBUG) << "LEFT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
         //next_page();
     } else if (event->button == GDK_BUTTON_SECONDARY){
         LOG(DEBUG) << "RIGHT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
@@ -460,30 +466,36 @@ struct GdkEventScroll {
 };
  */
 __attribute__((unused)) gboolean scroll_event_cb(GtkWidget *widget, GdkEventScroll *event, gpointer user_data){
-    GdkScrollDirection direction = event->direction;
+    //GdkScrollDirection direction = event->direction;
 
-    LOG(DEBUG) << "Scroll Event. Delta x:" << event->delta_x << " Delta y:" << event->delta_y << " Direction:" << direction;
+    //LOG(DEBUG) << "Scroll Event. Delta x:" << event->delta_x << " Delta y:" << event->delta_y << " Direction:" << direction;
 
     if (event->state & GDK_SHIFT_MASK){
         if (event->direction == GDK_SCROLL_UP){
-            m_ofdRender->ZoomIn();
+            //m_ofdRender->ZoomIn();
+            m_pageWall->ZoomIn();
             redraw_page();
         } else if (event->direction == GDK_SCROLL_DOWN){
-            m_ofdRender->ZoomOut();
+            //m_ofdRender->ZoomOut();
+            m_pageWall->ZoomOut();
             redraw_page();
         }
     } else {
         if (event->direction == GDK_SCROLL_UP){
-            m_ofdRender->MoveUp();
+            //m_ofdRender->MoveUp();
+            m_pageWall->MoveUp();
             redraw_page();
         } else if (event->direction == GDK_SCROLL_DOWN){
-            m_ofdRender->MoveDown();
+            //m_ofdRender->MoveDown();
+            m_pageWall->MoveDown();
             redraw_page();
         } else if (event->direction == GDK_SCROLL_LEFT){
-            m_ofdRender->MoveLeft();
+            //m_ofdRender->MoveLeft();
+            m_pageWall->MoveLeft();
             redraw_page();
         } else if (event->direction == GDK_SCROLL_RIGHT){
-            m_ofdRender->MoveRight();
+            //m_ofdRender->MoveRight();
+            m_pageWall->MoveRight();
             redraw_page();
         }
     }
@@ -551,6 +563,20 @@ __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, Gd
     return false;
 }
 
+static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
+
+    //if (m_ofdRender != nullptr){
+        //m_ofdRender->RebuildBackgroundImage(allocation->width, allocation->height);
+    //} else {
+        //m_ofdRender = std::make_shared<GtkRender>(drawingArea, allocation->width, allocation->height);
+    //}
+    m_pageWall = std::make_shared<PageWall>(allocation->width, allocation->height);
+
+    if (m_document != nullptr){
+        m_pageWall->RebuildWall(m_document, 1);
+    }
+}
+
 static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
     //gdk_cairo_set_source_pixbuf(cr, frame, 0, 0);
 
@@ -562,11 +588,15 @@ static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_paint(cr);
 
-    if (m_ofdRender != nullptr){
-        m_ofdRender->RenderBackgroundImage(m_document, m_pageIndex);
-        cairo_surface_t *backgroundSurface = m_ofdRender->GetCairoRender()->GetCairoSurface();
-        cairo_set_source_surface(cr, backgroundSurface, 0, 0);
-        cairo_paint(cr);
+    //if (m_ofdRender != nullptr){
+        //m_ofdRender->RenderBackgroundImage(m_document, m_pageIndex);
+        //cairo_surface_t *backgroundSurface = m_ofdRender->GetCairoRender()->GetCairoSurface();
+        //cairo_set_source_surface(cr, backgroundSurface, 0, 0);
+        //cairo_paint(cr);
+    //}
+
+    if (m_pageWall != nullptr){
+        m_pageWall->RenderWall(cr);
     }
 
     return true;
@@ -690,6 +720,8 @@ static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
             if (document != nullptr){
                 m_document = document;
                 m_pageIndex = 0;
+                m_pageWall->RebuildWall(m_document, 1);
+                m_pageWall->ZoomFitBest();
                 redraw_page();
             }
         }
@@ -720,13 +752,16 @@ static void on_toolbar_zoom_cb(GtkWidget *widget, gpointer user_data){
     std::string name = gtk_widget_get_name(widget);
     LOG(DEBUG) << "toolbar clicked. name:" << name;
     if (name == "zoom-in"){
-        m_ofdRender->ZoomIn();
+        //m_ofdRender->ZoomIn();
+        m_pageWall->ZoomIn();
         redraw_page();
     } else if (name == "zoom-out"){
-        m_ofdRender->ZoomOut();
+        //m_ofdRender->ZoomOut();
+        m_pageWall->ZoomOut();
         redraw_page();
     } else if (name == "zoom-fit-best"){
-        m_ofdRender->ZoomFitBest();
+        //m_ofdRender->ZoomFitBest();
+        m_pageWall->ZoomFitBest();
         redraw_page();
     } else if (name == "zoom-original"){
     }
@@ -952,7 +987,7 @@ static void startup(GApplication *app){
     g_object_unref (builder);
 
 
-    std::string filename = "./data/2.ofd";
+    std::string filename = "./data/1.ofd";
     m_document = open_ofd_document(filename);
     if (m_document != nullptr){
         size_t total_pages = m_document->GetNumPages();

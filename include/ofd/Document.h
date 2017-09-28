@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include "ofd/Common.h"
 
@@ -133,6 +134,7 @@ namespace ofd{
         public:
             const PackagePtr GetPackage() const {return m_package.lock();};
             PackagePtr GetPackage(){return m_package.lock();};
+            std::tuple<int, int> GetPageMaxPxielSize(double resolutionX, double resolutionY) const;
 
             std::string GetDocRoot() const {return m_docBody.DocRoot;};
             const CommonData& GetCommonData() const {return m_commonData;};

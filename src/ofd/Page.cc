@@ -422,9 +422,15 @@ bool Page::fromContentXML(XMLElementPtr contentElement){
     return ok;
 }
 
-double Page::GetFitScaling(double screenWidth, double screenHeight, double resolutionX, double resolutionY){
+std::tuple<int, int> Page::GetPixelSize(double resolutionX, double resolutionY) const{
     double pageWidth = Area.PhysicalBox.Width * resolutionX / 25.4;
     double pageHeight = Area.PhysicalBox.Height * resolutionY / 25.4;
+    return std::make_tuple((int)pageWidth, (int)pageHeight);
+}
+
+double Page::GetFitScaling(double screenWidth, double screenHeight, double resolutionX, double resolutionY) const{
+    double pageWidth, pageHeight;
+    std::tie(pageWidth, pageHeight) = GetPixelSize(resolutionX, resolutionY);
     double scalingX = screenWidth / pageWidth;
     double scalingY = screenHeight / pageHeight;
     double scaling = scalingX >= scalingY ? scalingX : scalingY;
