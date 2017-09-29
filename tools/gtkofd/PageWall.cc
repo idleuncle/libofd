@@ -8,8 +8,8 @@ using namespace ofd;
 extern double g_resolutionX; // = 240.0; // 120, 160, 240
 extern double g_resolutionY; // = 240.0;
 
-PageFrame::PageFrame(ofd::PagePtr page, int pageIndex, const FrameRect &frameRect):
-    m_page(page), m_pageIndex(pageIndex), m_frameRect(frameRect){
+PageFrame::PageFrame(ofd::PagePtr page, const FrameRect &frameRect):
+    m_page(page), m_frameRect(frameRect){
 }
 PageFrame::~PageFrame(){
 }
@@ -259,11 +259,11 @@ void PageWall::RebuildWall(ofd::DocumentPtr document, int rowPages){
     InitZoomScaling();
 
     // -------- Page frames in document ----------
-    for (auto i = 0 ; i < totalPages ; i++){
+    for (size_t i = 0 ; i < totalPages ; i++){
         PagePtr page = m_document->GetPage(i);
         assert(page != nullptr);
 
-        PageFramePtr pageFrame = std::make_shared<PageFrame>(page, i, m_frameRect);
+        PageFramePtr pageFrame = std::make_shared<PageFrame>(page, m_frameRect);
         pageFrame->Rebuild(m_wallScaling);
         m_pageFrames.push_back(pageFrame);
     }
@@ -309,7 +309,7 @@ void PageWall::RenderWall(cairo_t *cr){
     LOG(DEBUG) << "RenderWall() rows(" << startRow << "," << endRow << ") cols(" << startCol << "," << endCol << ")";
     for ( auto i = startCol ; i <= endCol ; i++ ){
         for ( auto j = startRow ; j <= endRow ; j++ ){
-            int pageIndex = j * m_rowPages + i;
+            size_t pageIndex = j * m_rowPages + i;
             if (pageIndex >= GetTotalPages()) break;
             PageFramePtr pageFrame = m_pageFrames[pageIndex];
             Rect canvasRect = getPageCanvasRect(j, i);

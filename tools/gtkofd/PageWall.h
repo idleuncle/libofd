@@ -121,7 +121,7 @@ struct FrameRect : public Rect{
 // 页面框
 class PageFrame{
 public:
-    PageFrame(ofd::PagePtr page, int pageIndex, const FrameRect &frameRect);
+    PageFrame(ofd::PagePtr page, const FrameRect &frameRect);
     virtual ~PageFrame();
 
     void Rebuild(double wallScaling);
@@ -140,7 +140,7 @@ public:
     void SetRedraw(bool bRedraw){m_bRedraw = true;};
 private:
     ofd::PagePtr m_page = nullptr;
-    __attribute__((unused)) int m_pageIndex = 0;
+    //__attribute__((unused)) int m_pageIndex = 0;
 
     // width and height available only.
     FrameRect m_frameRect;
