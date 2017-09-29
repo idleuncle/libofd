@@ -289,7 +289,7 @@ void OFDOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     int scaledWidth, scaledHeight;
     cairo_filter_t filter = CAIRO_FILTER_BILINEAR;
 
-    LOG(DEBUG) << "drawImage " << widthA << " x " <<  heightA;
+    LOG_DEBUG("drawImage %d x %d", widthA, heightA);
 
     cairo_get_matrix(m_cairo, &matrix);
     ofd::getImageScaledSize (&matrix, widthA, heightA, &scaledWidth, &scaledHeight);
@@ -500,7 +500,7 @@ void OFDOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str
     if (cairo_pattern_status (pattern))
         goto cleanup;
 
-    LOG(DEBUG) << "drawSoftMaskedImage " << width << " x " << height;
+    LOG_DEBUG("drawSoftMaskedImage %d x %d", width, height);
 
     cairo_pattern_set_filter (pattern, filter);
     cairo_pattern_set_filter (maskPattern, maskFilter);
@@ -665,7 +665,7 @@ void OFDOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     if (cairo_pattern_status (pattern))
         goto cleanup;
 
-    LOG(DEBUG) << "drawMaskedImage " << width << " x " << height;
+    LOG_DEBUG("drawMaskedImage %d x %d", width, height);
 
     cairo_pattern_set_filter (pattern, filter);
     cairo_pattern_set_filter (maskPattern, maskFilter);
@@ -802,7 +802,7 @@ void OFDOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *
 
     /* cairo does a very poor job of scaling down images so we scale them ourselves */
 
-    LOG(DEBUG) << "drawImageMaskPrescaled " <<  width << " x " << height;
+    LOG_DEBUG("drawImageMaskPrescaled %d x %d", width, height);
 
     /* this scaling code is adopted from the splash image scaling code */
     cairo_get_matrix(m_cairo, &matrix);
@@ -1141,7 +1141,7 @@ void OFDOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *st
     if (cairo_pattern_status (pattern))
         goto cleanup;
 
-    LOG(DEBUG) << "drawImageMask " << width << " x " << height;
+    LOG_DEBUG("drawImageMask %d x %d", width, height);
 
     cairo_pattern_set_filter (pattern, filter);
 

@@ -32,7 +32,7 @@ namespace utils{
 
         ifile.seekg(0, std::ios::end);
         fontDataSize = ifile.tellg();
-        LOG(INFO) << "filename: " << filename << " len: " << fontDataSize;
+        LOG_INFO("filename: %s len: %d",  filename.c_str(), fontDataSize);
 
         fontData = new char[fontDataSize];
         ifile.seekg(0, std::ios::beg);

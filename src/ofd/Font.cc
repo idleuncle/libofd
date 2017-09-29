@@ -24,7 +24,8 @@ namespace ofd{
     std::string generateFontFileName(uint64_t fontID){
         char buf[1024];
         sprintf(buf, "Font_%" PRIu64 ".ttf", fontID);
-        LOG(DEBUG) << "------- getFontFileName() fontID:" << fontID << " filename=" << std::string(buf);
+        LOG_DEBUG("------- getFontFileName() fontID:%d filename=%s", 
+                fontID, std::string(buf).c_str());
         return std::string(buf);
     }
 
@@ -96,7 +97,7 @@ bool FreetypeInitiator::InitializeFreetype(){
 
     FT_Error error = FT_Init_FreeType(&ft_lib);
     if ( error ){
-        LOG(ERROR) << "FT_Init_FreeType() in OFDRes::InitializeFreetype() failed.";
+        LOG_ERROR("%s", "FT_Init_FreeType() in OFDRes::InitializeFreetype() failed.");
     } else {
         ft_lib_initialized = true;
     }
@@ -142,12 +143,12 @@ std::tuple<FT_Face, cairo_font_face_t*, bool> CreateCairoFontFace(char *fontData
     cairo_font_face_t *font_face;
 
     if ( FT_New_Memory_Face(FreetypeInitiator::ft_lib, (unsigned char *)fontData, fontDataLen, 0, &face) != 0 ){
-        LOG(ERROR) << "FT_New_Memory_Face() in OFDFont::createCairoFontFace() failed.";
+        LOG_ERROR("%s", "FT_New_Memory_Face() in OFDFont::createCairoFontFace() failed.");
     } else {
 
         font_face = cairo_ft_font_face_create_for_ft_face (face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
         if ( cairo_font_face_set_user_data (font_face, &_ft_cairo_key, face, _ft_done_face_uncached) != 0 ) {
-            LOG(ERROR) << "cairo_font_face_set_user_data() in OFDFont::createCairoFontFace() failed.";
+            LOG_ERROR("%s", "cairo_font_face_set_user_data() in OFDFont::createCairoFontFace() failed.");
             _ft_done_face_uncached(face);
             cairo_font_face_destroy(font_face);
             font_face = nullptr;
@@ -199,7 +200,8 @@ std::string Font::LocateFontFile(const std::string& fontName){
 bool Font::CreateFromData(char *fontData, size_t fontDataSize){
     bool ok = true;
 
-    LOG(INFO) << "@@@@@@@@ ID: " << ID << " FontName: " << FontName << " fontDataSize: " << fontDataSize;
+    LOG_INFO("@@@@@@@@ ID:%d FontName:%s fontDataSize:%d ",
+            ID, FontName.c_str(), fontDataSize);
 
     if ( m_fontData != nullptr ){
         delete m_fontData;
@@ -299,10 +301,10 @@ bool Font::FromXML(XMLElementPtr fontElement){
             // Required.
             std::tie(FontName, exist) = fontElement->GetStringAttribute("FontName");
             if ( !exist ){
-                LOG(ERROR) << "Attribute FontName is required in Font XML.";
+                LOG_ERROR("%s", "Attribute FontName is required in Font XML.");
             }
         } else {
-            LOG(ERROR) << "Attribute ID is required in Font XML.";
+            LOG_ERROR("%s", "Attribute ID is required in Font XML.");
         }
 
         if ( exist ) {
@@ -362,7 +364,7 @@ bool Font::Load(PackagePtr package, bool reload){
 
         //std::string fontFile = std::string("./data/embed/f") + std::to_string(ID) + ".otf";
         ////std::string fontFile = "./data/embed/f2.otf";
-        //LOG(ERROR) << "Load fontFile: " << fontFile;
+        //LOG_ERROR("Load fontFile:%s", fontFile.c_str());
 
         //char *fontData = nullptr;
         //size_t fontDataSize = 0;
@@ -376,7 +378,7 @@ bool Font::Load(PackagePtr package, bool reload){
         bool ok = true;
 
         std::string fontFilePath = m_fontFilePath;
-        LOG(DEBUG) << "Load Font: " << fontFilePath;
+        LOG_DEBUG("Load Font:%s", fontFilePath.c_str());
 
         char *fontData = nullptr;
         size_t fontDataSize = 0;
@@ -387,19 +389,19 @@ bool Font::Load(PackagePtr package, bool reload){
             if ( utils::FileExist(fontFilePath) ){
                 std::tie(fontData, fontDataSize, readOK) = utils::ReadFileData(fontFilePath);
             } else {
-                LOG(WARNING) << "Font file " << fontFilePath << " is not exist in the archive or folder.";
+                LOG_WARN("Font file %s is not exist in the archive or folder.", fontFilePath.c_str());
             }
         }
         if ( readOK ){
             if ( CreateFromData(fontData, fontDataSize) ){
-                LOG(INFO) << "Font " << FontName << "(ID=" << ID << ") loaded.";
+                LOG_INFO("Font %s (ID=%d) loaded.", FontName.c_str(), ID);
             } else {
-                LOG(ERROR) << "createCairoFontFace() in OFDFont::Load() failed.";
+                LOG_ERROR("%s", "createCairoFontFace() in OFDFont::Load() failed.");
                 ok = false;
             }
         } else {
             ok = false;
-            LOG(ERROR) << "Call ReadZipFileRaw() to read font file " << fontFilePath << " failed.";
+            LOG_ERROR("Call ReadZipFileRaw() to read font file %s failed.", fontFilePath.c_str());
         }
 
         m_bLoaded = ok;

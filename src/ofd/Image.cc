@@ -16,7 +16,8 @@ namespace ofd{
     std::string generateImageFileName(uint64_t imageID){
         char buf[1024];
         sprintf(buf, "Image_%" PRIu64 ".png", imageID);
-        LOG(DEBUG) << "------- generateImageFileName() imageID:" << imageID << " filename=" << std::string(buf);
+        LOG_DEBUG("------- generateImageFileName() imageID:%d filename=%s", 
+                imageID, std::string(buf).c_str());
         return std::string(buf);
     }
 }
@@ -88,7 +89,7 @@ bool Image::Load(PackagePtr package, bool reload){
     bool ok = false;
 
     std::string imageFilePath = m_imageFilePath;
-    LOG(DEBUG) << "Load Image: " << imageFilePath;
+    LOG_DEBUG("Load Image:%s", imageFilePath.c_str());
 
     char *imageData = nullptr;
     size_t imageDataSize = 0;
@@ -141,7 +142,7 @@ bool Image::Load(PackagePtr package, bool reload){
         ok = true;
     } else {
         ok = false;
-        LOG(ERROR) << "Call ReadZipFileRaw() to read image file " << imageFilePath << " failed.";
+        LOG_ERROR("Call ReadZipFileRaw() to read image file %s failed.", imageFilePath.c_str());
     }
 
     m_bLoaded = ok;
@@ -255,7 +256,7 @@ bool Image::FromXML(utils::XMLElementPtr imageElement){
             // Required.
 
         } else {
-            LOG(ERROR) << "Attribute ID is required in Image XML.";
+            LOG_ERROR("%s", "Attribute ID is required in Image XML.");
         }
 
         if ( exist ){

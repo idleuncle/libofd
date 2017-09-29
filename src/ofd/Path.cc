@@ -326,7 +326,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 2;
                 numTokens -= 2;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }
@@ -338,7 +338,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 2;
                 numTokens -= 2;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] << pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }
@@ -352,7 +352,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 4;
                 numTokens -= 4;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }
@@ -370,7 +370,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 6;
                 numTokens -= 6;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }
@@ -387,7 +387,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 7;
                 numTokens -= 7;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }
@@ -398,7 +398,7 @@ PathPtr Path::FromPathData(const std::string &pathData){
                 idx += 2;
                 numTokens -= 2;
             } else {
-                LOG(WARNING) << "Not enough parameters in pathData tokens[" << idx << "]" << " pathData:" << pathData;
+                LOG_WARN("Not enough parameters in pathData tokens[%d] pathData:%s", idx, pathData.c_str());
                 ok = false;
                 break;
             }

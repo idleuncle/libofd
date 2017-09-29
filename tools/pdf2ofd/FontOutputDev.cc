@@ -62,7 +62,7 @@ void FontOutputDev::ProcessDoc(PDFDocPtr pdfDoc){
     preProcess(pdfDoc);
 
     auto numPages = pdfDoc->getNumPages();
-    LOG(INFO) << "Total " << numPages << " pages in pdf file"; 
+    LOG_INFO("Total %d pages in pdf file", numPages); 
 
     int firstPage = 1;
     for ( auto pg = firstPage ; pg <= numPages ; pg++ ){
@@ -83,7 +83,7 @@ void FontOutputDev::postProcess(){
         //__attribute__((unused)) const FontInfo *fontInfo = installFont(font);
     //}
     for ( auto ff : m_fontFiles ){
-        LOG(DEBUG) << "fontRef: " << ff.first << " FontFile: " << ff.second;
+        LOG_DEBUG("fontRef: %d FontFile: %s", ff.first, ff.second.c_str());
     }
 }
 

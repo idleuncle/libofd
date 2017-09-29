@@ -70,7 +70,10 @@ void OFDOutputDev::endString(GfxState *state){
         goto finish;
     }
 
-    LOG(INFO) << "[imageSurface] DrawTextObject m_matrix=(" << m_matrix.xx << "," << m_matrix.yx << "," << m_matrix.xy << "," << m_matrix.yy << "," << m_matrix.x0 << "," << m_matrix.y0 << ")";
+    LOG_INFO("[imageSurface] DrawTextObject m_matrix=[%.3f, %.3f, %.3f, %.3f, %.3f, %.3f]",
+            m_matrix.xx, m_matrix.yx, 
+            m_matrix.xy, m_matrix.yy,
+            m_matrix.x0, m_matrix.y0);
 
     //// Color
     //GfxRGB fillRGB;
@@ -81,11 +84,14 @@ void OFDOutputDev::endString(GfxState *state){
 
     cairo_matrix_t matrix;
     cairo_get_matrix(m_cairo, &matrix);
-    LOG(INFO) << "[imageSurface] DrawTextObject cairo_get_matrix() matrix=(" << matrix.xx << "," << matrix.yx << "," << matrix.xy << "," << matrix.yy << "," << matrix.x0 << "," << matrix.y0 << ")";
+    LOG_INFO("[imageSurface] DrawTextObject cairo_get_matrix() matrix=[%.3f, %.3f, %.3f, %.3f, %.3f, %.3f]",
+            matrix.xx, matrix.yx,
+            matrix.xy, matrix.yy,
+            matrix.x0, matrix.y0);
 
     // fill
     if (!(render & 1)) {
-        LOG(INFO) << "[imageSurface] DrawTextObject fill string";
+        LOG_INFO("%s", "[imageSurface] DrawTextObject fill string");
         //LOG (printf ("fill string\n"));
         cairo_set_source (m_cairo, m_fillPattern);
         if (m_useShowTextGlyphs)
@@ -98,7 +104,7 @@ void OFDOutputDev::endString(GfxState *state){
 
     // stroke
     if ((render & 3) == 1 || (render & 3) == 2) {
-        LOG(INFO) << "[imageSurface] DrawTextObject stroke string";
+        LOG_INFO("%s", "[imageSurface] DrawTextObject stroke string");
         cairo_set_source (m_cairo, m_strokePattern);
         cairo_glyph_path (m_cairo, m_cairoGlyphs, m_glyphsCount);
         cairo_stroke (m_cairo);
@@ -110,7 +116,7 @@ void OFDOutputDev::endString(GfxState *state){
 
     // clip
     if ((render & 4)) {
-        LOG(INFO) << "[imageSurface] DrawTextObject clip string";
+        LOG_INFO("%s", "[imageSurface] DrawTextObject clip string");
         // append the glyph path to m_textClipPath.
 
         // set textClipPath as the currentPath
@@ -183,16 +189,17 @@ void OFDOutputDev::drawChar(GfxState *state, double x, double y,
     buf[tLen] = '\0';
 
     unsigned long unic;
-    int ucLen = enc_utf8_to_unicode_one(buf, &unic);  
+    __attribute__((unused)) int ucLen = enc_utf8_to_unicode_one(buf, &unic);  
 
-    LOG(DEBUG) << "(x,y,dx,dy):" << std::setprecision(3) << "(" << x << ", " << y << ", " << dx << ", " << dy << ")" 
-        << " (originX, originY):" << "(" << originX << ", " << originY << ")"
-        << " mapUnicode() = \"" << buf << "\" tlen:" << tLen << " tounicode() = " << std::hex << unic << std::dec << " ucLen=" <<ucLen
-        << " code:" << std::hex << std::setw(4) << std::setfill('0') << code << std::dec
-        << " unicode:" << std::hex << std::setw(4) << std::setfill('0') << *u << std::dec
-        << " nBytes:" << nBytes << " uLen:" << uLen;
+    LOG_DEBUG("(x,y,dx,dy): (%.3f, %.3f, %.3f, %.3f)", 
+            x, y, dx, dy);
+    LOG_DEBUG(" (originX, originY): (%.3f, %.3f)", originX, originY);
+        //<< " mapUnicode() = \"" << buf << "\" tlen:" << tLen << " tounicode() = " << std::hex << unic << std::dec << " ucLen=" <<ucLen
+        //<< " code:" << std::hex << std::setw(4) << std::setfill('0') << code << std::dec
+        //<< " unicode:" << std::hex << std::setw(4) << std::setfill('0') << *u << std::dec
+        //<< " nBytes:" << nBytes << " uLen:" << uLen;
 
-    //LOG(DEBUG) << "code:" << std::hex << std::setw(4) << std::setfill('0') << code << std::dec << " nBytes:" << nBytes << " uLen:" << uLen;
+    //LOG_DEBUG("code:" << std::hex << std::setw(4) << std::setfill('0') << code << std::dec << " nBytes:" << nBytes << " uLen:" << uLen;
     if ( m_textPage != nullptr ){
         //LOG(INFO) << "code:" << std::hex << std::setw(4) << std::setfill('0') << code << std::dec << " nBytes:" << nBytes << " uLen:" << uLen;
 
@@ -202,11 +209,14 @@ void OFDOutputDev::drawChar(GfxState *state, double x, double y,
         GfxRGB fillRGB;
         state->getFillRGB(&fillRGB);
         ofdFillColor = GfxColor_to_OfdColor(&fillRGB);
-        LOG(DEBUG) << "[imageSurface] DrawTextObject ofdFillColor=(" << ofdFillColor->Value.RGB.Red << "," << ofdFillColor->Value.RGB.Green << "," << ofdFillColor->Value.RGB.Blue << ")";
+        LOG_DEBUG("[imageSurface] DrawTextObject ofdFillColor=(%d, %d, %d)",
+                ofdFillColor->Value.RGB.Red,
+                ofdFillColor->Value.RGB.Green,
+                ofdFillColor->Value.RGB.Blue);
 
         double x1, y1;
         state->transform(x, y, &x1, &y1);
-        LOG(DEBUG) << "addChar() " << buf << " (" << x1 << "," << y1 << ")";
+        LOG_DEBUG("addChar() %S (%.3f, %.3f)", buf, x1, y1);
 
         // ------ New TextObject
         ofd::TextObject *textObject = new ofd::TextObject(m_currentOFDPage->GetBodyLayer());
@@ -342,8 +352,8 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
     double charSpace = state->getCharSpace();
     double wordSpace = state->getWordSpace();
     double horizScaling = state->getHorizScaling();
-    double x0 = state->getCurX();
-    double y0 = state->getCurY();
+    //double x0 = state->getCurX();
+    //double y0 = state->getCurY();
 
     double riseX = 0.0; 
     double riseY = 0.0;
@@ -354,8 +364,8 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
     char *p = s->getCString();
     int len = s->getLength();
 
-    LOG(DEBUG) << "........ len=" << len << " FontSize=" << m_currentFontSize << " charSpace:" << charSpace << " wordSpace:" << wordSpace << " horizScaling:" << horizScaling;
-    LOG(DEBUG) << "         (x0,y0)=(" << x0 << "," << y0 << ") (riseX, riseY)=(" << riseX << "," << riseY << ")";
+    //LOG(DEBUG) << "........ len=" << len << " FontSize=" << m_currentFontSize << " charSpace:" << charSpace << " wordSpace:" << wordSpace << " horizScaling:" << horizScaling;
+    //LOG(DEBUG) << "         (x0,y0)=(" << x0 << "," << y0 << ") (riseX, riseY)=(" << riseX << "," << riseY << ")";
 
     //accumulated displacement of chars in this string, in text object space
     double dx = 0; double dy = 0;
@@ -372,7 +382,7 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
 
         // TODO
         if( !(utils::equal(ox, 0) && utils::equal(oy, 0)) ){
-            LOG(WARNING) << "TODO: origin of char is not (0,0)";
+            LOG_WARN("%s", "TODO: origin of char is not (0,0)");
         }
         ddx = ax * m_currentFontSize + charSpace;
         ddy = ay * m_currentFontSize;
@@ -386,8 +396,8 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
         int tLen = enc_unicode_to_utf8_one(*u, buf, 7); 
         buf[tLen] = '\0';
 
-        LOG(DEBUG) << "........ origin:(" << ox << "," << oy << ") " << " advance:(" << ax << "," << ay << ") " << " displacement:(" << ddx  << "," << ddy << ") ";
-        LOG(DEBUG) << "........ u = \"" << buf << "\" tlen:" << tLen;
+        LOG_DEBUG("........ origin:(%.3f, %.3f) displacement:(%.3f, %.3f)", ox, oy, ddx, ddy);
+        LOG_DEBUG("........ u = \"%s\" tlen:%d", buf, tLen);
 
 
         dx += ddx * horizScaling;
@@ -395,7 +405,7 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
         if (isSpace) {
             dx += wordSpace * horizScaling;
         }
-        LOG(DEBUG) << "-------- Accumulated Displacement:(" << dx << "," << dy <<") ";
+        LOG_DEBUG("-------- Accumulated Displacement:(%.3f, %.3f) ", dx, dy);
 
         p += n;
         len -= n;

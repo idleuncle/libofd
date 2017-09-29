@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <fstream>
 #include <Gfx.h>
 #include "ofd/Page.h"
 #include "ofd/Path.h"
@@ -80,10 +81,10 @@ void OFDOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path){
     double x, y;
     cairo_new_path(cairo);
 
-    LOG(DEBUG) << "doPath() numSubpaths=" << path->getNumSubpaths();
+    LOG_DEBUG("doPath() numSubpaths=%d", path->getNumSubpaths());
     for (i = 0; i < path->getNumSubpaths(); ++i) {
         subpath = path->getSubpath(i);
-        LOG(DEBUG) << "doPath() subpath[" << i << "] numPoints=" << subpath->getNumPoints();
+        LOG_DEBUG("doPath() subpath[%d] numPoints=%d", i, subpath->getNumPoints());
         if (subpath->getNumPoints() > 0) {
             if (m_alignStrokeCoords) {
                 alignStrokeCoords(subpath, 0, &x, &y);
@@ -91,7 +92,7 @@ void OFDOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path){
                 x = subpath->getX(0);
                 y = subpath->getY(0);
             }
-            LOG(DEBUG) << std::fixed << std::setprecision(3) << "doPath() move_to(" << x << "," << y << ")";
+            LOG_DEBUG("doPath() move_to(%.3f, %.3f)", x, y);
             cairo_move_to(cairo, x, y);
             j = 1;
             while (j < subpath->getNumPoints()) {
@@ -106,7 +107,7 @@ void OFDOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path){
                     double y1 = subpath->getY(j);
                     double x2 = subpath->getX(j+1);
                     double y2 = subpath->getY(j+1);
-                    LOG(DEBUG) << "doPath() curve_to(" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ") (" << x << "," << y << ")";
+                    LOG_DEBUG("doPath() curve_to(%.3f, %.3f) (%.3f, %.3f) (%.3f, %.3f)", x1, y1, x2, y2, x, y);
                     cairo_curve_to( cairo,
                             subpath->getX(j), subpath->getY(j),
                             subpath->getX(j+1), subpath->getY(j+1),
@@ -120,13 +121,13 @@ void OFDOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path){
                         x = subpath->getX(j);
                         y = subpath->getY(j);
                     }
-                    LOG(DEBUG) << "doPath() line_to(" << x << "," << y << ")";
+                    LOG_DEBUG("doPath() line_to(%.3f, %.3f)", x, y);
                     cairo_line_to(cairo, x, y);
                     ++j;
                 }
             }
             if (subpath->isClosed()) {
-                LOG(DEBUG) << "doPath() close_path()";
+                LOG_DEBUG("%s", "doPath() close_path()");
                 cairo_close_path(cairo);
             }
         }
@@ -142,20 +143,23 @@ void OFDOutputDev::stroke(GfxState *state) {
 	  //return;
   //}
 
-    LOG(INFO) << "[imageSurface] DrawPathObject Stroke Path";
+    LOG_INFO("%s", "[imageSurface] DrawPathObject Stroke Path");
 
     // Add PathObject
     PathPtr ofdPath = GfxPath_to_OfdPath(state);
     if ( ofdPath != nullptr ){
         PathObjectPtr pathObject = std::make_shared<PathObject>(m_currentOFDPage->GetBodyLayer());
         pathObject->SetPath(ofdPath);
-        LOG(DEBUG) <<  "stroke color in stroke(): " << m_strokeColor.r << ", " << m_strokeColor.g << ", " <<  m_strokeColor.b;
+        LOG_DEBUG( "stroke color in stroke(): %d, %d, %d", m_strokeColor.r,m_strokeColor.g, m_strokeColor.b);
         ColorPtr strokeColor = GfxColor_to_OfdColor(&m_strokeColor);
         strokeColor->Alpha = m_strokeOpacity * 255.0;
         pathObject->SetStrokeColor(strokeColor);
         pathObject->LineWidth = m_lineWidth;
 
-        LOG(INFO) << "[imageSurface] DrawPathObject m_matrix=(" << m_matrix.xx << "," << m_matrix.yx << "," << m_matrix.xy << "," << m_matrix.yy << "," << m_matrix.x0 << "," << m_matrix.y0 << ")";
+        LOG_INFO("[imageSurface] DrawPathObject m_matrix=(%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)",
+                m_matrix.xx, m_matrix.yx,
+                m_matrix.xy, m_matrix.yy,
+                m_matrix.x0, m_matrix.y0);
         showCairoMatrix(m_cairo, "imageSurface", "DrawPathObject cairo_matrix");
 
         //cairo_matrix_t matrix;
@@ -179,7 +183,10 @@ void OFDOutputDev::stroke(GfxState *state) {
 
         cairo_matrix_t objMatrix = GfxCTM_to_CairoMatrix(state);
 
-        LOG(INFO) << "[imageSurface] DrawPathObject objMatrix=(" << objMatrix.xx << "," << objMatrix.yx << "," << objMatrix.xy << "," << objMatrix.yy << "," << objMatrix.x0 << "," << objMatrix.y0 << ")";
+        LOG_INFO("[imageSurface] DrawPathObject objMatrix=(%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)",
+                objMatrix.xx, objMatrix.yx,
+                objMatrix.xy, objMatrix.yy,
+                objMatrix.x0, objMatrix.y0);
 
         pathObject->CTM[0] = objMatrix.xx;
         pathObject->CTM[1] = objMatrix.yx;
@@ -263,7 +270,7 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
             pathObject->Rule = ofd::PathRule::EvenOdd;
         }
 
-        LOG(DEBUG) <<  "fill color in fill(): " << m_fillColor.r << ", " << m_fillColor.g << ", " <<  m_fillColor.b;
+        LOG_DEBUG( "fill color in fill(): %.3f, %.3f, %.3f", m_fillColor.r, m_fillColor.g, m_fillColor.b);
         ColorPtr fillColor;
         if ( m_clipPath != nullptr ){
             fillColor = GfxColor_to_OfdColor(&m_clipFillColor);
@@ -282,7 +289,10 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
         }
         m_shading = nullptr;
 
-        LOG(INFO) << "[imageSurface] DrawPathObject m_matrix=(" << m_matrix.xx << "," << m_matrix.yx << "," << m_matrix.xy << "," << m_matrix.yy << "," << m_matrix.x0 << "," << m_matrix.y0 << ")";
+        LOG_INFO("[imageSurface] DrawPathObject m_matrix=(%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)",
+                m_matrix.xx, m_matrix.yx,
+                m_matrix.xy, m_matrix.yy,
+                m_matrix.x0, m_matrix.y0);
         showCairoMatrix(m_cairo, "imageSurface", "DrawPathObject cairo_matrix");
 
         cairo_matrix_t matrix;
@@ -311,7 +321,10 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
             objMatrix = GfxCTM_to_CairoMatrix(state);
         }
 
-        LOG(INFO) << "[imageSurface] DrawPathObject objMatrix=(" << objMatrix.xx << "," << objMatrix.yx << "," << objMatrix.xy << "," << objMatrix.yy << "," << objMatrix.x0 << "," << objMatrix.y0 << ")";
+        LOG_INFO("[imageSurface] DrawPathObject objMatrix=(%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)",
+                objMatrix.xx, objMatrix.yx,
+                objMatrix.xy, objMatrix.yy,
+                objMatrix.x0, objMatrix.y0);
 
         pathObject->CTM[0] = objMatrix.xx;
         pathObject->CTM[1] = objMatrix.yx;
@@ -321,7 +334,7 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
         pathObject->CTM[5] = objMatrix.y0;
 
     } else {
-        LOG(WARNING) << "createPathObject() return nullptr.";
+        LOG_WARN("%s", "createPathObject() return nullptr.");
     }
 
     m_clipPath = nullptr;
@@ -359,7 +372,7 @@ void OFDOutputDev::fill(GfxState *state) {
         if ( pathObject != nullptr ){
             m_currentOFDPage->AddObject(pathObject);
 
-            LOG(DEBUG) << "---- createPathObject in fill() ID=" << pathObject->ID;
+            LOG_DEBUG("---- createPathObject in fill() ID=%d", pathObject->ID);
 
             if ( m_cairoRender != nullptr ){
                 ObjectPtr object = std::shared_ptr<ofd::Object>(pathObject);
@@ -393,7 +406,7 @@ void OFDOutputDev::fill(GfxState *state) {
         //}
     //}
     if ( pathObject->ID == 71 ){
-        LOG(DEBUG) << "Draw path object ID = 71.";
+        LOG_DEBUG("%s", "Draw path object ID = 71.");
     }
 
     // TODO 调试绘制某个特定的PathObject。
@@ -403,10 +416,10 @@ void OFDOutputDev::fill(GfxState *state) {
     }
     //LOG(ERROR) << pathObject->to_string();
 
-    LOG(DEBUG) << "Before doPath() in OFDOutputDev::fill() -----------------";
+    LOG_DEBUG("%s", "Before doPath() in OFDOutputDev::fill() -----------------");
     doPath(m_cairo, state, state->getPath());
     //directDoPath(m_cairo);
-    LOG(DEBUG) << "After doPath() in OFDOutputDev::fill() -----------------";
+    LOG_DEBUG("%s", "After doPath() in OFDOutputDev::fill() -----------------");
     cairo_set_fill_rule(m_cairo, CAIRO_FILL_RULE_WINDING);
     cairo_set_source(m_cairo, m_fillPattern);
     //XXX: how do we get the path
@@ -782,7 +795,7 @@ void OFDOutputDev::eoClip(GfxState *state) {
         std::string cairoLog = ssCairoLog.str();
         cairoLogFile.write(cairoLog.c_str(), cairoLog.length());
 
-        LOG(INFO) << "[imageSurface] Clip clipPath=" << objectString;
+        LOG_INFO("[imageSurface] Clip clipPath=%s", objectString.c_str());
     }
 }
 

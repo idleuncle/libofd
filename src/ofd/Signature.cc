@@ -25,9 +25,9 @@ void test_libsodium(){
     unsigned long long unsignedMessageLen = 0;
     if ( crypto_sign_open(unsignedMessage, &unsignedMessageLen, 
                 signedMessage, signedMessageLen, pk) != 0 ){
-        LOG(ERROR) << "Message sign is wrong.";
+        LOG_ERROR("%s", "Message sign is wrong.");
     } else {
         unsignedMessage[unsignedMessageLen] = '\0';
-        LOG(INFO) << "Success signature. Message: " << std::string((const char*)unsignedMessage);
+        LOG_INFO("Success signature. Message:%s ", (const char*)unsignedMessage);
     }
 }

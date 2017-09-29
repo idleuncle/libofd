@@ -10,6 +10,7 @@
 #include <cmath>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
 #include <cctype>
 #include <unordered_set>
 #include <inttypes.h>
@@ -50,7 +51,7 @@ Unicode unicode_from_font (CharCode code, GfxFont * font);
 //using std::endl;
 
 std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
-    LOG(DEBUG) << "enter FontOutputDev::dumpEmbeddedFont()";
+    LOG_DEBUG("%s", "enter FontOutputDev::dumpEmbeddedFont()");
 
     if(info.is_type3)
         return dumpType3Font(font, info);
@@ -74,17 +75,17 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         ref_obj.free();
 
         if(!font_obj.isDict()) {
-            LOG(ERROR) << "Font object is not a dictionary";
+            LOG_ERROR("%s", "Font object is not a dictionary");
             throw 0;
         }
 
         Dict * dict = font_obj.getDict();
         if(dict->lookup("DescendantFonts", &font_obj2)->isArray()) {
             if(font_obj2.arrayGetLength() == 0) {
-                LOG(ERROR) << "Warning: empty DescendantFonts array";
+                LOG_ERROR("%s", "Warning: empty DescendantFonts array");
             } else {
                 if(font_obj2.arrayGetLength() > 1){
-                    LOG(ERROR) << "TODO: multiple entries in DescendantFonts array";
+                    LOG_ERROR("%s", "TODO: multiple entries in DescendantFonts array");
                 }
 
                 if(font_obj2.arrayGet(0, &obj2)->isDict()) {
@@ -94,7 +95,7 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         }
 
         if(!dict->lookup("FontDescriptor", &fontdesc_obj)->isDict()) {
-            LOG(ERROR) << "Cannot find FontDescriptor ";
+            LOG_ERROR("%s", "Cannot find FontDescriptor ");
             throw 0;
         }
 
@@ -110,11 +111,11 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
                 } else if (subtype == "OpenType") {
                     suffix = ".otf";
                 } else {
-                    LOG(ERROR) << "Unknown subtype: " << subtype;
+                    LOG_ERROR("Unknown subtype:%s", subtype.c_str());
                     throw 0;
                 }
             } else {
-                LOG(ERROR) << "Invalid subtype in font descriptor";
+                LOG_ERROR("%s", "Invalid subtype in font descriptor");
                 throw 0;
             }
         } else if (dict->lookup("FontFile2", &obj)->isStream()) { 
@@ -122,12 +123,12 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         } else if (dict->lookup("FontFile", &obj)->isStream()) {
             suffix = ".pfa";
         } else {
-            LOG(ERROR) << "Cannot find FontFile for dump";
+            LOG_ERROR("%s", "Cannot find FontFile for dump");
             throw 0;
         }
 
         if(suffix == "") {
-            LOG(ERROR) << "Font type unrecognized";
+            LOG_ERROR("%s", "Font type unrecognized");
             throw 0;
         }
 
@@ -148,7 +149,7 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         }
         obj.streamClose();
     } catch(int) {
-        LOG(ERROR) << "Something wrong when trying to dump font " << std::hex << fn_id << std::dec;
+        LOG_ERROR("Something wrong when trying to dump font 0x%x", fn_id);
     }
 
     obj2.free();
@@ -350,7 +351,7 @@ std::string FontOutputDev::dumpType3Font(GfxFont *font, FontInfo & info) {
 
 void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, FontInfo & info, bool get_metric_only) {
     if(m_param.debug) {
-        LOG(DEBUG) << "Embed font: " << filepath << " " << info.id;
+        LOG_DEBUG("Embed font: %s %d", filepath.c_str(), info.id);
     }
 
     ffw_load_font(filepath.c_str());
@@ -384,7 +385,7 @@ void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, Font
     info.em_size = ffw_get_em_size();
 
     if(m_param.debug) {
-        LOG(DEBUG) << "em size: " << info.em_size;
+        LOG_DEBUG("em size:%d", info.em_size);
     }
 
     info.space_width = 0;
@@ -474,7 +475,7 @@ void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, Font
                         {
                             name_conflict_warned = true;
                             //TODO: may be resolved using advanced font properties?
-                            LOG(ERROR) << "Warning: encoding conflict detected in font: " << std::hex << info.id << std::dec;
+                            LOG_ERROR("Warning: encoding conflict detected in font: 0x%x", info.id);
                         }
                     }
                 }
@@ -602,7 +603,7 @@ void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, Font
                     // in auto mode, just drop the tounicode map
                     if(!retried)
                     {
-                        LOG(ERROR) << "ToUnicode CMap is not valid and got dropped for font: " << std::hex << info.id << std::dec;
+                        LOG_ERROR("ToUnicode CMap is not valid and got dropped for font: 0x%x", info.id);
                         retried = true;
                         codeset.clear();
                         info.use_tounicode = false;
@@ -619,7 +620,7 @@ void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, Font
                 if(!name_conflict_warned) {
                     name_conflict_warned = true;
                     //TODO: may be resolved using advanced font properties?
-                    LOG(ERROR) << "Warning: encoding confliction detected in font: " << std::hex << info.id << std::dec;
+                    LOG_ERROR("Warning: encoding confliction detected in font: 0x%x", info.id);
                 }
             }
 
@@ -682,12 +683,12 @@ void FontOutputDev::embedFont(const std::string & filepath, GfxFont * font, Font
 
             ffw_add_empty_char((int32_t)' ', (int)floor(info.space_width * info.em_size + 0.5));
             if(m_param.debug) {
-                LOG(DEBUG) << "Missing space width in font " << std::hex << info.id << std::dec << ": set to " << std::dec << info.space_width;
+                LOG_DEBUG("Missing space width in font 0x%x: set to %d", info.id,  info.space_width);
             }
         }
 
         if(m_param.debug) {
-            LOG(DEBUG) << "space width: " << info.space_width;
+            LOG_DEBUG("space width:%d", info.space_width);
         }
 
         if(ctu)
@@ -807,9 +808,10 @@ const FontInfo * FontOutputDev::installFont(GfxFont * font) {
     font->getName();
 
     if(m_param.debug) {
-        LOG(DEBUG) << "Install font " << std::hex << new_fn_id << std::dec
-            << ": (" << (font->getID()->num) << ' ' << (font->getID()->gen) << ") " 
-            << (font->getName() ? font->getName()->getCString() : "");
+        LOG_DEBUG("Install font 0x%x: (%d, %d) %s",
+            new_fn_id, font->getID()->num, font->getID()->gen,
+            font->getName() ? font->getName()->getCString() : "");
+
     }
 
     if(new_font_info.is_type3) {
@@ -821,13 +823,13 @@ const FontInfo * FontOutputDev::installFont(GfxFont * font) {
             export_remote_default_font(new_fn_id);
         }
 #else
-        LOG(ERROR) << "Type 3 fonts are unsupported and will be rendered as Image" << std::endl;
+        LOG_ERROR("%s", "Type 3 fonts are unsupported and will be rendered as Image");
         //export_remote_default_font(new_fn_id);
 #endif
         return &new_font_info;
     }
     if(font->getWMode()) {
-        LOG(ERROR) << "Writing mode is unsupported and will be rendered as Image";
+        LOG_ERROR("%s", "Writing mode is unsupported and will be rendered as Image");
         //export_remote_default_font(new_fn_id);
         return &new_font_info;
     }
@@ -843,13 +845,13 @@ const FontInfo * FontOutputDev::installFont(GfxFont * font) {
                 installEmbeddedFont(font, new_font_info);
                 break;
             case gfxFontLocResident:
-                LOG(ERROR) << "Warning: Base 14 fonts should not be specially handled now. Please report a bug!";
+                LOG_ERROR("%s", "Warning: Base 14 fonts should not be specially handled now. Please report a bug!");
                 /* fall through */
             case gfxFontLocExternal:
                 installExternalFont(font, new_font_info);
                 break;
             default:
-                LOG(ERROR) << "TODO: other font loc";
+                LOG_ERROR("%s", "TODO: other font loc");
                 //export_remote_default_font(new_fn_id);
                 break;
         }      
@@ -887,7 +889,7 @@ void FontOutputDev::installExternalFont(GfxFont * font, FontInfo & info){
     auto iter = GB_ENCODED_FONT_NAME_MAP_1.find(fontname); 
     if(iter != GB_ENCODED_FONT_NAME_MAP_1.end()) {
         fontname = iter->second;
-        LOG(ERROR) << "Warning: workaround for font names in bad encodings.";
+        LOG_ERROR("%s", "Warning: workaround for font names in bad encodings.");
     }
 
     GfxFontLoc * localfontloc = font->locateFont(m_xref, nullptr);
@@ -899,7 +901,7 @@ void FontOutputDev::installExternalFont(GfxFont * font, FontInfo & info){
             delete localfontloc;
             return;
         } else {
-            LOG(ERROR) << "Cannot embed external font: f" << std::hex << info.id << std::dec << ' ' << fontname ;
+            LOG_ERROR("Cannot embed external font: 0x%x %s", info.id, fontname.c_str());
             // fallback to exporting by name
         }
     }

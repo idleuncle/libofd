@@ -49,7 +49,7 @@ std::string Page::to_string() const{
 bool Page::Open(){
     if ( m_opened ) return true;
     if ( BaseLoc.empty() ) {
-        LOG(WARNING) << "BaseLoc.empty()" << std::endl;
+        LOG_WARN("%s", "BaseLoc.empty()");
         return false;
     }
 
@@ -61,7 +61,7 @@ bool Page::Open(){
 
     std::string docRoot = document->GetDocRoot();
     std::string pageXMLFile = docRoot + "/" + BaseLoc; 
-    LOG(INFO) << "Try to open zipfile " << pageXMLFile;
+    LOG_INFO("Try to open zipfile %s", pageXMLFile.c_str());
 
     bool ok = false;
     std::string strPageXML;
@@ -71,13 +71,13 @@ bool Page::Open(){
         m_opened = fromPageXML(strPageXML);
 
         if ( m_opened ){
-            LOG(INFO) << "Open page success.";
-            LOG(INFO) << to_string();
+            LOG_INFO("%s", "Open page success.");
+            LOG_INFO("%s", to_string().c_str());
         } else {
-            LOG(ERROR) << "Open page failed. ID: " << ID << " BaseLoc: " << BaseLoc;
+            LOG_ERROR("Open page failed. ID:%d BaseLoc:%s", ID, BaseLoc.c_str());
         }
     } else {
-        LOG(ERROR) << "OFDPage::Open() ReadZipFileString() failed. " << pageXMLFile;
+        LOG_ERROR("OFDPage::Open() ReadZipFileString() failed. %s", pageXMLFile.c_str());
     }
 
     return m_opened;
@@ -119,7 +119,7 @@ std::tuple<ST_Box, bool> ReadBoxFromXML(XMLElementPtr boxElement){
 
     std::string boxString;
     std::tie(boxString, exist) = boxElement->GetStringValue();
-    LOG(INFO) << "Box String: " << boxString;
+    LOG_INFO("Box String:%s", boxString.c_str());
     if ( exist ){
         std::vector<std::string> tokens = utils::SplitString(boxString);
         if ( tokens.size() >= 4 ){
@@ -128,7 +128,7 @@ std::tuple<ST_Box, bool> ReadBoxFromXML(XMLElementPtr boxElement){
             box.Width = atof(tokens[2].c_str());
             box.Height = atof(tokens[3].c_str());
         } else {
-            LOG(ERROR) << "Box String tokens size >= 4 failed. boxString:" << boxString;
+            LOG_ERROR("Box String tokens size >= 4 failed. boxString:%s", boxString.c_str());
             exist = false;
         }
     }
@@ -230,13 +230,13 @@ std::tuple<CT_PageArea,bool> fromPageAreaXML(XMLElementPtr pageAreaElement){
     bool ok = true;
     CT_PageArea pageArea;
 
-    LOG(INFO) << "******** FromPagAreaXML()";
+    LOG_INFO("%s", "******** FromPagAreaXML()");
 
     XMLElementPtr childElement = pageAreaElement->GetFirstChildElement();
     while ( childElement != nullptr ){
 
         std::string childName = childElement->GetName();
-        LOG(INFO) << "PageArea child name: " << childName;
+        LOG_INFO("PageArea child name:%s", childName.c_str());
         bool exist = false;
 
         // -------- <PhysicalBox>
@@ -244,7 +244,7 @@ std::tuple<CT_PageArea,bool> fromPageAreaXML(XMLElementPtr pageAreaElement){
         if ( childName == "PhysicalBox" ){
             std::tie(pageArea.PhysicalBox, exist) = ReadBoxFromXML(childElement);
             if ( !exist ){
-                LOG(ERROR) << "Attribute PhysicalBox is requred in PageArea XML";
+                LOG_ERROR("%s", "Attribute PhysicalBox is requred in PageArea XML");
                 break;
             } else {
                 ok = true;
@@ -327,7 +327,7 @@ bool Page::fromPageXML(const std::string &strPageXML){
             }
         }
     } else {
-        LOG(ERROR) << "No root element in Content.xml";
+        LOG_ERROR("%s", "No root element in Content.xml");
     }
 
     return ok;
@@ -411,7 +411,7 @@ bool Page::fromContentXML(XMLElementPtr contentElement){
             LayerPtr layer = fromLayerXML(childElement);
             if ( layer != nullptr ){
                 m_layers.push_back(layer);
-                LOG(INFO) << "layer added. GetObjectsCount() = " << layer->GetNumObjects();
+                LOG_INFO("layer added. GetObjectsCount() = %d", layer->GetNumObjects());
                 ok = true;
             }
         }

@@ -273,7 +273,7 @@ void XMLWriter::EndDocument(){
     //if ( rootNode != nullptr ){
         //return std::make_shared<XMLElement>(rootNode);
     //} else {
-        //LOG(WARNING) << "GetRootElement() return nullptr";
+        //LOG_WARN("GetRootElement() return nullptr");
         //return nullptr;
     //}
 //}
@@ -507,7 +507,7 @@ XMLElementPtr XMLElement::ParseRootElement(const std::string &xmlString){
     if ( rootNode != nullptr ){
         return std::make_shared<XMLElement>(rootNode);
     } else {
-        LOG(WARNING) << "GetRootElement() return nullptr";
+        LOG_WARN("%s", "GetRootElement() return nullptr");
         return nullptr;
     }
 }
@@ -554,7 +554,7 @@ std::string XMLElement::GetName() const {
     if ( m_node != nullptr ){
         name = std::string((const char *)m_node->name);
     } else {
-        LOG(ERROR) << "m_node == nullptr while call XMLElement::GetName().";
+        LOG_ERROR("%s", "m_node == nullptr while call XMLElement::GetName().");
     }
     return name;
 }

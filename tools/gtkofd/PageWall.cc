@@ -70,7 +70,7 @@ void PageFrame::RenderFrame(cairo_t *cr, Point originPoint, Rect canvasRect, dou
     if (m_ofdRender != nullptr){
         if (m_bRedraw){
             m_ofdRender->RenderBackgroundImage(m_page, 0, 0, scaling);
-            LOG(DEBUG) << "RenderFrame() redraw.";
+            LOG_DEBUG("%s", "RenderFrame() redraw.");
             m_bRedraw = false;
         }
 
@@ -291,7 +291,7 @@ void PageWall::InitZoomScaling(){
 
 void PageWall::RenderWall(cairo_t *cr){
     if (m_document == nullptr){
-        LOG(WARNING) << "m_document == nullptr in RenderWall()";
+        LOG_WARN("%s", "m_document == nullptr in RenderWall()");
         return;
     }
     // 判断当前屏幕上需要绘制哪些页面
@@ -306,7 +306,8 @@ void PageWall::RenderWall(cairo_t *cr){
     int endCol = (m_wallOffsetX - m_wallLeftMargin + m_screenWidth) / frameWidth;
     if (endCol >= m_rowPages) endCol = m_rowPages - 1;
 
-    LOG(DEBUG) << "RenderWall() rows(" << startRow << "," << endRow << ") cols(" << startCol << "," << endCol << ")";
+    LOG_DEBUG("RenderWall() rows(%d, %d) cols(%d, %d)", startRow, endRow, startCol, endCol);
+
     for ( auto i = startCol ; i <= endCol ; i++ ){
         for ( auto j = startRow ; j <= endRow ; j++ ){
             size_t pageIndex = j * m_rowPages + i;

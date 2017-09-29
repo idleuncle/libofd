@@ -138,7 +138,7 @@ void OFDRender::RenderBackgroundImage(PagePtr page, double offsetX, double offse
         }
         m_cairoRender->RestoreState();
     } else {
-        LOG(ERROR) << "page->Open() failed. ID=" << page->ID;
+        LOG_ERROR("page->Open() failed. ID=%d", page->ID);
     }
 }
 

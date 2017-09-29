@@ -58,14 +58,14 @@ bool Document::Open(){
             std::string strResXML;
             std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(publicResFileName);
             if ( !m_commonData.PublicRes->FromResXML(strResXML) ){
-                LOG(ERROR) << "m_commonData.PublicRes.FromResXML() failed.";
+                LOG_ERROR("%s", "m_commonData.PublicRes.FromResXML() failed.");
                 return false;
             } else {
                 m_commonData.PublicRes->LoadFonts();
                 m_commonData.PublicRes->LoadImages();
             }
         } else {
-            LOG(INFO) << "Public resource file " << publicResFileName << " is not exist.";
+            LOG_INFO("Public resource file %s is not exist.", publicResFileName.c_str());
         }
     }
 
@@ -75,14 +75,14 @@ bool Document::Open(){
             std::string strResXML;
             std::tie(strResXML, std::ignore) = m_package.lock()->ReadZipFileString(documentResFileName);
             if ( !m_commonData.DocumentRes->FromResXML(strResXML) ){
-                LOG(ERROR) << "m_commonData.DocumentRes.FromResXML() failed.";
+                LOG_ERROR("%s", "m_commonData.DocumentRes.FromResXML() failed.");
                 return false;
             } else {
                 m_commonData.DocumentRes->LoadFonts();
                 m_commonData.DocumentRes->LoadImages();
             }
         } else {
-            LOG(WARNING) << "Document resource file " << documentResFileName << " is not exist.";
+            LOG_WARN("Document resource file %s is not exist.", documentResFileName.c_str());
         }
     }
     m_opened = true;
@@ -390,7 +390,7 @@ bool Document::FromDocBodyXML(XMLElementPtr docBodyElement){
         } else if ( childName == "DocRoot" ){
             std::string docRoot;
             std::tie(docRoot, std::ignore) = childElement->GetStringValue();
-            LOG(DEBUG) << "DocRoot: " << docRoot;
+            LOG_DEBUG("DocRoot:%s", docRoot.c_str());
 
         // TODO
         // -------- <Versions>
@@ -408,7 +408,7 @@ bool Document::FromDocBodyXML(XMLElementPtr docBodyElement){
     }
 
     if ( !hasDocInfo ){
-        LOG(ERROR) << "No DocInfo element in DocBody.";
+        LOG_ERROR("%s", "No DocInfo element in DocBody.");
     }
 
     //if ( reader.EnterChildElement("DocBody") ){
@@ -421,7 +421,7 @@ bool Document::FromDocBodyXML(XMLElementPtr docBodyElement){
             //} else if ( reader.CheckElement("DocRoot") ){
                 //std::string content;
                 //reader.ReadElement(content);
-                //LOG(DEBUG) << "DocRoot: " << content;
+                //LOG_DEBUG("DocRoot:%s", content.c_str());
 
             //// -------- <Versions>
             //} else if ( reader.CheckElement("Versions") ){
@@ -453,13 +453,13 @@ bool Document::fromDocInfoXML(XMLElementPtr docInfoElement){
         // Optional.
         if ( childName == "DocID" ){
             std::tie(docInfo.DocID, std::ignore) = childElement->GetStringValue();
-            LOG(DEBUG) << "DocID: " << docInfo.DocID;
+            LOG_DEBUG("DocID:%s", docInfo.DocID.c_str());
 
         // -------- <Title>
         // Optional.
         } else if ( childName == "Title" ){
             std::tie(docInfo.Title, std::ignore) = childElement->GetStringValue();
-            LOG(DEBUG) << "Title: " << docInfo.Title;
+            LOG_DEBUG("Title:%s", docInfo.Title.c_str());
 
         // -------- <Author>
         // Optional.
@@ -552,13 +552,13 @@ bool Document::fromDocInfoXML(XMLElementPtr docInfoElement){
             //if ( reader.CheckElement("DocID") ){
                 //std::string docID;
                 //reader.ReadElement(docID);
-                //LOG(DEBUG) << "DocID: " << docID;
+                //LOG_DEBUG("DocID:%d", docID);
 
             //// -------- <DocRoot>
             //} else if ( reader.CheckElement("Title") ){
                 //std::string title;
                 //reader.ReadElement(title);
-                //LOG(DEBUG) << "Title: " << title;
+                //LOG_DEBUG("Title:%s", title.c_str());
             //}
 
             //reader.NextElement();
@@ -655,10 +655,10 @@ bool Document::FromDocumentXML(const std::string &strDocumentXML){
                 childElement = childElement->GetNextSiblingElement();
             }
         } else {
-            LOG(ERROR) << "Root element in Document Content.xml is not named 'Document'";
+            LOG_ERROR("%s", "Root element in Document Content.xml is not named 'Document'");
         }
     } else {
-        LOG(ERROR) << "No root element in Document Content.xml";
+        LOG_ERROR("%s", "No root element in Document Content.xml");
     }
 
     return ok;
@@ -688,7 +688,7 @@ bool Document::fromCommonDataXML(XMLElementPtr commonDataElement){
             // OFD (section 7.5) P11. Definitions.xsd
             // Required.
             std::tie(m_commonData.PageArea, ok) = fromPageAreaXML(childElement);
-            LOG(DEBUG) << "CommonData.PageArea = " << m_commonData.PageArea.to_string();
+            LOG_DEBUG("CommonData.PageArea = %s", m_commonData.PageArea.to_string().c_str());
 
         } else if ( childName == "PublicRes" ){
             // -------- <PublicRes>
@@ -750,18 +750,18 @@ bool Document::fromPagesXML(XMLElementPtr pagesElement){
             bool exist = false;
             std::tie(pageID, exist) = childElement->GetIntAttribute("ID");
             if ( !exist ){
-                LOG(ERROR) << "Attribute ID is required in Document.xsd";
+                LOG_ERROR("%s", "Attribute ID is required in Document.xsd");
                 return false;
             }
 
             std::string baseLoc;
             std::tie(baseLoc, exist) = childElement->GetStringAttribute("BaseLoc");
             if ( !exist ){
-                LOG(ERROR) << "Attribute BaseLoc is required in Document.xsd";
+                LOG_ERROR("%s", "Attribute BaseLoc is required in Document.xsd");
                 return false;
             }
 
-            LOG(DEBUG) << "PageID: " << pageID << " BaseLoc: " << baseLoc;
+            LOG_DEBUG("PageID:%d BaseLoc:%s", pageID, baseLoc.c_str());
 
             PagePtr page = AddNewPage();
             page->ID = pageID;

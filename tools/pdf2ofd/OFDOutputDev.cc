@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <assert.h>
 
@@ -74,8 +75,11 @@ void OFDOutputDev::OnWord(TextWord *word, GfxState *state){
     const std::string myString = word->getText()->getCString();
     double fontSize = word->getFontSize();
     int numChars = word->getLength();
-    LOG(INFO) << "........ OnWord() strokeColor=(" << strokeColor.r << "," << strokeColor.g << "," << strokeColor.b << ") fillColor=(" << fillColor.r << "," << fillColor.g << "," << fillColor.b << ")";
-    LOG(INFO) << "TextWord FontSize=" << fontSize << " numChars=" << numChars << " len(string)=" << myString.length() << " size(string)=" << myString.size() << " word->getText()->getLength() = " << word->getText()->getLength();
+    LOG_INFO("........ OnWord() strokeColor=(%d, %d, %d) fillColor=(%d, %d, %d)",
+            strokeColor.r, strokeColor.g, strokeColor.b,
+            fillColor.r, fillColor.g, fillColor.b);
+
+    LOG_INFO("TextWord FontSize=%d numChars=%d len(string)=%d size(string)=%d word->getText()->getLength() = %d", fontSize, numChars, myString.length(), myString.size(), word->getText()->getLength());
 
 }
 
@@ -328,7 +332,7 @@ void OFDOutputDev::ProcessDoc(PDFDocPtr pdfDoc){
     //GBool printing = gTrue;
 
     auto numPages = pdfDoc->getNumPages();
-    LOG(INFO) << "Total " << numPages << " pages in pdf file"; 
+    LOG_INFO("Total %d pages in pdf file", numPages); 
 
     int firstPage = 1;
     // FIXME
@@ -416,7 +420,7 @@ std::tuple<cairo_surface_t*, FILE*> OFDOutputDev::beforeDocument(const std::stri
         } else {
             outputFile = fopen(outputFileName.c_str(), "wb");
             if (!outputFile) {
-                LOG(ERROR) << "Error opening output file " << outputFileName;
+                LOG_ERROR("Error opening output file %s", outputFileName.c_str());
                 exit(2);
             }
         }
@@ -456,7 +460,7 @@ void OFDOutputDev::afterDocument(){
           cairo_surface_finish(outputSurface);
           cairo_status_t status = cairo_surface_status(outputSurface);
           if (status){
-              LOG(ERROR) << "cairo error: " << cairo_status_to_string(status);
+              LOG_ERROR("cairo error: %s", cairo_status_to_string(status));
           }
           cairo_surface_destroy(outputSurface);
         }
@@ -509,7 +513,7 @@ void OFDOutputDev::afterPage(const std::string &imageFileName){
         cairo_surface_finish(m_outputSurface);
         cairo_status_t status = cairo_surface_status(m_outputSurface);
         if (status){
-            LOG(ERROR) << "cairo error: " << cairo_status_to_string(status);
+            LOG_ERROR("cairo error:%s", cairo_status_to_string(status));
         }
         cairo_surface_destroy(m_outputSurface);
 
@@ -599,7 +603,7 @@ void OFDOutputDev::renderPage(int pg, double page_w, double page_h, double outpu
 
     status = cairo_status(cr);
     if (status) {
-        LOG(ERROR) << "cairo error: " << cairo_status_to_string(status);
+        LOG_ERROR("cairo error:%s", cairo_status_to_string(status));
     }
     cairo_destroy (cr);
 }

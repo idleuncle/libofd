@@ -39,7 +39,7 @@ bool Package::Open(const std::string &filename){
 
     m_zip = std::make_shared<utils::Zip>();
     if ( !m_zip->Open(m_filename, false) ){
-        LOG(ERROR) << "Error: Open " << m_filename << " failed.";
+        LOG_ERROR("Error: Open %s failed.", m_filename.c_str());
         return false;
     }
 
@@ -86,7 +86,7 @@ void test_libsodium();
 bool Package::Save(const std::string &filename){
     //if ( !m_opened ) return false;
 
-    LOG(INFO) << "Save OFD file: " << filename;
+    LOG_INFO("Save OFD file:%s", filename.c_str());
 
     bool ok = false;
 
@@ -95,7 +95,7 @@ bool Package::Save(const std::string &filename){
 
     ZipPtr zip = std::make_shared<utils::Zip>();
     if ( !zip->Open(m_filename, true) ){
-        LOG(ERROR) << "Error: Open " << m_filename << " failed."; 
+        LOG_ERROR("Error: Open %s failed.", m_filename.c_str()); 
         return false;
     }
 
@@ -150,7 +150,7 @@ bool Package::Save(const std::string &filename){
                 if ( dataOK ){
                     defaultFont->CreateFromData(data, dataSize);
                 } else {
-                    LOG(ERROR) << "Read default font data failed.";
+                    LOG_ERROR("%s", "Read default font data failed.");
                 }
             }
 
@@ -229,7 +229,7 @@ bool Package::Save(const std::string &filename){
             size_t fontDataSize = font->GetFontDataSize();
             if ( fontData != nullptr && fontDataSize > 0 ){
                 std::string fontFileName = resDir + "/" + generateFontFileName(font->ID);
-                //LOG(ERROR) << "zip->AddFile() while save Font. file = " << fontFileName;
+                //LOG_ERROR("zip->AddFile() while save Font. file=%s", fontFileName.c_str());
                 zip->AddFile(fontFileName, fontData, fontDataSize);
             }
         }
@@ -277,7 +277,7 @@ bool Package::Save(const std::string &filename){
     zip = nullptr;
 
     ok = true;
-    LOG(INFO) << "Save " << filename << " done.";
+    LOG_INFO("Save %s done.", filename.c_str());
 
 
     test_libsodium();
@@ -322,11 +322,11 @@ std::string Package::generateOFDXML() const{
 DocumentPtr Package::AddNewDocument(){
     size_t idx = m_documents.size();
     std::string docRoot = std::string("Doc_") + std::to_string(idx);
-    LOG(DEBUG) << "Calling OFDPackage::AddNewDocument(). docRoot: " << docRoot;
+    LOG_DEBUG("Calling OFDPackage::AddNewDocument(). docRoot:%s", docRoot.c_str());
 
     DocumentPtr document = Document::CreateNewDocument(GetSelf(), docRoot);
 
-    LOG(DEBUG) << "After create document.";
+    LOG_DEBUG("%s", "After create document.");
     m_documents.push_back(document);
 
     return document;
@@ -398,7 +398,7 @@ bool Package::fromOFDXML(const std::string &strOFDXML){
             // Required.
             std::tie(Version, exist) = rootElement->GetStringAttribute("Version");
             if ( !exist ){
-                LOG(ERROR) << "Attribute Version is Required in OFD.xsd";
+                LOG_ERROR("%s", "Attribute Version is Required in OFD.xsd");
                 return false;
             }
 
@@ -406,7 +406,7 @@ bool Package::fromOFDXML(const std::string &strOFDXML){
             // Required.
             std::tie(DocType, exist) = rootElement->GetStringAttribute("DocType");
             if ( !exist ){
-                LOG(ERROR) << "Attribute DocType is Required in OFD.xsd";
+                LOG_ERROR("%s", "Attribute DocType is Required in OFD.xsd");
                 return false;
             }
 
@@ -425,7 +425,7 @@ bool Package::fromOFDXML(const std::string &strOFDXML){
 
                     std::string docRoot = document->GetDocRoot();
                     std::string docXMLFile = docRoot + "/Document.xml";
-                    LOG(INFO) << "Document xml:" << docXMLFile;
+                    LOG_INFO("Document xml:%s", docXMLFile.c_str());
 
                     std::string strDocumentXML;
                     std::tie(strDocumentXML, ok) = ReadZipFileString(docXMLFile);
@@ -437,10 +437,10 @@ bool Package::fromOFDXML(const std::string &strOFDXML){
             if ( !hasDocBody ){
             }
         } else {
-            LOG(ERROR) << "Root element in OFD.xml is not named 'OFD'";
+            LOG_ERROR("%s", "Root element in OFD.xml is not named 'OFD'");
         }
     } else {
-        LOG(ERROR) << "No root element in OFD.xml";
+        LOG_ERROR("%s", "No root element in OFD.xml");
     }
 
     return ok;

@@ -34,7 +34,7 @@ SDL_Surface *create_image_surface(int width, int height, int bpp){
     SDL_Surface *imageSurface = SDL_CreateRGBSurface(0, width, height, bpp, 
             rmask, gmask, bmask, amask);
     if ( imageSurface == nullptr ){
-        LOG(ERROR) << "SDL_CreateRGBSurface() failed. " << SDL_GetError();
+        LOG_ERROR("SDL_CreateRGBSurface() failed. %s", SDL_GetError());
     }
 
     return imageSurface;
@@ -453,7 +453,7 @@ bool ImOFDApp::initSDL(double screenWidth, double screenHeight, int screenBPP){
 
     m_imageSurface = create_image_surface(m_screenWidth, m_screenHeight, m_screenBPP);
     if ( m_imageSurface == nullptr ){
-        LOG(ERROR) << "create_image_surface() failed. " << SDL_GetError();
+        LOG_ERROR("create_image_surface() failed. %s", SDL_GetError());
         return false;
     }
     return true;
@@ -620,7 +620,7 @@ void ImOFDApp::renderCairo(){
 
     cairo_surface_t *cairoSurface = create_cairo_surface_from_sdl_surface(m_imageSurface);
     if ( cairoSurface == nullptr ){
-        LOG(ERROR) << "create_cairo_surface_from_sdl_surface() failed.";
+        LOG_ERROR("%s", "create_cairo_surface_from_sdl_surface() failed.");
         return;
     }
 

@@ -151,7 +151,7 @@ Resource::ImplCls::ImplCls(Resource *resource, PackagePtr package, DocumentPtr d
                 m_resDescFile = "PublicRes.xml";
             }
         } else {
-            LOG(ERROR) << "m_package == nullptr in Resource.";
+            LOG_ERROR("%s", "m_package == nullptr in Resource.");
         }
     }
 }
@@ -308,7 +308,7 @@ bool Resource::ImplCls::LoadFonts(){
         auto font = fontIter.second;
 
         if ( !font->Load(m_package.lock()) ){
-            LOG(ERROR) << "Load font (" << font->FontName << " failed.";
+            LOG_ERROR("Load font %s failed.", font->FontName.c_str());
         }
     }
 
@@ -366,7 +366,7 @@ bool Resource::ImplCls::LoadImages(){
         auto image = imageIter.second;
 
         if ( !image->Load(m_package.lock()) ){
-            LOG(ERROR) << "Load image " << image->GetImageFilePath() << " failed.";
+            LOG_ERROR("Load image %s failed.", image->GetImageFilePath().c_str());
         }
     }
 
@@ -427,14 +427,14 @@ bool Resource::ImplCls::FromMultiMediasXML(utils::XMLElementPtr multimediasElemn
             bool exist = false;
             std::tie(mmID, exist) = childElement->GetIntAttribute("ID");
             if ( !exist ){
-                LOG(ERROR) << "Attribute ID is required in MultiMedia";
+                LOG_ERROR("%s", "Attribute ID is required in MultiMedia");
                 return false;
             }
 
             std::string mmType;
             std::tie(mmType, exist) = childElement->GetStringAttribute("Type");
             if ( !exist ){
-                LOG(ERROR) << "Attribute Type is required in MultiMedia";
+                LOG_ERROR("%s", "Attribute Type is required in MultiMedia");
                 return false;
             }
 
@@ -443,14 +443,14 @@ bool Resource::ImplCls::FromMultiMediasXML(utils::XMLElementPtr multimediasElemn
 
             utils::XMLElementPtr mediaFileElement = childElement->GetFirstChildElement();
             if ( mediaFileElement == nullptr ){
-                LOG(ERROR) << "Child element MediaFile is required in MultiMedia";
+                LOG_ERROR("%s", "Child element MediaFile is required in MultiMedia");
                 return false;
             }
 
             std::string mediaFile;
             std::tie(mediaFile, exist) = mediaFileElement->GetStringValue();
             if ( !exist ){
-                LOG(ERROR) << "MediaFile value is required in MultiMedia";
+                LOG_ERROR("%s", "MediaFile value is required in MultiMedia");
                 return false;
             }
 
@@ -482,7 +482,7 @@ bool Resource::ImplCls::FromResXML(const std::string &strResXML){
             bool exist = false;
             std::tie(m_baseLoc, exist) = rootElement->GetStringAttribute("BaseLoc");
             if ( !exist ){
-                LOG(ERROR) << "BaseLoc attribute is required in Res.xsd";
+                LOG_ERROR("%s", "BaseLoc attribute is required in Res.xsd");
                 return false;
             }
 

@@ -167,7 +167,7 @@ void CairoRender::ImplCls::Rebuild(double pixelWidth, double pixelHeight, double
     m_resolutionY = resolutionY;
     m_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pixelWidth, pixelHeight);
     if ( m_surface == nullptr ){
-        LOG(ERROR) << "create_image_surface() failed. ";
+        LOG_ERROR("%s", "create_image_surface() failed.");
         return;
     }
 
@@ -249,7 +249,7 @@ void CairoRender::ImplCls::DrawPage(PagePtr page, ViewArea viewArea){
 
     const LayerPtr bodyLayer = page->GetBodyLayer(); 
     if ( bodyLayer == nullptr ) {
-        LOG(WARNING) << "page->GetBodyLayer() return nullptr. Maybe NULL content.";
+        LOG_WARN("%s", "page->GetBodyLayer() return nullptr. Maybe NULL content.");
         return;
     }
     size_t numObjects = bodyLayer->GetNumObjects();
@@ -360,7 +360,7 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
 
     cairo_status_t status = cairo_scaled_font_status(scaled_font);
     if ( status  != CAIRO_STATUS_SUCCESS ){
-        LOG(ERROR) << "cairo_scaled_font_create() failed. Cairo status: " << cairo_status_to_string(status);
+        LOG_ERROR("cairo_scaled_font_create() failed. Cairo status:%s", cairo_status_to_string(status));
         return;
     }
 
@@ -415,7 +415,7 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
             );
 
     if ( status != CAIRO_STATUS_SUCCESS ){
-        LOG(ERROR) << "cairo_scaled_font_text_to_glyphs() failed. Cairo status: " << cairo_status_to_string(status);
+        LOG_ERROR("cairo_scaled_font_text_to_glyphs() failed. Cairo status:%d", cairo_status_to_string(status));
         return;
     }
 

@@ -47,9 +47,9 @@ bool Zip::ImplCls::Open(const std::string &filename, bool bWrite){
 
     if ( m_archive == nullptr ){
         if ( error == ZIP_ER_EXISTS ){
-            LOG(ERROR) << "Error: Open " << filename << " failed. error=" << error << " The file exists and ZIP_EXCL is set.";
+            LOG_ERROR("Error: Open %s failed. error=%d. The file exists and ZIP_EXCL is set.", filename.c_str(), error);
         } else {
-            LOG(ERROR) << "Error: Open " << filename << " failed. error=" << error;
+            LOG_ERROR("Error: Open %s failed. error=%d", filename.c_str(), error);
         }
         return false;
     }
@@ -73,7 +73,7 @@ std::tuple<std::string, bool> Zip::ImplCls::ReadFileString(const std::string &fi
             struct zip_stat st;
             zip_stat_init(&st);
             zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
-            LOG(DEBUG) << "zip_stat:" << st.valid;
+            LOG_DEBUG("zip_stat:%d", st.valid);
 
             size_t filesize = st.size;
             __attribute__((unused)) size_t compsize = st.comp_size;
@@ -81,9 +81,9 @@ std::tuple<std::string, bool> Zip::ImplCls::ReadFileString(const std::string &fi
             zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
             char *content = new char[filesize + 1];
             size_t did_read = zip_fread(file, content, filesize);
-            LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
+            LOG_DEBUG("did_read: %d filesize:%d", did_read, filesize);
             if (did_read != filesize ) {
-                LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
+                LOG_WARN("File %s readed %d bytes, but is not equal to excepted filesize %d bytes.", fileinzip.c_str(), did_read, filesize);
                 delete[] content;
             } else {
                 content[filesize] = '\0';
@@ -93,7 +93,7 @@ std::tuple<std::string, bool> Zip::ImplCls::ReadFileString(const std::string &fi
             }
             zip_fclose(file);
         } else {
-            LOG(WARNING) << "File " << fileinzip << " does not in archive.";
+            LOG_WARN("File %s does not in archive.", fileinzip.c_str());
         }
     }
 
@@ -110,7 +110,7 @@ std::tuple<char*, size_t, bool> Zip::ImplCls::ReadFileRaw(const std::string &fil
             struct zip_stat st;
             zip_stat_init(&st);
             zip_stat(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE, &st);
-            LOG(DEBUG) << "zip_stat:" << st.valid;
+            LOG_DEBUG("zip_stat:%d", st.valid);
 
             filesize = st.size;
             __attribute__((unused)) size_t compsize = st.comp_size;
@@ -118,16 +118,16 @@ std::tuple<char*, size_t, bool> Zip::ImplCls::ReadFileRaw(const std::string &fil
             zip_file *file = zip_fopen(m_archive, fileinzip.c_str(), ZIP_FL_NOCASE);
             content = new char[filesize];
             size_t did_read = zip_fread(file, content, filesize);
-            LOG(DEBUG) << "did_read:" << did_read << " filesize:" << filesize;
+            LOG_DEBUG("did_read:%d filesize:%d", did_read, filesize);
             if (did_read != filesize ) {
-                LOG(WARNING) << "File " << fileinzip << " readed " << did_read << " bytes, but is not equal to excepted filesize " << filesize << " bytes.";
+                LOG_WARN("File %s readed %d bytes, but is not equal to excepted filesize %d bytes.", fileinzip.c_str(), did_read, filesize);
                 delete[] content;
             } else {
                 ok = true;
             }
             zip_fclose(file);
         } else {
-            LOG(WARNING) << "File " << fileinzip << " does not in archive.";
+            LOG_WARN("File %s does not in archive.", fileinzip.c_str());
         }
     }
 
@@ -154,14 +154,14 @@ bool Zip::ImplCls::AddFileRaw(const std::string &filename, const char *text, siz
         /*zip_source *s = zip_source_buffer(archive, text.c_str(), text.length(), 0);*/
         zip_source *s = zip_source_buffer(m_archive, buf, bufSize, 1);
         if ( s == nullptr ) {
-            LOG(ERROR) << "zip_source_buffer_create() failed. filename:" << filename;
+            LOG_ERROR("zip_source_buffer_create() failed. filename:%s", filename.c_str());
             return false;
         }
         int ret = zip_file_add(m_archive, filename.c_str(), s, ZIP_FL_OVERWRITE | ZIP_FL_ENC_UTF_8);
         if ( ret >= 0 ){
             return true;
         } else {
-            LOG(ERROR) << "zip_file_add() failed. filename:" << filename;
+            LOG_ERROR("zip_file_add() failed. filename:%s", filename.c_str());
             zip_source_free(s);
             return false;
         }
@@ -216,17 +216,17 @@ std::tuple<char*, size_t, bool> Zip::ReadFileRaw(const std::string &fileinzip) c
 }
 
 bool Zip::AddFile(const std::string &filename, const std::string &text) {
-    LOG(DEBUG) << "Zip::AddFile(). filename: " << filename;
+    LOG_DEBUG("Zip::AddFile(). filename:%s", filename.c_str());
     return m_impl->AddFileString(filename, text);
 }
 
 bool Zip::AddFile(const std::string &filename, const char *buf, size_t bufSize) {
-    LOG(DEBUG) << "Zip::AddFile(). filename: " << filename;
+    LOG_DEBUG("Zip::AddFile(). filename:%s", filename.c_str());
     return m_impl->AddFileRaw(filename, buf, bufSize);
 }
 
 bool Zip::AddDir(const std::string &dirName) {
-    LOG(DEBUG) << "Zip::AddDir(). dirame: " << dirName;
+    LOG_DEBUG("Zip::AddDir(). dirame:%s", dirName.c_str());
     return m_impl->AddDir(dirName);
 }
 

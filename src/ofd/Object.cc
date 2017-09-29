@@ -223,7 +223,7 @@ bool Object::FromXML(XMLElementPtr objectElement){
     if ( ok ){
         FromElementsXML(objectElement);
     } else {
-        LOG(WARNING) << "FromAttributesXML() return false;";
+        LOG_WARN("%s", "FromAttributesXML() return false;");
     }
 
     return ok;
@@ -239,7 +239,7 @@ bool Object::FromAttributesXML(utils::XMLElementPtr objectElement){
     bool exist = false;
     std::tie(ID, exist) = objectElement->GetIntAttribute("ID");
     if ( !exist ){
-        LOG(ERROR) << "Attribute ID is required in Object XML."; 
+        LOG_ERROR("%s", "Attribute ID is required in Object XML."); 
         return false;
     }
 
@@ -247,10 +247,10 @@ bool Object::FromAttributesXML(utils::XMLElementPtr objectElement){
     // Required.
     std::string strBoundary;
     std::tie(strBoundary, exist) = objectElement->GetStringAttribute("Boundary");
-    //LOG(INFO) << "Boundary: " << strBoundary;
+    //LOG_INFO("Boundary:%s", strBoundary.c_str());
 
     if ( !exist ){
-        LOG(ERROR) << "Attribute ID is required in Object XML."; 
+        LOG_ERROR("%s", "Attribute ID is required in Object XML."); 
         return false;
     }
     std::vector<std::string> tokens = utils::SplitString(strBoundary);
@@ -273,7 +273,8 @@ bool Object::FromAttributesXML(utils::XMLElementPtr objectElement){
         Boundary.YMax = top + height;
         ok = true;
     } else {
-        LOG(ERROR) << "Box String tokens size >= 4 failed. boxString:" << strBoundary << " element name: " << objectElement->GetName();
+        LOG_ERROR("Box String tokens size >= 4 failed. boxString:%s element name:%s", 
+                strBoundary.c_str(), objectElement->GetName().c_str());
         return false;
     }
 

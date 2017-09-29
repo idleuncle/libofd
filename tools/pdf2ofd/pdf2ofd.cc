@@ -28,10 +28,10 @@ std::shared_ptr<PDFDoc> OpenPDFFile(const std::string &pdfFilename, const std::s
             if (pdfDoc->okToCopy()){
                 ok = true;
             } else {
-                LOG(ERROR) << "PDF file is not okToCopy. " << pdfFilename;
+                LOG_ERROR("PDF file is not okToCopy. %s", pdfFilename.c_str());
             }
         } else {
-            LOG(ERROR) << "Cann't read pdf file: " << pdfFilename;
+            LOG_ERROR("Cann't read pdf file: %s", pdfFilename.c_str());
         }
 
         if ( !ok ){
@@ -39,7 +39,7 @@ std::shared_ptr<PDFDoc> OpenPDFFile(const std::string &pdfFilename, const std::s
             pdfDoc = nullptr;
         }
     } else {
-        LOG(WARNING) << "pdfDoc == nullptr";
+        LOG_WARN("%s", "pdfDoc == nullptr");
     }
 
     if ( ownerPW != nullptr ){
@@ -61,17 +61,17 @@ DEFINE_string(user_password, "", "The user password of PDF file.");
 
 int main(int argc, char *argv[]){
 
-    TIMED_FUNC(timerMain);
+    //TIMED_FUNC(timerMain);
 
     gflags::SetVersionString("1.0.0");
     gflags::SetUsageMessage("Usage: ./pdf2ofd <pdffile> [ofdfile]");
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-    Logger::Initialize(FLAGS_v);
+    utils::Logger::Initialize(FLAGS_v);
 
     // pdf filename
     if ( argc < 2 ){
-        LOG(WARNING) << "Usage: ./pdf2ofd <pdffile> [ofdfile]";
+        LOG_WARN("%s", "Usage: ./pdf2ofd <pdffile> [ofdfile]");
         exit(-1);
     }
     std::string pdfFilename = argv[1];
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
     if ( argc > 2 ) {
         packageName = argv[2];
     }
-    LOG(INFO) << "Try to translate pdf file " << pdfFilename << " to ofd file " << packageName;
+    LOG_INFO("Try to translate pdf file %s to ofd file %s", pdfFilename.c_str(), packageName.c_str());
 
     // owner password
     std::string ownerPassword = FLAGS_owner_password;

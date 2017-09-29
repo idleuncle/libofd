@@ -11,16 +11,16 @@ ReadWindow::~ReadWindow(){
 DocumentPtr ReadWindow::OpenOFDFile(const std::string &filename){
     m_package = std::make_shared<ofd::Package>();
     if ( !m_package->Open(filename) ){
-        LOG(ERROR) << "OFDPackage::Open() failed. filename:" << filename;
+        LOG_ERROR("OFDPackage::Open() failed. filename:%s", filename.c_str());
         return nullptr;
     }
     DocumentPtr document = m_package->GetDefaultDocument(); 
     assert(document != nullptr);
-    LOG(DEBUG) << document->to_string();
+    LOG_DEBUG("%s", document->to_string().c_str());
 
     bool bOpened = document->Open();
     if ( !bOpened ){
-        LOG(ERROR) << "Open OFD Document failed. filename: " << filename;
+        LOG_ERROR("Open OFD Document failed. filename:%s", filename.c_str());
         return nullptr;
     }
 
@@ -73,7 +73,7 @@ void ReadWindow::FirstPage(){
     m_pageIndex = 0;
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 }
 
 void ReadWindow::LastPage(){
@@ -82,7 +82,7 @@ void ReadWindow::LastPage(){
     m_pageIndex = total_pages - 1;
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 }
 
 void ReadWindow::NextPage(){
@@ -95,7 +95,7 @@ void ReadWindow::NextPage(){
     }
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 }
 
 void ReadWindow::PreviousPage(){
@@ -108,7 +108,7 @@ void ReadWindow::PreviousPage(){
     }
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
+    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 }
 
 void ReadWindow::ZoomIn(){

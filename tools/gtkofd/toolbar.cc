@@ -7,7 +7,7 @@
 static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
     ReadWindow *readWindow = (ReadWindow*)user_data;
     std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "document-open"){
         readWindow->CmdFileOpen();
     }
@@ -15,13 +15,13 @@ static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
 
 static void on_toolbar_edit_cb(GtkWidget *widget, gpointer user_data){
     std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
 }
 
 static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
     ReadWindow *readWindow = (ReadWindow*)user_data;
     std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "go-first"){
         readWindow->CmdFirstPage();
     } else if (name == "go-previous"){
@@ -38,7 +38,7 @@ static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
 static void on_toolbar_zoom_cb(GtkWidget *widget, gpointer user_data){
     ReadWindow *readWindow = (ReadWindow*)user_data;
     std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
+    LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "zoom-in"){
         readWindow->CmdZoomIn();
     } else if (name == "zoom-out"){

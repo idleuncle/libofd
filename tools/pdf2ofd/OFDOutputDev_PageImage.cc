@@ -24,7 +24,7 @@ void OFDOutputDev::writeCairoSurfaceImage(cairo_surface_t *surface, const std::s
     }
 
     if (!file) {
-        LOG(ERROR) << "Error opening output file" <<  filename;
+        LOG_ERROR("Error opening output file %s", filename.c_str());
         exit(2);
     }
 
@@ -35,7 +35,7 @@ void OFDOutputDev::writeCairoSurfaceImage(cairo_surface_t *surface, const std::s
     unsigned char *data = cairo_image_surface_get_data(surface);
 
     if (!writer->init(file, width, height, m_resolutionX, m_resolutionY)) {
-        LOG(ERROR) << "Error writing " << filename;
+        LOG_ERROR("Error writing %s", filename.c_str());
         exit(2);
     }
     unsigned char *row = (unsigned char *) gmallocn(width, 4);

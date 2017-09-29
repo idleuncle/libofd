@@ -93,14 +93,14 @@ bool ImageObject::FromAttributesXML(XMLElementPtr objectElement){
         // -------- <ImageObject ResourceID="">
         std::tie(ResourceID, exist) = objectElement->GetIntAttribute("ResourceID");
         if ( !exist ){
-            LOG(WARNING) << "ResourceID does not exist in ImageObject";
+            LOG_WARN("%s", "ResourceID does not exist in ImageObject");
             return false;
         } else {
             const ResourcePtr documentRes = GetDocumentRes();
             assert(documentRes != nullptr);
             ImagePtr image = documentRes->GetImage(ResourceID);
             if ( image == nullptr ){
-                LOG(ERROR) << "Image ID = " << ResourceID << " not found in documentRes.";
+                LOG_ERROR("Image ID = %d not found in documentRes.", ResourceID);
                 return false;
             } else {
                 m_image = image;

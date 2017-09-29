@@ -129,7 +129,7 @@ FontPtr GfxFont_to_OfdFont(GfxFont *gfxFont, XRef *xref){
         delete fontLoc;
         fontLoc = nullptr;
     } else {
-        LOG(WARNING) << "fontLoc == nullptr.";
+        LOG_WARN("%s", "fontLoc == nullptr.");
     }
 
     // -------- FontData --------
@@ -159,6 +159,8 @@ ofd::ColorPtr GfxColor_to_OfdColor(GfxRGB *gfxColor){
     uint32_t r = colToDbl(gfxColor->r) * 255.0;
     uint32_t g = colToDbl(gfxColor->g) * 255.0;
     uint32_t b = colToDbl(gfxColor->b) * 255.0;
-    LOG(DEBUG) << "GfxColor_to_OfdColor() (" << gfxColor->r << "," << gfxColor->g << "," << gfxColor->b << ")" << " to (" << r << "," << g << "," << b << ")";
+    LOG_DEBUG("GfxColor_to_OfdColor() (%d, %d, %d) to (%d, %d, %d)", 
+    gfxColor->r, gfxColor->g, gfxColor->b,
+    r, g, b);
     return Color::Instance(r, g, b);
 }

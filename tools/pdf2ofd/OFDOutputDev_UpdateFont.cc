@@ -72,22 +72,52 @@ void showGfxFont(GfxFont *gfxFont){
         fontTypeName = "(fontTrueType)";
     }
 
-    LOG(INFO) << "UpdateFont() \n"
-        << "fontID(num,gen):(" << ref->num << ", " << ref->gen << ") \n"
-        << "FontType: " << int(fontType) << fontTypeName << " \n"
-        << "FontFamily:" << fontFamily << " \n"
-        << "FontName:" << fontName << " \n"
-        << "FontEncodingName:" << fontEncodingName << " \n"
-        << "fontEmbeddedName:" << fontEmbeddedName << " \n"
-        << "embID(num,gen): (" << embID.num << ", " << embID.gen << ") \n"
-        << "FontStretch: " << fontStretch << " \n"
-        << "FontWeight: " << fontWeight << " \n"
-        << "isItalic: " << isItalic << " \n"
-        << "isBold: " << isBold << " \n"
-        << "fontMatrix: [" << fontMatrix[0] << ", " << fontMatrix[1] << ", " << fontMatrix[2] << ", "
-        << fontMatrix[3] << ", " <<  fontMatrix[4] << ", " << fontMatrix[5] << "] \n"
-        << "fontBBox: [" << fontBBox[0] << ", " << fontBBox[1] << ", " << fontBBox[2] << ", " << fontBBox[3] << "] \n"
-        ;
+    //LOG(INFO) << "UpdateFont() \n"
+        //<< "fontID(num,gen):(" << ref->num << ", " << ref->gen << ") \n"
+        //<< "FontType: " << int(fontType) << fontTypeName << " \n"
+        //<< "FontFamily:" << fontFamily << " \n"
+        //<< "FontName:" << fontName << " \n"
+        //<< "FontEncodingName:" << fontEncodingName << " \n"
+        //<< "fontEmbeddedName:" << fontEmbeddedName << " \n"
+        //<< "embID(num,gen): (" << embID.num << ", " << embID.gen << ") \n"
+        //<< "FontStretch: " << fontStretch << " \n"
+        //<< "FontWeight: " << fontWeight << " \n"
+        //<< "isItalic: " << isItalic << " \n"
+        //<< "isBold: " << isBold << " \n"
+        //<< "fontMatrix: [" << fontMatrix[0] << ", " << fontMatrix[1] << ", " << fontMatrix[2] << ", "
+        //<< fontMatrix[3] << ", " <<  fontMatrix[4] << ", " << fontMatrix[5] << "] \n"
+        //<< "fontBBox: [" << fontBBox[0] << ", " << fontBBox[1] << ", " << fontBBox[2] << ", " << fontBBox[3] << "] \n"
+        //;
+
+
+    LOG_INFO("UpdateFont() \n"
+        "fontID(num,gen):(%d, %d) \n"
+        "FontType: %d %s \n"
+        "FontFamily: %s \n"
+        "FontName: %s \n"
+        "FontEncodingName: %s \n"
+        "fontEmbeddedName: %s  \n"
+        "embID(num,gen): (%d, %d) \n"
+        "FontStretch: %d \n"
+        "FontWeight: %d \n"
+        "isItalic: %d \n"
+        "isBold:  %d \n"
+        "fontMatrix: [%.3f, %.3f, %.3f, %.3f, %.3f, %.3f] \n"
+        "fontBBox: [%.3f, %.3f, %.3f, %.3f] \n",
+        ref->num, ref->gen,
+        int(fontType), fontTypeName.c_str(),
+        fontFamily.c_str(),
+        fontName.c_str(),
+        fontEncodingName.c_str(),
+        fontEmbeddedName.c_str(),
+        embID.num, embID.gen,
+        fontStretch,
+        fontWeight,
+        isItalic,
+        isBold,
+        fontMatrix[0], fontMatrix[1], fontMatrix[2],
+        fontMatrix[3], fontMatrix[4], fontMatrix[5],
+        fontBBox[0], fontBBox[1], fontBBox[2], fontBBox[3]);
 
 }
 
@@ -118,7 +148,7 @@ std::tuple<int*, size_t> getCodeToGID(GfxFont *gfxFont, char *fontData, size_t f
                         codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
                         delete ff;
                     } else {
-                        LOG(ERROR) << "FofiTrueType make or load failed.";
+                        LOG_ERROR("%s", "FofiTrueType make or load failed.");
                     }
                 }
                 codeToGIDLen = n;
@@ -218,14 +248,14 @@ void OFDOutputDev::updateFont(GfxState *state){
             sprintf(szFontFile, "./data/embed/f%" PRIu64 ".otf", (uint64_t)gfxFont->getID()->num);
             std::string fontFile(szFontFile);
             //std::string fontFile = std::string("./data/embed/f") + std::to_string(ofdFont->ID) + ".otf";
-            LOG(DEBUG) << "fontFile: " << fontFile;
+            LOG_DEBUG("fontFile: %s", fontFile.c_str());
             utils::WriteFileData(fontFile, fontData, fontDataSize);
             }
 
         //////FIXME
         // -------- font for pdf --------
 
-            LOG(INFO) << "num_mkfonts=" << num_mkfonts;
+            LOG_INFO("num_mkfonts=%s", num_mkfonts);
             num_mkfonts++;
             //std::string dumpFontFile = dump_embedded_font(gfxFont, m_xref);
             //FontInfo fontInfo;
@@ -243,7 +273,7 @@ void OFDOutputDev::updateFont(GfxState *state){
             char szFontFile[256];
             sprintf(szFontFile, "./data/embed/f%" PRIu64 ".otf", (uint64_t)gfxFont->getID()->num);
             std::string fontFile(szFontFile);
-            LOG(ERROR) << "fontFile: " << fontFile;
+            LOG_ERROR("fontFile:%s", fontFile.c_str());
             
             //fontData = gfxFont->readEmbFontFile(m_xref, &fontDataSize);
             //utils::WriteFileData(fontFile, fontData, fontDataSize);
@@ -266,7 +296,7 @@ void OFDOutputDev::updateFont(GfxState *state){
         FontPtr ofdFont = commonData.DocumentRes->GetFont(fontID);
         // -------- font for ofd --------
         if ( ofdFont == nullptr ){
-            LOG(INFO) << "num_mkfonts=" << num_mkfonts;
+            LOG_INFO("num_mkfonts=%d", num_mkfonts);
             num_mkfonts++;
             
             ofdFont = GfxFont_to_OfdFont(gfxFont, m_xref);
@@ -301,11 +331,11 @@ void OFDOutputDev::updateFont(GfxState *state){
                     commonData.DocumentRes->AddFont(ofdFont);
                     showGfxFont(gfxFont);
                 } else {
-                    LOG(DEBUG) << "Read dump font file " << dumpedFontFile << " failed.";
+                    LOG_DEBUG("Read dump font file %s failed.", dumpedFontFile.c_str());
                 }
 
             } else {
-                LOG(WARNING) << "Font (id=" << fontID << ") embeddedFontFile is empty.";
+                LOG_WARN("Font (id=%d) embeddedFontFile is empty.", fontID);
             }
             //m_currentFont = ofdFont;
         }
@@ -327,8 +357,8 @@ void OFDOutputDev::updateFont(GfxState *state){
         //m_currentCTM = m;
 
         //LOG(INFO) << "UpdateFont() ID: " << fontID << " FontName: " << ofdFont->FontName << " fontSize: " << fontSize << " sizeof(m): " << sizeof(m);
-        LOG(INFO) << "TextMat: [" << m[0] << ", " << m[1] << ", " << m[2] << ", "
-            << m[3] << ", " << m[4] << ", " << m[5] << "]";
+        LOG_INFO("TextMat: [%.3f, %.3f, %.3f, %.3f, %.3f, %.3f]",
+                m[0], m[1], m[2], m[3], m[4], m[5]);
 
         /* NOTE: adjusting by a constant is hack. The correct solution
          * is probably to use user-fonts and compute the scale on a per
@@ -344,7 +374,8 @@ void OFDOutputDev::updateFont(GfxState *state){
         matrix.x0 = 0.0;
         matrix.y0 = 0.0;
 
-        LOG(DEBUG) << "font matrix: " << matrix.xx << ", " << matrix.yx << ", " << matrix.xy << ", " << matrix.yy;
+        LOG_DEBUG("font matrix: [%.3f, %.3f, %.3f, %.3f]",
+               matrix.xx, matrix.yx, matrix.xy,matrix.yy);
 
         /* Make sure the font matrix is invertible before setting it.  cairo
          * will blow up if we give it a matrix that's not invertible, so we
@@ -354,7 +385,7 @@ void OFDOutputDev::updateFont(GfxState *state){
          */
         invert_matrix = matrix;
         if (cairo_matrix_invert(&invert_matrix)) {
-            LOG(ERROR) << "font matrix not invertible";
+            LOG_ERROR("%s", "font matrix not invertible");
             m_textMatrixValid = false;
             return;
         }

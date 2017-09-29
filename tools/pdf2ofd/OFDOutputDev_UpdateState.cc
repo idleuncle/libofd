@@ -1,4 +1,4 @@
-
+#include <fstream>
 #include "OFDOutputDev.h"
 #include "utils/logger.h"
 
@@ -31,8 +31,9 @@ void OFDOutputDev::setDefaultCTM(double *ctm) {
     matrix.x0 = ctm[4];
     matrix.y0 = ctm[5];
 
-    LOG(INFO) << "[imageSurface] setDefaultCTM (" << ctm[0] << ", " << ctm[1] << ", " << ctm[2]
-        << ", " << ctm[3] << ", " << ctm[4] << ", " << ctm[5] << ")";
+    LOG_INFO("[imageSurface] setDefaultCTM (%.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+           ctm[0], ctm[1], ctm[2],
+           ctm[3], ctm[4], ctm[5]);
 
     std::stringstream ssCairoLog;
 
@@ -63,8 +64,8 @@ void OFDOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21
     matrix.x0 = m31;
     matrix.y0 = m32;
 
-    LOG(INFO) << "[imageSurface] updateCTM (" << m11 << ", " << m12 << ", " << m21 
-        << ", " << m22 << ", " << m31 << ", " << m32 << ")";
+    LOG_INFO("[imageSurface] updateCTM (%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)",
+            m11, m12, m21, m22, m31, m32);
 
     std::stringstream ssCairoLog;
     ssCairoLog << "[imageSurface] updateCTM (" << m11 << ", " << m12 << ", " << m21 
@@ -83,7 +84,7 @@ void OFDOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21
      * instead of having to invert the matrix. */
     invert_matrix = matrix;
     if (cairo_matrix_invert(&invert_matrix)) {
-        LOG(ERROR) << "matrix not invertible\n";
+        LOG_ERROR("%s", "matrix not invertible");
         return;
     }
 
@@ -173,7 +174,7 @@ void OFDOutputDev::updateMiterLimit(GfxState *state){
 
 
 void OFDOutputDev::updateLineWidth(GfxState *state){
-    LOG(INFO) <<  "[imageSurface] updateLineWidth() line width: " << state->getLineWidth();
+    LOG_INFO( "[imageSurface] updateLineWidth() line width: %d", state->getLineWidth());
     m_adjustedStrokeWidth = false;
     double width = state->getLineWidth();
     if ( m_strokeAdjust && !m_printing ) {
@@ -242,7 +243,8 @@ void OFDOutputDev::updateFillColor(GfxState *state){
             m_cairoRender->UpdateFillPattern(colToDbl(fillColor.r), colToDbl(fillColor.g),
                 colToDbl(fillColor.b), m_fillOpacity);
         }
-        LOG(INFO) <<  "[imageSurface] fill color: " << fillColor.r << ", " <<  fillColor.g << ", " << fillColor.b;
+        LOG_INFO( "[imageSurface] fill color: %d, %d, %d",
+                fillColor.r, fillColor.g, fillColor.b);
 
 
         std::stringstream ssCairoLog;
@@ -275,7 +277,8 @@ void OFDOutputDev::updateStrokeColor(GfxState *state){
                 colToDbl(m_strokeColor.b), m_strokeOpacity);
         }
 
-        LOG(INFO) <<  "[imageSurface] stroke color: " << m_strokeColor.r << ", " << m_strokeColor.g << ", " <<  m_strokeColor.b;
+        LOG_INFO("[imageSurface] stroke color: %d, %d, %d",
+                m_strokeColor.r, m_strokeColor.g, m_strokeColor.b);
 
         std::stringstream ssCairoLog;
         ssCairoLog << "- updateStrokeColor - " << " strokeColor:(" << m_strokeColor.r << "," <<  m_strokeColor.g << "," << m_strokeColor.b << ") ";
@@ -302,7 +305,7 @@ void OFDOutputDev::updateFillOpacity(GfxState *state){
             m_cairoRender->UpdateFillPattern(colToDbl(m_fillColor.r), colToDbl(m_fillColor.g),
                 colToDbl(m_fillColor.b), m_fillOpacity);
         }
-        LOG(INFO) << "[imageSurface] updateFillOpacity() fill opacity: " << m_fillOpacity;
+        LOG_INFO("[imageSurface] updateFillOpacity() fill opacity: %.3f", m_fillOpacity);
 
         std::stringstream ssCairoLog;
         ssCairoLog << "- updateFillOpacity - " << " Opacity:" << m_fillOpacity << "(old value:" << opacity << ")"; 
@@ -330,7 +333,7 @@ void OFDOutputDev::updateStrokeOpacity(GfxState *state){
                 colToDbl(m_strokeColor.b), m_strokeOpacity);
         }
 
-        LOG(INFO) <<  "[imageSurface] updateStrokeOpacity() stroke opacity: " << m_strokeOpacity;
+        LOG_INFO("[imageSurface] updateStrokeOpacity() stroke opacity: %.3f", m_strokeOpacity);
 
         std::stringstream ssCairoLog;
         ssCairoLog << "- updateStrokeOpacity - " << " Opacity:" << m_strokeOpacity << "(old value:" << opacity << ")"; 

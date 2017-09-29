@@ -58,17 +58,16 @@ void OFDOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     }
 
     if ( m_document != nullptr ){
-        LOG(INFO) << "******** startPage(" << pageNum << ") ********";
+        LOG_INFO("******** startPage(%d) ********", pageNum);
         m_currentOFDPage = m_document->AddNewPage();
         m_currentOFDPage->AddNewLayer(ofd::LayerType::BODY);
 
         ::Page *pdfPage = m_pdfDoc->getPage(pageNum);
         PDFRectangle *mediaBox = pdfPage->getMediaBox();
-        LOG(INFO) << "mdeiaBox:(" << mediaBox->x1 << ", " << mediaBox->y1
-            << ", " << mediaBox->x2 << ", " << mediaBox->y2 << ")";
+        LOG_INFO("mdeiaBox:(%.3f, %.3f, %.3f, %.3f)", mediaBox->x1, mediaBox->y1, mediaBox->x2, mediaBox->y2);
         PDFRectangle *cropBox = pdfPage->getCropBox();
-        LOG(INFO) << "cropBox:(" << cropBox->x1 << ", " << cropBox->y1
-            << ", " << cropBox->x2 << ", " << cropBox->y2 << ")";
+        LOG_INFO("cropBox:(%.3f, %.3f, %.3f, %.3f)", 
+                cropBox->x1, cropBox->y1, cropBox->x2, cropBox->y2);
         //pdfPage->isCroped();
 
         double pageMediaWidth = pdfPage->getMediaWidth();
@@ -77,21 +76,21 @@ void OFDOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
         double pageCropHeight = pdfPage->getCropHeight();
         int pageRotate = pdfPage->getRotate();
 
-        LOG(INFO) << "Page " << pageNum;
-        LOG(INFO) << " Media(" << pageMediaWidth << ", " << pageMediaHeight << ") ";
-        LOG(INFO) << "Crop(" << pageCropWidth << ", " << pageCropHeight << ") ";
-        LOG(INFO) << "Rotate: " << pageRotate;
+        LOG_INFO("Page %d", pageNum);
+        LOG_INFO(" Media(%.3f, %.3f)", pageMediaWidth, pageMediaHeight);
+        LOG_INFO("Crop(%.3f, %.3f)", pageCropWidth, pageCropHeight);
+        LOG_INFO("Rotate: %d", pageRotate);
 
 
         double pageCTM[6];
         pdfPage->getDefaultCTM(&pageCTM[0], 72, 72, 0, false, false);
-        LOG(INFO) << "Default CTM(" << 
-            pageCTM[0] << ", " <<
-            pageCTM[1] << ", " <<
-            pageCTM[2] << ", " <<
-            pageCTM[3] << ", " <<
-            pageCTM[4] << ", " <<
-            pageCTM[5] << ") ";
+        LOG_INFO("Default CTM(%.3f, %.3f, %.3f, %.3f, %.3f, %.3f)", 
+            pageCTM[0], 
+            pageCTM[1],
+            pageCTM[2],
+            pageCTM[3],
+            pageCTM[4],
+            pageCTM[5]);
 
 
         CT_PageArea pageArea;
@@ -100,7 +99,7 @@ void OFDOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
         pageArea.EnableApplicationBox(true);
         m_currentOFDPage->Area = pageArea;
 
-        LOG(INFO) << "\n";
+        LOG_INFO("%s", "\n");
 
 
     }
@@ -344,7 +343,7 @@ void OFDOutputDev::processTextPage(TextPage *textPage, PagePtr currentOFDPage){
     }
 
     uint64_t pageID = currentOFDPage->ID;
-    LOG(DEBUG) << "processTextPage(). page ID: " << pageID;
+    LOG_DEBUG("processTextPage(). page ID:%d", pageID);
 
 
     // OFDCairoRender
@@ -392,7 +391,7 @@ void OFDOutputDev::saveState(GfxState *state){
     //}
 
     m_numSaveState++;
-    LOG(INFO) << "[imageSurface] SaveState";
+    LOG_INFO("%s", "[imageSurface] SaveState");
     
     cairo_save(m_cairo);
     if ( m_cairoShape != nullptr ){
@@ -421,7 +420,7 @@ void OFDOutputDev::restoreState(GfxState *state){
     //}
     m_numSaveState--;
     assert(m_numSaveState >= 0);
-    LOG(INFO) << "[imageSurface] RestoreState";
+    LOG_INFO("%s", "[imageSurface] RestoreState");
 
     cairo_restore(m_cairo);
     if ( m_cairoShape != nullptr ){

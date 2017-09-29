@@ -99,7 +99,7 @@ void OFDOutputDev::SetCairo(cairo_t *cairo) {
     if ( m_cairo != nullptr) {
         cairo_status_t status = cairo_status(m_cairo);
         if (status) {
-            LOG(ERROR) << "cairo context error: {0:s}\n" << cairo_status_to_string(status);
+            LOG_ERROR("cairo context error: %s", cairo_status_to_string(status));
         }
         cairo_destroy (m_cairo);
         assert(!m_cairoShape);

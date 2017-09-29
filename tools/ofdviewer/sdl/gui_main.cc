@@ -35,7 +35,7 @@ SDL_Surface *create_image_surface(int width, int height, int bpp){
     SDL_Surface *imageSurface = SDL_CreateRGBSurface(0, width, height, bpp, 
             rmask, gmask, bmask, amask);
     if ( imageSurface == nullptr ){
-        LOG(ERROR) << "SDL_CreateRGBSurface() failed. " << SDL_GetError();
+        LOG_ERROR("SDL_CreateRGBSurface() failed. %s", SDL_GetError());
     }
 
     return imageSurface;
@@ -124,24 +124,24 @@ bool SDLApp::init(){
     int screenFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE; // SDL_WINDOW_BORDERLESS
     m_mainWindow = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_screenWidth, m_screenHeight, screenFlags);
     if ( m_mainWindow == nullptr ){
-        LOG(ERROR) << "SDL_CreateWindow() failed. " << SDL_GetError();
+        LOG_ERROR("SDL_CreateWindow() failed. %s", SDL_GetError());
         return false;
     }
 
     m_screenRenderer = SDL_CreateRenderer(m_mainWindow, -1, SDL_RENDERER_ACCELERATED);// | SDL_RENDERER_PRESENTVSYNC);
     if ( m_screenRenderer == nullptr ){
-        LOG(ERROR) << "SDL_CreateRenderer() failed. " << SDL_GetError();
+        LOG_ERROR("SDL_CreateRenderer() failed. %s", SDL_GetError());
         return false;
     }
 
     if ( !(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) ){
-        LOG(ERROR) << "IMG_Init() failed. " << SDL_GetError();
+        LOG_ERROR("IMG_Init() failed. %s", SDL_GetError());
         return false;
     }
 
     m_imageSurface = create_image_surface(m_screenWidth, m_screenHeight, m_screenBPP);
     if ( m_imageSurface == nullptr ){
-        LOG(ERROR) << "create_image_surface() failed. " << SDL_GetError();
+        LOG_ERROR("create_image_surface() failed. %s", SDL_GetError());
         return false;
     }
 
@@ -324,7 +324,7 @@ void SDLApp::Loop(){
 
     cairo_surface_t *cairoSurface = create_cairo_surface_from_sdl_surface(m_imageSurface);
     if ( cairoSurface == nullptr ){
-        LOG(ERROR) << "create_cairo_surface_from_sdl_surface() failed.";
+        LOG_ERROR("%s", "create_cairo_surface_from_sdl_surface() failed.");
         return;
     }
 
@@ -376,7 +376,7 @@ void MySDLApp::OnEvent(SDL_Event event, bool &done){
                         m_pageIndex--;
                     }
                 }
-                LOG(DEBUG) << "Page " << m_pageIndex << "/" << totalPages;
+                LOG_DEBUG("Page %d/%d", m_pageIndex, totalPages);
             }
             break;
         } else if (event.key.keysym.sym == SDLK_DOWN) {
@@ -389,7 +389,7 @@ void MySDLApp::OnEvent(SDL_Event event, bool &done){
                         m_pageIndex = 0;
                     }
                 }
-                LOG(DEBUG) << "Page " << m_pageIndex + 1 << "/" << totalPages;
+                LOG_DEBUG("Page %d/%d", m_pageIndex + 1, totalPages);
             }
             break;
         } else if (event.key.keysym.sym == SDLK_RETURN) {
@@ -456,7 +456,7 @@ void MySDLApp::OnRender(cairo_surface_t *surface){
                 m_cairoRender->Paint(surface);
                 m_cairoRender->RestoreState();
             } else {
-                LOG(ERROR) << "page->Open() failed. pageIndex=" << m_pageIndex;
+                LOG_ERROR("page->Open() failed. pageIndex=%d", m_pageIndex);
             }
         }
     }
@@ -470,11 +470,11 @@ SDL_Texture *loadTexture(SDL_Renderer *renderer, const std::string &image_file){
     if ( loadedSurface != nullptr ){
         texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
         if ( texture == nullptr ){
-            LOG(WARNING) << "SDL_CreateTextureFromSurface() failed. " << SDL_GetError();
+            LOG_WARN("SDL_CreateTextureFromSurface() failed. %s", SDL_GetError());
         }
         SDL_FreeSurface(loadedSurface);
     } else {
-        LOG(WARNING) << "IMG_Load(\"" << image_file << "\") failed " << SDL_GetError();
+        LOG_WARN("IMG_Load(\"%s\") failed. %s", image_file.c_str(), SDL_GetError());
     }
 
     return texture;
@@ -486,35 +486,35 @@ DEFINE_string(owner_password, "", "The owner password of PDF file.");
 DEFINE_string(user_password, "", "The user password of PDF file.");
 int sdl_main(int argc, char *argv[]){
 
-    TIMED_FUNC(timerMain);
+    //TIMED_FUNC(timerMain);
 
     gflags::SetVersionString("1.0.0");
     gflags::SetUsageMessage("Usage: ofdviewer <pdffile>");
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    Logger::Initialize(FLAGS_v);
+    utils::Logger::Initialize(FLAGS_v);
 
-    LOG(INFO) << "Start " << argv[0];
+    LOG_INFO("Start %s", argv[0]);
 
     std::string filename = argv[1];
 
     utils::GlobalParameters::colorOrder = utils::ColorOrder::BGR;
     ofd::PackagePtr package = std::make_shared<ofd::Package>();
     if ( !package->Open(filename) ){
-        LOG(ERROR) << "OFDPackage::Open() failed. filename:" << filename;
+        LOG_ERROR("OFDPackage::Open() failed. filename:%s", filename.c_str());
         return -1;
     }
     DocumentPtr document = package->GetDefaultDocument(); 
     assert(document != nullptr);
-    LOG(DEBUG) << document->to_string();
+    LOG_DEBUG("%s", document->to_string().c_str());
 
     bool bOpened = document->Open();
     if ( !bOpened ){
-        LOG(ERROR) << "Open OFD Document failed. filename: " << filename;
+        LOG_ERROR("Open OFD Document failed. filename:%s", filename.c_str());
         exit(-1);
     }
 
     size_t total_pages = document->GetNumPages();
-    LOG(INFO) << total_pages << " pages in " << filename;
+    LOG_INFO("%d pages in %s", total_pages, filename.c_str());
     if ( total_pages > 0 ){
         int screenWidth = 794;
         int screenHeight = 1122;
@@ -529,7 +529,7 @@ int sdl_main(int argc, char *argv[]){
 
 
 
-    LOG(INFO) << "Done.";
+    LOG_INFO("%s", "Done.");
 
     return 0;
 }

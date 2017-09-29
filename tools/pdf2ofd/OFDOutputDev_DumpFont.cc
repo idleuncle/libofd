@@ -237,7 +237,7 @@ std::string OFDOutputDev::dump_embedded_font(GfxFont * font, XRef * xref) {
 
         std::string tmpDir = "/tmp";
         filepath = tmpDir + "/f" + std::to_string(fn_id) + suffix;
-        LOG(DEBUG) << "...... tmp font name: " << filepath << " fontid: " << fn_id;
+        LOG_DEBUG("...... tmp font name:%s fontid:%d", filepath.c_str(), fn_id);
         //tmp_files.add(filepath);
 
         ofstream outf(filepath.c_str(), ofstream::binary);
@@ -299,7 +299,7 @@ std::string get_suffix(const std::string & path) {
 
 void OFDOutputDev::embed_font(const string & filepath, GfxFont * font, FontInfo & info, bool get_metric_only) {
 
-    LOG(DEBUG) << "embed_font() filepath: " << filepath;
+    LOG_DEBUG("embed_font() filepath:%s", filepath.c_str());
     assert(!filepath.empty());
 
     // Params
@@ -542,7 +542,7 @@ void OFDOutputDev::embed_font(const string & filepath, GfxFont * font, FontInfo 
                 if( tounicode == 0 ) {
                     // in auto mode, just drop the tounicode map
                     if(!retried) {
-                        LOG(ERROR) << "ToUnicode CMap is not valid and got dropped for font: " << hex << info.id << dec << endl;
+                        LOG_ERROR("ToUnicode CMap is not valid and got dropped for font: 0x%x", info.id);
                         retried = true;
                         codeset.clear();
                         info.use_tounicode = false;
@@ -560,7 +560,7 @@ void OFDOutputDev::embed_font(const string & filepath, GfxFont * font, FontInfo 
                 if(!name_conflict_warned) {
                     name_conflict_warned = true;
                     //TODO: may be resolved using advanced font properties?
-                    LOG(ERROR) << "Warning: encoding confliction detected in font: " << hex << info.id << dec << endl;
+                    LOG_ERROR("Warning: encoding confliction detected in font: 0x%x", info.id);
                 }
             }
 
@@ -749,7 +749,7 @@ void OFDOutputDev::install_external_font(GfxFont *font, FontInfo & info) {
     auto iter = GB_ENCODED_FONT_NAME_MAP.find(fontname); 
     if(iter != GB_ENCODED_FONT_NAME_MAP.end()) {
         fontname = iter->second;
-        LOG(ERROR) << "Warning: workaround for font names in bad encodings.";
+        LOG_ERROR("%s", "Warning: workaround for font names in bad encodings.");
     }
 
     GfxFontLoc * localfontloc = font->locateFont(m_xref, nullptr);
@@ -760,7 +760,7 @@ void OFDOutputDev::install_external_font(GfxFont *font, FontInfo & info) {
             delete localfontloc;
             return;
         } else {
-            LOG(ERROR) << "Cannot embed external font: f" << hex << info.id << dec << ' ' << fontname;
+            LOG_ERROR("Cannot embed external font: 0x%x %s", info.id, fontname.c_str());
             // fallback to exporting by name
         }
     }

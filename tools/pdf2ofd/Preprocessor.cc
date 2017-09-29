@@ -55,7 +55,7 @@ void Preprocessor::ProcessDoc(PDFDocPtr doc) {
                 nullptr, nullptr, nullptr, nullptr);
     }
     if( numPages >= 0 )
-        LOG(INFO) << "Preprocessing: " << numPages << "/" << numPages;
+        LOG_INFO("Preprocessing: %d/%d", numPages, numPages);
 }
 
 void Preprocessor::drawChar(GfxState *state, double x, double y,

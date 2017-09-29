@@ -134,7 +134,7 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     switch (event->keyval){
     case GDK_KEY_o:
         if (event->state & GDK_CONTROL_MASK){
-            LOG(DEBUG) << "Key Ctrl+o released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+o released. keyval: 0x%x", event->keyval);
             m_readWindow->CmdFileOpen();
         }
         break;
@@ -142,40 +142,40 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         if (event->state & GDK_CONTROL_MASK){
             // 放大 Ctrl + +
             m_readWindow->CmdZoomIn();
-            LOG(DEBUG) << "Key Ctrl++ released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl++ released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_minus:
         if (event->state & GDK_CONTROL_MASK){
             // 缩小 Ctrl + -
             m_readWindow->CmdZoomIn();
-            LOG(DEBUG) << "Key Ctrl+- released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+- released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_1:
         if (event->state & GDK_CONTROL_MASK){
             // 原始大小 Ctrl + 1
             m_readWindow->CmdZoomOriginal();
-            LOG(DEBUG) << "Key Ctrl+1 released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+1 released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_2:
         if (event->state & GDK_CONTROL_MASK){
             // 适合页面 Ctrl + 2
             m_readWindow->CmdZoomFitBest();
-            LOG(DEBUG) << "Key Ctrl+2 released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+2 released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_3:
         if (event->state & GDK_CONTROL_MASK){
             // 适合宽度 Ctrl + 3
-            LOG(DEBUG) << "Key Ctrl+3 released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+3 released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_4:
         if (event->state & GDK_CONTROL_MASK){
             // 适合高度 Ctrl + 4 
-            LOG(DEBUG) << "Key Ctrl+4 released. keyval:" << event->keyval;
+            LOG_DEBUG("Key Ctrl+4 released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_Home:
@@ -185,34 +185,34 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         m_readWindow->CmdLastPage();
         break;
     case GDK_KEY_Page_Down:
-        LOG(DEBUG) << "Page Down KEY RELEASED!";
+        LOG_DEBUG("%s", "Page Down KEY RELEASED!");
         m_readWindow->CmdNextPage();
         break;
     case GDK_KEY_Page_Up:
-        LOG(DEBUG) << "Page Up KEY RELEASED!";
+        LOG_DEBUG("%s", "Page Up KEY RELEASED!");
         m_readWindow->CmdPreviousPage();
         break;
     case GDK_KEY_Down:
-        LOG(DEBUG) << "Down KEY RELEASED!";
+        LOG_DEBUG("%s", "Down KEY RELEASED!");
         m_readWindow->CmdMoveDown();
         break;
     case GDK_KEY_Up:
-        LOG(DEBUG) << "Up KEY RELEASED!";
+        LOG_DEBUG("%s", "Up KEY RELEASED!");
         m_readWindow->CmdMoveUp();
         break;
     case GDK_KEY_Left:
-        LOG(DEBUG) << "Left KEY RELEASED!";
+        LOG_DEBUG("%s", "Left KEY RELEASED!");
         m_readWindow->CmdMoveLeft();
         break;
     case GDK_KEY_Right:
-        LOG(DEBUG) << "Right KEY RELEASED!";
+        LOG_DEBUG("%s", "Right KEY RELEASED!");
         m_readWindow->CmdMoveRight();
         break;
     case GDK_KEY_space:
-        LOG(DEBUG) << "SPACE KEY RELEASED!";
+        LOG_DEBUG("%s", "SPACE KEY RELEASED!");
         break;
     default:
-        //LOG(DEBUG) << "Key released. keyval:" << event->keyval;
+        //LOG_DEBUG)("Key released. keyval: 0x%x", event->keyval);
         return false;
     }; // switch
 
@@ -235,10 +235,10 @@ struct GdkEventButton {
  */
 static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
     if (event->button == GDK_BUTTON_PRIMARY){
-        //LOG(DEBUG) << "LEFT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
+        //LOG_DEBUG("LEFT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
         //next_page();
     } else if (event->button == GDK_BUTTON_SECONDARY){
-        LOG(DEBUG) << "RIGHT BUTTON PRESSED! x:" << event->x << " y:" << event->y;
+        LOG_DEBUG("RIGHT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
         //prev_page();
     }
 
@@ -335,12 +335,12 @@ struct GdkEventCrossing {
 };
  */
 __attribute__((unused)) static gboolean enter_notify_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
-    LOG(DEBUG) << "ENTER NOTIFY x:" << event->x << " y:" << event->y;
+    LOG_DEBUG("ENTER NOTIFY x:%d y:%d", event->x, event->y);
     return false;
 }
 
 __attribute__((unused)) static gboolean leave_notify_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
-    LOG(DEBUG) << "LEAVE NOTIFY x:" << event->x << " y:" << event->y;
+    LOG_DEBUG("LEAVE NOTIFY x:%d y:%d", event->x, event->y);
     return false;
 }
 
@@ -355,7 +355,7 @@ typedef enum {
 } GtkDirectionType;
  */
 __attribute__((unused)) static gboolean focus_cb(GtkWidget *widget, GtkDirectionType direction, gpointer user_data){
-    LOG(DEBUG) << "FOCUS direction:" << direction;
+    LOG_DEBUG("FOCUS direction:%d", direction);
     return false;
 }
 
@@ -368,12 +368,12 @@ struct GdkEventFocus {
 };
  */
 __attribute__((unused)) static gboolean focus_in_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
-    LOG(DEBUG) << "Keyboard FOCUS in EVENT. Gained keyboard focus:" << event->in;
+    LOG_DEBUG("Keyboard FOCUS in EVENT. Gained keyboard focus:%d", event->in);
     return false;
 }
 
 __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
-    LOG(DEBUG) << "Keyboard FOCUS out EVENT. Gained keyboard focus:" << event->in;
+    LOG_DEBUG("Keyboard FOCUS out EVENT. Gained keyboard focus:%d", event->in);
     return false;
 }
 
@@ -637,7 +637,7 @@ static void startup(GApplication *app){
 
     GResource *resource = gtkofd_get_resource();
     if (resource == nullptr){
-        LOG(ERROR) << "gtkofd_get_resource() return nullptr." << std::endl;
+        LOG_ERROR("%s", "gtkofd_get_resource() return nullptr.");
     }
     g_resources_register(resource);
     m_readWindow->resource = resource;
@@ -660,7 +660,7 @@ static void startup(GApplication *app){
     ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
     if (document != nullptr){
         size_t total_pages = document->GetNumPages();
-        LOG(INFO) << total_pages << " pages in " << filename;
+        LOG_INFO("%d pages in %s", total_pages, filename.c_str());
         //if ( total_pages > 0 ){
             //int screenWidth = 794;
             //int screenHeight = 1122;
@@ -717,7 +717,7 @@ static void change_theme_state(GSimpleAction *action, GVariant *state, gpointer 
 
 int main(int argc, char *argv[]){
 
-    Logger::Initialize(1);
+    utils::Logger::Initialize(1);
 
     m_readWindow = std::make_shared<ReadWindow>();
 
