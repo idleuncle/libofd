@@ -620,7 +620,7 @@ void ImOFDApp::renderCairo(){
 
     cairo_surface_t *cairoSurface = create_cairo_surface_from_sdl_surface(m_imageSurface);
     if ( cairoSurface == nullptr ){
-        LOG_ERROR("%s", "create_cairo_surface_from_sdl_surface() failed.");
+        LOG_ERROR("create_cairo_surface_from_sdl_surface() failed.");
         return;
     }
 

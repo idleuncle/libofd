@@ -91,7 +91,7 @@ void OFDOutputDev::endString(GfxState *state){
 
     // fill
     if (!(render & 1)) {
-        LOG_INFO("%s", "[imageSurface] DrawTextObject fill string");
+        LOG_INFO("[imageSurface] DrawTextObject fill string");
         //LOG (printf ("fill string\n"));
         cairo_set_source (m_cairo, m_fillPattern);
         if (m_useShowTextGlyphs)
@@ -104,7 +104,7 @@ void OFDOutputDev::endString(GfxState *state){
 
     // stroke
     if ((render & 3) == 1 || (render & 3) == 2) {
-        LOG_INFO("%s", "[imageSurface] DrawTextObject stroke string");
+        LOG_INFO("[imageSurface] DrawTextObject stroke string");
         cairo_set_source (m_cairo, m_strokePattern);
         cairo_glyph_path (m_cairo, m_cairoGlyphs, m_glyphsCount);
         cairo_stroke (m_cairo);
@@ -116,7 +116,7 @@ void OFDOutputDev::endString(GfxState *state){
 
     // clip
     if ((render & 4)) {
-        LOG_INFO("%s", "[imageSurface] DrawTextObject clip string");
+        LOG_INFO("[imageSurface] DrawTextObject clip string");
         // append the glyph path to m_textClipPath.
 
         // set textClipPath as the currentPath
@@ -382,7 +382,7 @@ void OFDOutputDev::drawString(GfxState *state, GooString * s){
 
         // TODO
         if( !(utils::equal(ox, 0) && utils::equal(oy, 0)) ){
-            LOG_WARN("%s", "TODO: origin of char is not (0,0)");
+            LOG_WARN("TODO: origin of char is not (0,0)");
         }
         ddx = ax * m_currentFontSize + charSpace;
         ddy = ay * m_currentFontSize;

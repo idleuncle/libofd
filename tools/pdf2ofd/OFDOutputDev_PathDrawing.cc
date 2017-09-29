@@ -127,7 +127,7 @@ void OFDOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path){
                 }
             }
             if (subpath->isClosed()) {
-                LOG_DEBUG("%s", "doPath() close_path()");
+                LOG_DEBUG("doPath() close_path()");
                 cairo_close_path(cairo);
             }
         }
@@ -143,7 +143,7 @@ void OFDOutputDev::stroke(GfxState *state) {
 	  //return;
   //}
 
-    LOG_INFO("%s", "[imageSurface] DrawPathObject Stroke Path");
+    LOG_INFO("[imageSurface] DrawPathObject Stroke Path");
 
     // Add PathObject
     PathPtr ofdPath = GfxPath_to_OfdPath(state);
@@ -334,7 +334,7 @@ PathObjectPtr OFDOutputDev::createPathObject(GfxState *state){
         pathObject->CTM[5] = objMatrix.y0;
 
     } else {
-        LOG_WARN("%s", "createPathObject() return nullptr.");
+        LOG_WARN("createPathObject() return nullptr.");
     }
 
     m_clipPath = nullptr;
@@ -406,7 +406,7 @@ void OFDOutputDev::fill(GfxState *state) {
         //}
     //}
     if ( pathObject->ID == 71 ){
-        LOG_DEBUG("%s", "Draw path object ID = 71.");
+        LOG_DEBUG("Draw path object ID = 71.");
     }
 
     // TODO 调试绘制某个特定的PathObject。
@@ -416,10 +416,10 @@ void OFDOutputDev::fill(GfxState *state) {
     }
     //LOG(ERROR) << pathObject->to_string();
 
-    LOG_DEBUG("%s", "Before doPath() in OFDOutputDev::fill() -----------------");
+    LOG_DEBUG("Before doPath() in OFDOutputDev::fill() -----------------");
     doPath(m_cairo, state, state->getPath());
     //directDoPath(m_cairo);
-    LOG_DEBUG("%s", "After doPath() in OFDOutputDev::fill() -----------------");
+    LOG_DEBUG("After doPath() in OFDOutputDev::fill() -----------------");
     cairo_set_fill_rule(m_cairo, CAIRO_FILL_RULE_WINDING);
     cairo_set_source(m_cairo, m_fillPattern);
     //XXX: how do we get the path

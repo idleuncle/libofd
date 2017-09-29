@@ -148,7 +148,7 @@ std::tuple<int*, size_t> getCodeToGID(GfxFont *gfxFont, char *fontData, size_t f
                         codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
                         delete ff;
                     } else {
-                        LOG_ERROR("%s", "FofiTrueType make or load failed.");
+                        LOG_ERROR("FofiTrueType make or load failed.");
                     }
                 }
                 codeToGIDLen = n;
@@ -385,7 +385,7 @@ void OFDOutputDev::updateFont(GfxState *state){
          */
         invert_matrix = matrix;
         if (cairo_matrix_invert(&invert_matrix)) {
-            LOG_ERROR("%s", "font matrix not invertible");
+            LOG_ERROR("font matrix not invertible");
             m_textMatrixValid = false;
             return;
         }

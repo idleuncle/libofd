@@ -326,7 +326,7 @@ void SDLApp::Loop(){
 
     cairo_surface_t *cairoSurface = create_cairo_surface_from_sdl_surface(m_imageSurface);
     if ( cairoSurface == nullptr ){
-        LOG_ERROR("%s", "create_cairo_surface_from_sdl_surface() failed.");
+        LOG_ERROR("create_cairo_surface_from_sdl_surface() failed.");
         return;
     }
 
@@ -504,7 +504,7 @@ int sdl_main(int argc, char *argv[]){
     }
     DocumentPtr document = package->GetDefaultDocument(); 
     assert(document != nullptr);
-    LOG_DEBUG("%s", document->to_string().c_str());
+    LOG_DEBUG(document->to_string().c_str());
 
     bool bOpened = document->Open();
     if ( !bOpened ){
@@ -528,7 +528,7 @@ int sdl_main(int argc, char *argv[]){
 
 
 
-    LOG_INFO("%s", "Done.");
+    LOG_INFO("Done.");
 
     return 0;
 }

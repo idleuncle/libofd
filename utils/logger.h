@@ -34,12 +34,12 @@ public:
 
 extern Logger g_logger;
 
-#define LOG_DEBUG(format, ...) utils::g_logger.debug(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
-#define LOG_INFO(format, ...) utils::g_logger.info(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
-#define LOG_NOTICE(format, ...) utils::g_logger.notice(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
-#define LOG_WARN(format, ...) utils::g_logger.warn(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
-#define LOG_ERROR(format, ...) utils::g_logger.error(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
-#define LOG_FATAL(format, ...) utils::g_logger.fatal(__FILE__, __func__, __LINE__, format, __VA_ARGS__)
+#define LOG_DEBUG(format, ...) utils::g_logger.debug(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_INFO(format, ...) utils::g_logger.info(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_NOTICE(format, ...) utils::g_logger.notice(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_WARN(format, ...) utils::g_logger.warn(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) utils::g_logger.error(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_FATAL(format, ...) utils::g_logger.fatal(__FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 
 }; // namespace utils
 

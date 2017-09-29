@@ -39,7 +39,7 @@ std::shared_ptr<PDFDoc> OpenPDFFile(const std::string &pdfFilename, const std::s
             pdfDoc = nullptr;
         }
     } else {
-        LOG_WARN("%s", "pdfDoc == nullptr");
+        LOG_WARN("pdfDoc == nullptr");
     }
 
     if ( ownerPW != nullptr ){
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
 
     // pdf filename
     if ( argc < 2 ){
-        LOG_WARN("%s", "Usage: ./pdf2ofd <pdffile> [ofdfile]");
+        LOG_WARN("Usage: ./pdf2ofd <pdffile> [ofdfile]");
         exit(-1);
     }
     std::string pdfFilename = argv[1];

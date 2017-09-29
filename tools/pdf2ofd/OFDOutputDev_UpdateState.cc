@@ -84,7 +84,7 @@ void OFDOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21
      * instead of having to invert the matrix. */
     invert_matrix = matrix;
     if (cairo_matrix_invert(&invert_matrix)) {
-        LOG_ERROR("%s", "matrix not invertible");
+        LOG_ERROR("matrix not invertible");
         return;
     }
 

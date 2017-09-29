@@ -185,31 +185,31 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         m_readWindow->CmdLastPage();
         break;
     case GDK_KEY_Page_Down:
-        LOG_DEBUG("%s", "Page Down KEY RELEASED!");
+        LOG_DEBUG("Page Down KEY RELEASED!");
         m_readWindow->CmdNextPage();
         break;
     case GDK_KEY_Page_Up:
-        LOG_DEBUG("%s", "Page Up KEY RELEASED!");
+        LOG_DEBUG("Page Up KEY RELEASED!");
         m_readWindow->CmdPreviousPage();
         break;
     case GDK_KEY_Down:
-        LOG_DEBUG("%s", "Down KEY RELEASED!");
+        LOG_DEBUG("Down KEY RELEASED!");
         m_readWindow->CmdMoveDown();
         break;
     case GDK_KEY_Up:
-        LOG_DEBUG("%s", "Up KEY RELEASED!");
+        LOG_DEBUG("Up KEY RELEASED!");
         m_readWindow->CmdMoveUp();
         break;
     case GDK_KEY_Left:
-        LOG_DEBUG("%s", "Left KEY RELEASED!");
+        LOG_DEBUG("Left KEY RELEASED!");
         m_readWindow->CmdMoveLeft();
         break;
     case GDK_KEY_Right:
-        LOG_DEBUG("%s", "Right KEY RELEASED!");
+        LOG_DEBUG("Right KEY RELEASED!");
         m_readWindow->CmdMoveRight();
         break;
     case GDK_KEY_space:
-        LOG_DEBUG("%s", "SPACE KEY RELEASED!");
+        LOG_DEBUG("SPACE KEY RELEASED!");
         break;
     default:
         //LOG_DEBUG)("Key released. keyval: 0x%x", event->keyval);
@@ -637,7 +637,7 @@ static void startup(GApplication *app){
 
     GResource *resource = gtkofd_get_resource();
     if (resource == nullptr){
-        LOG_ERROR("%s", "gtkofd_get_resource() return nullptr.");
+        LOG_ERROR("gtkofd_get_resource() return nullptr.");
     }
     g_resources_register(resource);
     m_readWindow->resource = resource;

@@ -749,7 +749,7 @@ void OFDOutputDev::install_external_font(GfxFont *font, FontInfo & info) {
     auto iter = GB_ENCODED_FONT_NAME_MAP.find(fontname); 
     if(iter != GB_ENCODED_FONT_NAME_MAP.end()) {
         fontname = iter->second;
-        LOG_ERROR("%s", "Warning: workaround for font names in bad encodings.");
+        LOG_ERROR("Warning: workaround for font names in bad encodings.");
     }
 
     GfxFontLoc * localfontloc = font->locateFont(m_xref, nullptr);

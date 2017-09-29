@@ -70,7 +70,7 @@ void PageFrame::RenderFrame(cairo_t *cr, Point originPoint, Rect canvasRect, dou
     if (m_ofdRender != nullptr){
         if (m_bRedraw){
             m_ofdRender->RenderBackgroundImage(m_page, 0, 0, scaling);
-            LOG_DEBUG("%s", "RenderFrame() redraw.");
+            LOG_DEBUG("RenderFrame() redraw.");
             m_bRedraw = false;
         }
 
@@ -291,7 +291,7 @@ void PageWall::InitZoomScaling(){
 
 void PageWall::RenderWall(cairo_t *cr){
     if (m_document == nullptr){
-        LOG_WARN("%s", "m_document == nullptr in RenderWall()");
+        LOG_WARN("m_document == nullptr in RenderWall()");
         return;
     }
     // 判断当前屏幕上需要绘制哪些页面

@@ -129,7 +129,7 @@ FontPtr GfxFont_to_OfdFont(GfxFont *gfxFont, XRef *xref){
         delete fontLoc;
         fontLoc = nullptr;
     } else {
-        LOG_WARN("%s", "fontLoc == nullptr.");
+        LOG_WARN("fontLoc == nullptr.");
     }
 
     // -------- FontData --------

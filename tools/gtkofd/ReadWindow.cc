@@ -16,7 +16,7 @@ DocumentPtr ReadWindow::OpenOFDFile(const std::string &filename){
     }
     DocumentPtr document = m_package->GetDefaultDocument(); 
     assert(document != nullptr);
-    LOG_DEBUG("%s", document->to_string().c_str());
+    LOG_DEBUG(document->to_string().c_str());
 
     bool bOpened = document->Open();
     if ( !bOpened ){

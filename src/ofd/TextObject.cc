@@ -52,7 +52,7 @@ void TextObject::GenerateAttributesXML(utils::XMLWriter &writer) const{
     if ( Font != nullptr ){
         writer.WriteAttribute("Font", Font->ID);
     } else {
-        LOG_WARN("%s", "Attribute Font is required in TextObject XML.");
+        LOG_WARN("Attribute Font is required in TextObject XML.");
     }
 
     // -------- <TextObject Size="">
@@ -152,7 +152,7 @@ bool TextObject::FromAttributesXML(utils::XMLElementPtr objectElement){
     bool exist = false;
     std::tie(fontID, exist) = objectElement->GetIntAttribute("Font");
     if ( !exist ){
-        LOG_ERROR("%s", "Attribute Font is required in TextObject XML."); 
+        LOG_ERROR("Attribute Font is required in TextObject XML."); 
         return false;
     } else {
         const ResourcePtr documentRes = GetDocumentRes();
@@ -177,7 +177,7 @@ bool TextObject::FromAttributesXML(utils::XMLElementPtr objectElement){
     // Required.
     std::tie(FontSize, exist) = objectElement->GetIntAttribute("Size");
     if ( !exist ){
-        LOG_ERROR("%s", "Attribute Size is required in TextObject XML."); 
+        LOG_ERROR("Attribute Size is required in TextObject XML."); 
         return false;
     }
 
@@ -202,13 +202,13 @@ bool TextObject::IterateElementsXML(utils::XMLElementPtr childElement){
         bool exist = false;
         std::tie(textCode.X, exist) = childElement->GetFloatAttribute("X");
         if ( !exist ){
-            LOG_ERROR("%s", "Attribute X is required in TextCode XML");
+            LOG_ERROR("Attribute X is required in TextCode XML");
             return false;
         }
 
         std::tie(textCode.Y, exist) = childElement->GetFloatAttribute("Y");
         if ( !exist ){
-            LOG_ERROR("%s", "Attribute Y is required in TextCode XML");
+            LOG_ERROR("Attribute Y is required in TextCode XML");
             return false;
         }
 

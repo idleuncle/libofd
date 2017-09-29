@@ -99,7 +99,7 @@ void OFDOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
         pageArea.EnableApplicationBox(true);
         m_currentOFDPage->Area = pageArea;
 
-        LOG_INFO("%s", "\n");
+        LOG_INFO("\n");
 
 
     }
@@ -391,7 +391,7 @@ void OFDOutputDev::saveState(GfxState *state){
     //}
 
     m_numSaveState++;
-    LOG_INFO("%s", "[imageSurface] SaveState");
+    LOG_INFO("[imageSurface] SaveState");
     
     cairo_save(m_cairo);
     if ( m_cairoShape != nullptr ){
@@ -420,7 +420,7 @@ void OFDOutputDev::restoreState(GfxState *state){
     //}
     m_numSaveState--;
     assert(m_numSaveState >= 0);
-    LOG_INFO("%s", "[imageSurface] RestoreState");
+    LOG_INFO("[imageSurface] RestoreState");
 
     cairo_restore(m_cairo);
     if ( m_cairoShape != nullptr ){

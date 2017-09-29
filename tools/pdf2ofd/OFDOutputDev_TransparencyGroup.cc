@@ -88,7 +88,7 @@ void OFDOutputDev::endTransparencyGroup(GfxState * /*state*/) {
     }
     m_groupPattern = cairo_pop_group(m_cairo);
 
-    LOG_DEBUG("%s", "end transparency group");
+    LOG_DEBUG("end transparency group");
 
     if ( m_groupColorSpaceStack->next && m_groupColorSpaceStack->next->knockout) {
         if ( m_shapePattern != nullptr ){
@@ -116,7 +116,7 @@ void OFDOutputDev::popTransparencyGroup() {
 
 void OFDOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) {
 
-    LOG_DEBUG("%s", "paint transparency group");
+    LOG_DEBUG("paint transparency group");
 
     cairo_save(m_cairo);
     cairo_set_matrix(m_cairo, &m_groupColorSpaceStack->group_matrix);
@@ -187,7 +187,7 @@ void OFDOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
                                  Function * transferFunc, GfxColor * backdropColor) {
     cairo_pattern_destroy(m_maskPattern);
 
-    LOG_DEBUG("%s", "set softMask");
+    LOG_DEBUG("set softMask");
 
     if (!alpha || transferFunc) {
         /* We need to mask according to the luminocity of the group.
