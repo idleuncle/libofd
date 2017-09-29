@@ -5,12 +5,6 @@
 #include <gdk/gdkscreen.h>
 #include <assert.h>
 
-extern "C"{
-#include "gtkofd_resources.h"
-}
-#include "OFDRender.h"
-#include "PageWall.h"
-
 #include "ofd/Package.h"
 #include "ofd/Document.h"
 #include "ofd/Page.h"
@@ -19,57 +13,15 @@ extern "C"{
 #include "ofd/CairoRender.h"
 using namespace ofd;
 
-GtkWindow *m_mainWindow;
-
-class GtkRender : public ofd::OFDRender{
-public:
-    GtkRender(GtkWidget *drawingArea, int screenWidth, int screenHeight, int screenBPP = 32):
-        ofd::OFDRender(screenWidth, screenHeight, screenBPP) 
-        //m_drawingArea(drawingArea)
-    {}
-    virtual ~GtkRender(){};
-
-    virtual void UpdateScreenRenderer(){
-    }
-    virtual void UpdateScreen(){
-    }
-
-private:
-    //__attribute__((unused)) GtkWidget *m_drawingArea;
-}; // class GtkRender
-std::shared_ptr<ofd::OFDRender> m_ofdRender = nullptr;
-
-//double g_resolutionX = 240.0; // 120, 160, 240
-//double g_resolutionY = 240.0;
-//double ZOOM_STEP = 0.1;
-//double ZOOM_BASE = exp(1.0);
-//double X_STEP = 9;
-//double Y_STEP = 10;
-
-ofd::PackagePtr m_package = nullptr; 
-DocumentPtr m_document = nullptr;
-size_t m_pageIndex = 0;
-
-PageWallPtr m_pageWall = nullptr;
-
-DocumentPtr open_ofd_document(const std::string &filename){
-    m_package = std::make_shared<ofd::Package>();
-    if ( !m_package->Open(filename) ){
-        LOG(ERROR) << "OFDPackage::Open() failed. filename:" << filename;
-        return nullptr;
-    }
-    DocumentPtr document = m_package->GetDefaultDocument(); 
-    assert(document != nullptr);
-    LOG(DEBUG) << document->to_string();
-
-    bool bOpened = document->Open();
-    if ( !bOpened ){
-        LOG(ERROR) << "Open OFD Document failed. filename: " << filename;
-        return nullptr;
-    }
-
-    return document;
+extern "C"{
+#include "gtkofd_resources.h"
 }
+#include "OFDRender.h"
+#include "PageWall.h"
+#include "ReadWindow.h"
+
+
+ReadWindowPtr m_readWindow = nullptr;
 
 typedef struct{
     GtkApplicationWindow parentWindow;
@@ -87,21 +39,6 @@ typedef struct{
 
 } ApplicationWindowContext;
 
-
-//class MyRender : public SDLCairoRender{
-//public:
-    //MyRender(int screenWidth, int screenHeight, int screenBPP);
-    //virtual ~MyRender(){};
-    //virtual void onRender(cairo_surface_t *surface);
-//};
-
-//MyRender::MyRender(int screenWidth, int screenHeight, int screenBPP):
-    //SDLCairoRender(screenWidth, screenHeight, screenBPP)
-//{
-//}
-
-//void MyRender::onRender(cairo_surface_t *surface){
-//}
 
 static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer user_data){
 
@@ -148,147 +85,42 @@ static void activate_quit (GSimpleAction *action, GVariant *parameter, gpointer 
 
 __attribute__((unused)) static void activate_run(GSimpleAction *action, GVariant *parameter, gpointer user_data){
 
-    //GtkWidget *window = (GtkWidget*)user_data;
-
-    //GtkTreeSelection *selection;
-    //GtkTreeModel *model;
-    //GtkTreeIter iter;
-
-    //selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
-    //if (gtk_tree_selection_get_selected (selection, &model, &iter))
-        //run_example_for_row (window, model, &iter);
-}
-
-//__attribute__((unused)) static GdkPixbuf *frame = nullptr;
-GResource *resource = nullptr;
-GtkWidget *drawingArea = nullptr;
-GtkWidget *infobar = nullptr;
-GtkWidget *message = nullptr;
-GtkWindow *renderingWindow = nullptr;
-
-static void redraw_page(){
-    gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
-}
-
-static void first_page(){
-    if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
-    m_pageIndex = 0;
-    //m_ofdRender->SetOffsetX(0.0);
-    //m_ofdRender->SetOffsetY(0.0);
-    redraw_page();
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
-}
-
-static void last_page(){
-    if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
-    m_pageIndex = total_pages - 1;
-    //m_ofdRender->SetOffsetX(0.0);
-    //m_ofdRender->SetOffsetY(0.0);
-    redraw_page();
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
-}
-static void next_page(){
-    if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
-    if (m_pageIndex < total_pages - 1){
-        m_pageIndex++;
-    } else {
-        m_pageIndex = 0;
-    }
-    //m_ofdRender->SetOffsetX(0.0);
-    //m_ofdRender->SetOffsetY(0.0);
-    redraw_page();
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
-}
-
-static void prev_page(){
-    if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
-    if (m_pageIndex > 0){
-        m_pageIndex--;
-    } else {
-        m_pageIndex = total_pages - 1;
-    }
-    //m_ofdRender->SetOffsetX(0.0);
-    //m_ofdRender->SetOffsetY(0.0);
-    redraw_page();
-    LOG(DEBUG) << "Page " << m_pageIndex + 1 <<  "/" << total_pages;
-}
-
-static std::string choose_file(){
-    std::string fileName;
-
-    GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File",
-            m_mainWindow,
-            GTK_FILE_CHOOSER_ACTION_OPEN,
-            "_Cancel",
-            GTK_RESPONSE_CANCEL,
-            "_Open",
-            GTK_RESPONSE_ACCEPT,
-            nullptr);
-    gint res = gtk_dialog_run(GTK_DIALOG(dialog));
-    if (res == GTK_RESPONSE_ACCEPT){
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
-        char *filename = gtk_file_chooser_get_filename(chooser);
-        fileName = filename;
-        g_free(filename);
-    }
-
-    gtk_widget_destroy(dialog);
-
-    return fileName;
 }
 
 // https://developer.gnome.org/gtk3/3.2/GtkWidget.html#Signal-Details
 
 static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
+    assert(m_readWindow != nullptr);
+
     switch (event->keyval){
     case GDK_KEY_i:
-        //m_ofdRender->ZoomIn();
-        m_pageWall->ZoomIn();
-        redraw_page();
+        m_readWindow->CmdZoomIn();    
         break;
     case GDK_KEY_o:
         if (!(event->state & GDK_CONTROL_MASK)){
-            //m_ofdRender->ZoomOut();
-            m_pageWall->ZoomOut();
-            redraw_page();
+            m_readWindow->CmdZoomOut();    
         }
         break;
     case GDK_KEY_f:
-        //m_ofdRender->ZoomFitBest();
-        m_pageWall->ZoomFitBest();
-        redraw_page();
+        m_readWindow->CmdZoomFitBest();
         break;
     case GDK_KEY_h:
-        //m_ofdRender->MoveLeft();
-        m_pageWall->MoveLeft();
-        redraw_page();
+        m_readWindow->CmdMoveLeft();
         break;
     case GDK_KEY_j:
-        //m_ofdRender->MoveDown();
-        m_pageWall->MoveDown();
-        redraw_page();
+        m_readWindow->CmdMoveDown();
         break;
     case GDK_KEY_k:
-        //m_ofdRender->MoveUp();
-        m_pageWall->MoveUp();
-        redraw_page();
+        m_readWindow->CmdMoveUp();
         break;
     case GDK_KEY_l:
-        //m_ofdRender->MoveRight();
-        m_pageWall->MoveRight();
-        redraw_page();
+        m_readWindow->CmdMoveRight();
         break;
     case GDK_KEY_n:
-        next_page();
-        redraw_page();
+        m_readWindow->CmdNextPage();
         break;
     case GDK_KEY_p:
-        prev_page();
-        redraw_page();
+        m_readWindow->CmdPreviousPage();
         break;
     default:
         //LOG(DEBUG) << "Key pressed. keyval:" << event->keyval;
@@ -303,49 +135,34 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_o:
         if (event->state & GDK_CONTROL_MASK){
             LOG(DEBUG) << "Key Ctrl+o released. keyval:" << event->keyval;
-            std::string fileName = choose_file();
-            if (!fileName.empty()){
-                DocumentPtr document = open_ofd_document(fileName);
-                if (document != nullptr){
-                    m_document = document;
-                    m_pageIndex = 0;
-                    m_pageWall->RebuildWall(m_document, 1);
-                    m_pageWall->ZoomFitBest();
-                    redraw_page();
-                }
-            }
+            m_readWindow->CmdFileOpen();
         }
         break;
     case GDK_KEY_plus:
         if (event->state & GDK_CONTROL_MASK){
             // 放大 Ctrl + +
-            //m_ofdRender->ZoomIn();
-            m_pageWall->ZoomIn();
-            redraw_page();
+            m_readWindow->CmdZoomIn();
             LOG(DEBUG) << "Key Ctrl++ released. keyval:" << event->keyval;
         }
         break;
     case GDK_KEY_minus:
         if (event->state & GDK_CONTROL_MASK){
             // 缩小 Ctrl + -
-            //m_ofdRender->ZoomOut();
-            m_pageWall->ZoomOut();
-            redraw_page();
+            m_readWindow->CmdZoomIn();
             LOG(DEBUG) << "Key Ctrl+- released. keyval:" << event->keyval;
         }
         break;
     case GDK_KEY_1:
         if (event->state & GDK_CONTROL_MASK){
             // 原始大小 Ctrl + 1
+            m_readWindow->CmdZoomOriginal();
             LOG(DEBUG) << "Key Ctrl+1 released. keyval:" << event->keyval;
         }
         break;
     case GDK_KEY_2:
         if (event->state & GDK_CONTROL_MASK){
             // 适合页面 Ctrl + 2
-            //m_ofdRender->ZoomFitBest();
-            m_pageWall->ZoomFitBest();
-            redraw_page();
+            m_readWindow->CmdZoomFitBest();
             LOG(DEBUG) << "Key Ctrl+2 released. keyval:" << event->keyval;
         }
         break;
@@ -362,24 +179,34 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         }
         break;
     case GDK_KEY_Home:
-        first_page();
+        m_readWindow->CmdFirstPage();
         break;
     case GDK_KEY_End:
-        last_page();
+        m_readWindow->CmdLastPage();
         break;
     case GDK_KEY_Page_Down:
         LOG(DEBUG) << "Page Down KEY RELEASED!";
-        next_page();
+        m_readWindow->CmdNextPage();
         break;
     case GDK_KEY_Page_Up:
         LOG(DEBUG) << "Page Up KEY RELEASED!";
-        prev_page();
+        m_readWindow->CmdPreviousPage();
         break;
     case GDK_KEY_Down:
         LOG(DEBUG) << "Down KEY RELEASED!";
+        m_readWindow->CmdMoveDown();
         break;
     case GDK_KEY_Up:
         LOG(DEBUG) << "Up KEY RELEASED!";
+        m_readWindow->CmdMoveUp();
+        break;
+    case GDK_KEY_Left:
+        LOG(DEBUG) << "Left KEY RELEASED!";
+        m_readWindow->CmdMoveLeft();
+        break;
+    case GDK_KEY_Right:
+        LOG(DEBUG) << "Right KEY RELEASED!";
+        m_readWindow->CmdMoveRight();
         break;
     case GDK_KEY_space:
         LOG(DEBUG) << "SPACE KEY RELEASED!";
@@ -467,36 +294,23 @@ struct GdkEventScroll {
  */
 __attribute__((unused)) gboolean scroll_event_cb(GtkWidget *widget, GdkEventScroll *event, gpointer user_data){
     //GdkScrollDirection direction = event->direction;
-
     //LOG(DEBUG) << "Scroll Event. Delta x:" << event->delta_x << " Delta y:" << event->delta_y << " Direction:" << direction;
 
     if (event->state & GDK_SHIFT_MASK){
         if (event->direction == GDK_SCROLL_UP){
-            //m_ofdRender->ZoomIn();
-            m_pageWall->ZoomIn();
-            redraw_page();
+            m_readWindow->CmdZoomIn();
         } else if (event->direction == GDK_SCROLL_DOWN){
-            //m_ofdRender->ZoomOut();
-            m_pageWall->ZoomOut();
-            redraw_page();
+            m_readWindow->CmdZoomOut();
         }
     } else {
         if (event->direction == GDK_SCROLL_UP){
-            //m_ofdRender->MoveUp();
-            m_pageWall->MoveUp();
-            redraw_page();
+            m_readWindow->CmdMoveUp();
         } else if (event->direction == GDK_SCROLL_DOWN){
-            //m_ofdRender->MoveDown();
-            m_pageWall->MoveDown();
-            redraw_page();
+            m_readWindow->CmdMoveDown();
         } else if (event->direction == GDK_SCROLL_LEFT){
-            //m_ofdRender->MoveLeft();
-            m_pageWall->MoveLeft();
-            redraw_page();
+            m_readWindow->CmdMoveLeft();
         } else if (event->direction == GDK_SCROLL_RIGHT){
-            //m_ofdRender->MoveRight();
-            m_pageWall->MoveRight();
-            redraw_page();
+            m_readWindow->CmdMoveRight();
         }
     }
 
@@ -565,54 +379,29 @@ __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, Gd
 
 static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
 
-    //if (m_ofdRender != nullptr){
-        //m_ofdRender->RebuildBackgroundImage(allocation->width, allocation->height);
-    //} else {
-        //m_ofdRender = std::make_shared<GtkRender>(drawingArea, allocation->width, allocation->height);
-    //}
-    m_pageWall = std::make_shared<PageWall>(allocation->width, allocation->height);
+    assert(m_readWindow != nullptr);
+    m_readWindow->OnSize(allocation->width, allocation->height);
 
-    if (m_document != nullptr){
-        m_pageWall->RebuildWall(m_document, 1);
-    }
 }
 
 static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
-    //gdk_cairo_set_source_pixbuf(cr, frame, 0, 0);
 
-    GdkRGBA rgba;
-    rgba.red = 1.0;
-    rgba.green = 1.0;
-    rgba.blue = 1.0;
-    rgba.alpha = 1.0;
-    gdk_cairo_set_source_rgba(cr, &rgba);
-    cairo_paint(cr);
-
-    //if (m_ofdRender != nullptr){
-        //m_ofdRender->RenderBackgroundImage(m_document, m_pageIndex);
-        //cairo_surface_t *backgroundSurface = m_ofdRender->GetCairoRender()->GetCairoSurface();
-        //cairo_set_source_surface(cr, backgroundSurface, 0, 0);
-        //cairo_paint(cr);
-    //}
-
-    if (m_pageWall != nullptr){
-        m_pageWall->RenderWall(cr);
-    }
+    m_readWindow->OnDraw(cr);
 
     return true;
 }
 
 __attribute__((unused)) static void showInfoBar(GSimpleAction *action, GVariant *parameter, gpointer data){
 
-    const gchar *name = g_action_get_name(G_ACTION(action));
-    const gchar *value = g_variant_get_string(parameter, nullptr);
+    //const gchar *name = g_action_get_name(G_ACTION(action));
+    //const gchar *value = g_variant_get_string(parameter, nullptr);
 
-    gchar *text = g_strdup_printf("Your activated action: \"%s\".\n"
-            "Current value: %s", name ,value);
-    gtk_label_set_text(GTK_LABEL(message), text);
-    gtk_widget_show(infobar);
+    //gchar *text = g_strdup_printf("Your activated action: \"%s\".\n"
+            //"Current value: %s", name ,value);
+    //gtk_label_set_text(GTK_LABEL(message), text);
+    //gtk_widget_show(infobar);
 
-    g_free(text);
+    //g_free(text);
 }
 
 void adjust_window_size(GtkWindow *window){
@@ -698,87 +487,8 @@ void app_set_theme_from_resource(const gchar *theme_path) {
     }
 }
 
-#define TOOL_BUTTON_SIZE GTK_ICON_SIZE_SMALL_TOOLBAR
-//#define TOOL_BUTTON_SIZE GTK_ICON_SIZE_DND
-
-GtkWidget* GTK_IMAGE_FROM_RESOURCE(const std::string &iconName){
-    //std::string resourcePath = std::string("/icons/gtkofd/faenza/16/") + iconName + ".png";
-    //std::string resourcePath = std::string("/icons/gtkofd/faenza/24/") + iconName + ".png";
-    //std::string resourcePath = std::string("/icons/gtkofd/faenza/48/") + iconName + ".png";
-    std::string resourcePath = std::string("/icons/gtkofd/emerald/16/") + iconName + ".svg";
-    //std::string resourcePath = std::string("/icons/gtkofd/emerald/24/") + iconName + ".svg";
-    return gtk_image_new_from_resource(resourcePath.c_str());
-}
-
-static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
-    std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
-    if (name == "document-open"){
-        std::string fileName = choose_file();
-        if (!fileName.empty()){
-            DocumentPtr document = open_ofd_document(fileName);
-            if (document != nullptr){
-                m_document = document;
-                m_pageIndex = 0;
-                m_pageWall->RebuildWall(m_document, 1);
-                m_pageWall->ZoomFitBest();
-                redraw_page();
-            }
-        }
-    }
-}
-
-static void on_toolbar_edit_cb(GtkWidget *widget, gpointer user_data){
-    std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
-}
-
-static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
-    std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
-    if (name == "go-first"){
-        first_page();
-    } else if (name == "go-previous"){
-        prev_page();
-    } else if (name == "go-next"){
-        next_page();
-    } else if (name == "go-last"){
-        last_page();
-    } else if (name == "go-jump"){
-    }
-}
-
-static void on_toolbar_zoom_cb(GtkWidget *widget, gpointer user_data){
-    std::string name = gtk_widget_get_name(widget);
-    LOG(DEBUG) << "toolbar clicked. name:" << name;
-    if (name == "zoom-in"){
-        //m_ofdRender->ZoomIn();
-        m_pageWall->ZoomIn();
-        redraw_page();
-    } else if (name == "zoom-out"){
-        //m_ofdRender->ZoomOut();
-        m_pageWall->ZoomOut();
-        redraw_page();
-    } else if (name == "zoom-fit-best"){
-        //m_ofdRender->ZoomFitBest();
-        m_pageWall->ZoomFitBest();
-        redraw_page();
-    } else if (name == "zoom-original"){
-    }
-}
-
-static void insert_toolbar_item(GtkToolbar *toolbar, const std::string &name, const std::string &label, GCallback callback, void *user_data=nullptr, bool enable=true, const std::string &tooltip=""){
-    GtkToolItem *item = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE(name.c_str()), label.c_str());
-    if (tooltip.empty()){
-        gtk_tool_item_set_tooltip_text(item, label.c_str());
-    } else {
-        gtk_tool_item_set_tooltip_text(item, tooltip.c_str());
-    }
-    gtk_toolbar_insert(toolbar, item, -1);
-    gtk_widget_set_name(GTK_WIDGET(item), name.c_str());
-    gtk_widget_set_sensitive(GTK_WIDGET(item), enable);
-    g_signal_connect(G_OBJECT(item), "clicked", G_CALLBACK(callback), user_data);
-}
+// defined in toolbar.cc
+void init_toolbar(GtkToolbar *mainToolbar);
 
 static void activate(GApplication *app){
 
@@ -787,79 +497,37 @@ static void activate(GApplication *app){
     GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
 
     // -------- mainWindow --------
-    m_mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
-    assert(m_mainWindow != nullptr);
-
-    g_signal_connect_swapped(G_OBJECT(m_mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
+    GtkWindow *mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
+    assert(mainWindow != nullptr);
+    g_signal_connect_swapped(G_OBJECT(mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
+    m_readWindow->m_mainWindow = mainWindow;
 
     // -------- mainToolbar --------
     GtkToolbar *mainToolbar = (GtkToolbar*)gtk_builder_get_object(builder, "mainToolbar");
     assert(mainToolbar != nullptr);
-    gtk_toolbar_set_style(GTK_TOOLBAR(mainToolbar), GTK_TOOLBAR_BOTH);
-    //gtk_toolbar_set_style(GTK_TOOLBAR(mainToolbar), GTK_TOOLBAR_ICONS);
+    m_readWindow->m_mainToolbar = mainToolbar;
 
-    //gtk_toolbar_set_icon_size(mainToolbar, GTK_ICON_SIZE_MENU); // 16px for menu
-    gtk_toolbar_set_icon_size(mainToolbar, GTK_ICON_SIZE_SMALL_TOOLBAR); // 16px for small toolbar
-    //gtk_toolbar_set_icon_size(mainToolbar, GTK_ICON_SIZE_LARGE_TOOLBAR); // 24px for large toolbar
-    //gtk_toolbar_set_icon_size(mainToolbar, GTK_ICON_SIZE_DND); // 32px for drang and drop
-    //gtk_toolbar_set_icon_size(mainToolbar, GTK_ICON_SIZE_DIALOG); // 48px for dialog
-
-    gtk_container_set_border_width(GTK_CONTAINER(mainToolbar), 0);
-
-    // https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
-    
-    //insert_toolbar_item(mainToolbar, "document-new", "新建", G_CALLBACK(on_toolbar_document_cb));
-    insert_toolbar_item(mainToolbar, "document-open", "打开", G_CALLBACK(on_toolbar_document_cb));
-    insert_toolbar_item(mainToolbar, "document-save", "保存", G_CALLBACK(on_toolbar_document_cb), nullptr, false);
-    //insert_toolbar_item(mainToolbar, "document-save-as", "另存", G_CALLBACK(on_toolbar_document_cb));
-    insert_toolbar_item(mainToolbar, "document-properties", "属性", G_CALLBACK(on_toolbar_document_cb), nullptr, true, "文档属性");
-    insert_toolbar_item(mainToolbar, "document-page-setup", "设置", G_CALLBACK(on_toolbar_document_cb), nullptr, true, "页面设置");
-    insert_toolbar_item(mainToolbar, "document-print", "打印", G_CALLBACK(on_toolbar_document_cb));
-
-    // -------- separator tool item --------
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
-
-    insert_toolbar_item(mainToolbar, "go-first", "首页", G_CALLBACK(on_toolbar_go_cb));
-    insert_toolbar_item(mainToolbar, "go-previous", "上页", G_CALLBACK(on_toolbar_go_cb));
-    insert_toolbar_item(mainToolbar, "go-next", "下页", G_CALLBACK(on_toolbar_go_cb));
-    insert_toolbar_item(mainToolbar, "go-last", "尾页", G_CALLBACK(on_toolbar_go_cb));
-    insert_toolbar_item(mainToolbar, "go-jump", "跳转", G_CALLBACK(on_toolbar_go_cb));
-
-    // -------- separator tool item --------
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
-
-    insert_toolbar_item(mainToolbar, "zoom-in", "放大", G_CALLBACK(on_toolbar_zoom_cb));
-    insert_toolbar_item(mainToolbar, "zoom-out", "缩小", G_CALLBACK(on_toolbar_zoom_cb));
-    insert_toolbar_item(mainToolbar, "zoom-fit-best", "合适", G_CALLBACK(on_toolbar_zoom_cb));
-    insert_toolbar_item(mainToolbar, "zoom-original", "原始", G_CALLBACK(on_toolbar_zoom_cb));
-
-    // -------- separator tool item --------
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
-
-    insert_toolbar_item(mainToolbar, "edit-copy", "拷贝", G_CALLBACK(on_toolbar_edit_cb));
-    insert_toolbar_item(mainToolbar, "edit-find", "查找", G_CALLBACK(on_toolbar_edit_cb));
-
-    // -------- separator tool item --------
-    gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), gtk_separator_tool_item_new(), -1);
-
-    insert_toolbar_item(mainToolbar, "application-exit", "退出", G_CALLBACK(gtk_main_quit));
+    init_toolbar(mainToolbar);
 
     // -------- infobar --------
-    infobar = GTK_WIDGET(gtk_builder_get_object(builder, "infobar"));
+    GtkWidget *infobar = GTK_WIDGET(gtk_builder_get_object(builder, "infobar"));
     assert(infobar != nullptr);
+    m_readWindow->infobar = infobar;
 
     // -------- message --------
-    message = GTK_WIDGET(gtk_builder_get_object(builder, "message"));
+    GtkWidget *message = GTK_WIDGET(gtk_builder_get_object(builder, "message"));
     assert(message != nullptr);
+    m_readWindow->message = message;
 
     // -------- drawingArea --------
-    drawingArea = GTK_WIDGET(gtk_builder_get_object(builder, "drawingArea"));
+    GtkWidget *drawingArea = GTK_WIDGET(gtk_builder_get_object(builder, "drawingArea"));
     assert(drawingArea != nullptr);
+    m_readWindow->drawingArea = drawingArea;
 
     // -------- renderingWindow --------
-    renderingWindow = (GtkWindow*)gtk_builder_get_object(builder, "renderingWindow");
+    GtkWindow *renderingWindow = (GtkWindow*)gtk_builder_get_object(builder, "renderingWindow");
     assert(renderingWindow != nullptr);
-
+    m_readWindow->m_renderingWindow = renderingWindow;
 
     g_object_unref(builder);
 
@@ -869,8 +537,8 @@ static void activate(GApplication *app){
         //{ "run", activate_run, nullptr, nullptr, nullptr },
         { "bold", activate_about, nullptr, nullptr, nullptr },
     };
-    g_action_map_add_action_entries(G_ACTION_MAP(m_mainWindow),
-            win_entries, G_N_ELEMENTS(win_entries), m_mainWindow);
+    g_action_map_add_action_entries(G_ACTION_MAP(mainWindow),
+            win_entries, G_N_ELEMENTS(win_entries), mainWindow);
     g_signal_connect(drawingArea, "draw", G_CALLBACK(draw_cb), nullptr);
     g_signal_connect(drawingArea, "size-allocate", G_CALLBACK(size_allocate_cb), nullptr);
 
@@ -879,8 +547,8 @@ static void activate(GApplication *app){
     // -------- Drawing Widget --------
     GtkWidget *drawingWidget = GTK_WIDGET(drawingArea);
 
-    g_signal_connect(G_OBJECT(m_mainWindow), "key-press-event", G_CALLBACK(key_press_cb), nullptr);
-    g_signal_connect(G_OBJECT(m_mainWindow), "key-release-event", G_CALLBACK(key_release_cb), nullptr);
+    g_signal_connect(G_OBJECT(mainWindow), "key-press-event", G_CALLBACK(key_press_cb), nullptr);
+    g_signal_connect(G_OBJECT(mainWindow), "key-release-event", G_CALLBACK(key_release_cb), nullptr);
 
     g_signal_connect(G_OBJECT(drawingWidget), "button-press-event", G_CALLBACK(button_press_cb), nullptr);
     g_signal_connect(G_OBJECT(drawingWidget), "motion-notify-event", G_CALLBACK(motion_notify_cb), nullptr);
@@ -902,20 +570,20 @@ static void activate(GApplication *app){
             | GDK_POINTER_MOTION_HINT_MASK);
 
     // -------- Main Window --------
-    gtk_window_set_title(m_mainWindow, "OFD 阅读器");
+    gtk_window_set_title(mainWindow, "OFD 阅读器");
     // Hide the title bar and the board.
-    //gtk_window_set_decorated(m_mainWindow, false);
-    adjust_window_size(m_mainWindow);
-    gtk_window_activate_focus(m_mainWindow);
+    //gtk_window_set_decorated(mainWindow, false);
+    adjust_window_size(mainWindow);
+    gtk_window_activate_focus(mainWindow);
 
 
-    //gtk_window_set_opacity(m_mainWindow, 0.85);
-    //gtk_window_set_focus_on_map(m_mainWindow, true);
+    //gtk_window_set_opacity(mainWindow, 0.85);
+    //gtk_window_set_focus_on_map(mainWindow, true);
 
-    //gtk_window_set_icon(m_mainWindow, create_pixbuf("./app.png"));
+    //gtk_window_set_icon(mainWindow, create_pixbuf("./app.png"));
 
-    gtk_application_add_window(GTK_APPLICATION(app), m_mainWindow);
-    gtk_widget_show_all(GTK_WIDGET(m_mainWindow));
+    gtk_application_add_window(GTK_APPLICATION(app), mainWindow);
+    gtk_widget_show_all(GTK_WIDGET(mainWindow));
 
     gtk_widget_hide(infobar);
 
@@ -967,11 +635,12 @@ static void activate(GApplication *app){
 
 static void startup(GApplication *app){
 
-    resource = gtkofd_get_resource();
+    GResource *resource = gtkofd_get_resource();
     if (resource == nullptr){
         LOG(ERROR) << "gtkofd_get_resource() return nullptr." << std::endl;
     }
     g_resources_register(resource);
+    m_readWindow->resource = resource;
 
     //GtkBuilder *builder = gtk_builder_new_from_file("./app.ui");
     //GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
@@ -988,15 +657,15 @@ static void startup(GApplication *app){
 
 
     std::string filename = "./data/1.ofd";
-    m_document = open_ofd_document(filename);
-    if (m_document != nullptr){
-        size_t total_pages = m_document->GetNumPages();
+    ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
+    if (document != nullptr){
+        size_t total_pages = document->GetNumPages();
         LOG(INFO) << total_pages << " pages in " << filename;
-        if ( total_pages > 0 ){
+        //if ( total_pages > 0 ){
             //int screenWidth = 794;
             //int screenHeight = 1122;
             //int screenBPP = 32;
-        }
+        //}
     }
 
 }
@@ -1050,6 +719,8 @@ int main(int argc, char *argv[]){
 
     Logger::Initialize(1);
 
+    m_readWindow = std::make_shared<ReadWindow>();
+
     GtkApplication *app;
     static GActionEntry app_entries[] = {
         { "about", activate_about, nullptr, nullptr, nullptr },
@@ -1057,10 +728,9 @@ int main(int argc, char *argv[]){
         { "dark", activate_toggle, nullptr, "false", change_theme_state },
     };
 
-    app = gtk_application_new("org.gtk.Demo", 
+    app = gtk_application_new("org.ofd.Reader", 
             //GApplicationFlags(G_APPLICATION_FLAGS_NONE));
             GApplicationFlags(G_APPLICATION_NON_UNIQUE|G_APPLICATION_HANDLES_COMMAND_LINE));
-
 
     g_action_map_add_action_entries(G_ACTION_MAP(app),
             app_entries, G_N_ELEMENTS(app_entries),

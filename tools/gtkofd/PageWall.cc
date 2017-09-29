@@ -127,6 +127,9 @@ void PageFrame::ZoomFitBest(){
     }
 }
 
+void PageFrame::ZoomOriginal(){
+}
+
 // ===================== PageWall ====================
 
 PageWall::PageWall(int screenWidth, int screenHeight, int screenBPP){
@@ -156,15 +159,19 @@ void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScal
 void PageWall::MoveUp(){
     m_wallOffsetY -= Y_STEP;
 }
+
 void PageWall::MoveDown(){
     m_wallOffsetY += Y_STEP;
 }
+
 void PageWall::MoveLeft(){
     m_wallOffsetX -= X_STEP;
 }
+
 void PageWall::MoveRight(){
     m_wallOffsetX += X_STEP;
 }
+
 void PageWall::ZoomIn(){
     m_zoomFactor += ZOOM_STEP;
     InitZoomScaling();
@@ -172,6 +179,7 @@ void PageWall::ZoomIn(){
         pageFrame->ZoomIn();
     }
 }
+
 void PageWall::ZoomOut(){
     m_zoomFactor -= ZOOM_STEP;
     InitZoomScaling();
@@ -179,6 +187,7 @@ void PageWall::ZoomOut(){
         pageFrame->ZoomOut();
     }
 }
+
 void PageWall::ZoomFitBest(){
     m_zoomFactor = ZOOM_BASE;
     m_wallOffsetX = 0;
@@ -188,6 +197,13 @@ void PageWall::ZoomFitBest(){
         pageFrame->ZoomFitBest();
     }
 }
+
+void PageWall::ZoomOriginal(){
+    for (auto pageFrame : m_pageFrames){
+        pageFrame->ZoomOriginal();
+    }
+}
+
 void PageWall::RebuildWall(ofd::DocumentPtr document, int rowPages){
 
     m_document = document;

@@ -135,6 +135,7 @@ public:
     void ZoomIn();
     void ZoomOut();
     void ZoomFitBest();
+    void ZoomOriginal();
 
     void SetRedraw(bool bRedraw){m_bRedraw = true;};
 private:
@@ -193,6 +194,7 @@ public:
     void ZoomIn();
     void ZoomOut();
     void ZoomFitBest();
+    void ZoomOriginal();
 
 private:
     int getPageIndexFromWallPoint(int x, int y) const;
