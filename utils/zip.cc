@@ -3,6 +3,7 @@
 #include "utils/logger.h"
 #define ZIP_DISABLE_DEPRECATED
 #include <zip.h>
+#include <string.h>
 
 using namespace utils;
 

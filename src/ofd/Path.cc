@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <sstream>
+#include <algorithm>
 #include "ofd/Path.h"
 #include "utils/logger.h"
 #include "utils/utils.h"
