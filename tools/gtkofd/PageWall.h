@@ -184,8 +184,8 @@ public:
 
     double ZOOM_BASE = exp(1.0);
     double ZOOM_STEP = 0.1;
-    double X_STEP = 20;
-    double Y_STEP = 20;
+    double X_STEP = 36;
+    double Y_STEP = 45;
 
     void MoveUp();
     void MoveDown();

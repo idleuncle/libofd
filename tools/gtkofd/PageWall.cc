@@ -231,16 +231,16 @@ void PageWall::RebuildWall(ofd::DocumentPtr document, int rowPages){
     }
 
     // -------- PageFrame Margins --------
-    m_frameLeftMargin = 5;
-    m_frameTopMargin = 5;
+    m_frameLeftMargin = 0;
+    m_frameTopMargin = 0;
     m_frameRightMargin = 0;
     m_frameBottomMargin = 0;
 
     m_frameRect = FrameRect(0, 0, pageMaxWidth, pageMaxHeight);
-    m_frameRect.margins.left = 5;
-    m_frameRect.margins.top = 5;
-    m_frameRect.margins.right = 0;
-    m_frameRect.margins.bottom = 0;
+    m_frameRect.margins.left = 2;
+    m_frameRect.margins.top = 3;
+    m_frameRect.margins.right = 3;
+    m_frameRect.margins.bottom = 2;
 
     // -------- PageWall Margins --------
     m_wallLeftMargin = 10;
@@ -317,7 +317,6 @@ void PageWall::RenderWall(cairo_t *cr){
             Point originPoint(canvasRect.x - m_wallOffsetX, canvasRect.y - m_wallOffsetY);
 
             cairo_save(cr);
-            cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 0.8);
             double x0 = (double)originPoint.x - 0.5;
             double y0 = (double)originPoint.y - 0.5;
             double x1 = x0 + (double)canvasRect.width;
@@ -328,8 +327,12 @@ void PageWall::RenderWall(cairo_t *cr){
             cairo_line_to(cr, x0, y1);
             cairo_line_to(cr, x0, y0);
             cairo_close_path(cr);
+            cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
+            cairo_fill(cr);
+            cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 0.8);
             cairo_stroke(cr);
             cairo_restore(cr);
+
             pageFrame->RenderFrame(cr, originPoint, canvasRect, m_wallScaling);
         }
     }

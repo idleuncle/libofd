@@ -48,10 +48,10 @@ void ReadWindow::OnSize(int width, int height){
 
 void ReadWindow::OnDraw(cairo_t *cr){
     GdkRGBA rgba;
-    rgba.red = 1.0;
-    rgba.green = 1.0;
-    rgba.blue = 1.0;
-    rgba.alpha = 1.0;
+    rgba.red = 0.5;
+    rgba.green = 0.5;
+    rgba.blue = 0.5;
+    rgba.alpha = 0.5;
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_paint(cr);
 
