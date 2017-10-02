@@ -94,11 +94,7 @@ void OFDRender::RenderBackgroundImage(DocumentPtr document, size_t pageIndex){
     }
 }
 
-void OFDRender::RenderBackgroundImage(PagePtr page){
-    double offsetX = m_offsetX;
-    double offsetY = m_offsetY;
-    double scaling = m_scaling;
-
+double OFDRender::CalculateScaling(PagePtr page) const{
     double fitScaling = page->GetFitScaling(m_screenWidth, m_screenHeight, g_resolutionX, g_resolutionY);
 
     double factor = 1.0;
@@ -108,9 +104,16 @@ void OFDRender::RenderBackgroundImage(PagePtr page){
     } else {
         factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
     }
-    scaling = fitScaling * factor;
-    //scaling = fitScaling;
-    m_scaling = scaling;
+    double scaling = fitScaling * factor;
+
+    return scaling;
+}
+
+void OFDRender::RenderBackgroundImage(PagePtr page){
+    double offsetX = m_offsetX;
+    double offsetY = m_offsetY;
+
+    m_scaling = CalculateScaling(page);
 
     RenderBackgroundImage(page, offsetX, offsetY, m_scaling);
 }

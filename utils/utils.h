@@ -76,6 +76,7 @@ namespace utils{
         return (int)floor(x);
     }
 
+    unsigned long long GetTimeTick();
 }
 
 #ifndef likely

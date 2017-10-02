@@ -30,14 +30,16 @@ static std::string choose_file(GtkWindow *parentWindow){
 void ReadWindow::CmdFileOpen(){
     std::string fileName = choose_file(m_mainWindow);
     if (!fileName.empty()){
-        DocumentPtr document = OpenOFDFile(fileName);
-        if (document != nullptr){
-            m_document = document;
-            m_pageIndex = 0;
-            m_pageWall->RebuildWall(m_document, 1);
+        OpenOFDFile(fileName);
+        //DocumentPtr document = OpenOFDFile(fileName);
+        //if (document != nullptr){
+            //m_document = document;
+            //m_pageIndex = 0;
+            //m_pageWall->Rebuild(document, 1);
+            //m_pageWall->RebuildWall();
 
             CmdZoomFitBest();
-        }
+        //}
     }
 }
 
@@ -66,13 +68,15 @@ void ReadWindow::CmdJumpPage(){
 }
 
 void ReadWindow::CmdZoomIn(){
-    ZoomIn();
-    RedrawPage();
+    //ZoomIn();
+    //RedrawPage();
+    ScrollIn();
 }
 
 void ReadWindow::CmdZoomOut(){
-    ZoomOut();
-    RedrawPage();
+    //ZoomOut();
+    //RedrawPage();
+    ScrollOut();
 }
 
 void ReadWindow::CmdZoomFitBest(){
@@ -86,21 +90,25 @@ void ReadWindow::CmdZoomOriginal(){
 }
 
 void ReadWindow::CmdMoveUp(){
-    MoveUp();
-    RedrawPage();
+    //MoveUp();
+    //RedrawPage();
+    ScrollUp();
 }
 
 void ReadWindow::CmdMoveDown(){
-    MoveDown();
-    RedrawPage();
+    //MoveDown();
+    //RedrawPage();
+    ScrollDown();
 }
 
 void ReadWindow::CmdMoveLeft(){
-    MoveLeft();
-    RedrawPage();
+    //MoveLeft();
+    //RedrawPage();
+    ScrollLeft();
 }
 
 void ReadWindow::CmdMoveRight(){
-    MoveRight();
-    RedrawPage();
+    //MoveRight();
+    //RedrawPage();
+    ScrollRight();
 }

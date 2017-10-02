@@ -38,6 +38,10 @@ public:
     void SetOffsetY(double offsetY){m_offsetY = offsetY;};
     void SetScaling(double scaling){m_scaling = scaling;};
 
+    double GetScaling() const{return m_scaling;};
+
+    double CalculateScaling(PagePtr page) const;
+
 protected:
     int m_screenWidth = -1;
     int m_screenHeight = 0;

@@ -304,9 +304,17 @@ __attribute__((unused)) gboolean scroll_event_cb(GtkWidget *widget, GdkEventScro
         }
     } else {
         if (event->direction == GDK_SCROLL_UP){
-            m_readWindow->CmdMoveUp();
+            if (event->state & GDK_CONTROL_MASK){
+                m_readWindow->CmdMoveLeft();
+            } else {
+                m_readWindow->CmdMoveUp();
+            }
         } else if (event->direction == GDK_SCROLL_DOWN){
-            m_readWindow->CmdMoveDown();
+            if (event->state & GDK_CONTROL_MASK){
+                m_readWindow->CmdMoveRight();
+            } else {
+                m_readWindow->CmdMoveDown();
+            }
         } else if (event->direction == GDK_SCROLL_LEFT){
             m_readWindow->CmdMoveLeft();
         } else if (event->direction == GDK_SCROLL_RIGHT){
@@ -631,6 +639,9 @@ static void activate(GApplication *app){
 
     g_signal_emit_by_name(G_OBJECT(drawingArea), "activate");
     gtk_widget_grab_focus(drawingArea);
+
+
+    m_readWindow->CmdZoomFitBest();
 }
 
 static void startup(GApplication *app){
@@ -655,7 +666,6 @@ static void startup(GApplication *app){
 
     g_object_unref (builder);
 
-
     std::string filename = "./data/1.ofd";
     ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
     if (document != nullptr){
@@ -667,7 +677,6 @@ static void startup(GApplication *app){
             //int screenBPP = 32;
         //}
     }
-
 }
 
 static gint command_line(GApplication *app, GApplicationCommandLine *cmdline){

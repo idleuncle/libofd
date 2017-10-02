@@ -64,8 +64,22 @@ public:
     ofd::PackagePtr m_package = nullptr; 
     DocumentPtr m_document = nullptr;
     size_t m_pageIndex = 0;
+    int m_rowPages = 1;
+
 
     PageWallPtr m_pageWall = nullptr;
+
+    void ScrollUp();
+    void ScrollDown();
+    void ScrollLeft();
+    void ScrollRight();
+    void ScrollIn();
+    void ScrollOut();
+    int m_scrollAction = -1;
+    unsigned long long m_lastScrollTime = 0;
+    double m_scrollAcceRate = 1.0;
+private:
+    double applyScrollAccelerate(int scrollAction, double acceleration, double maxAcceleration);
 }; // class ReadWindow
 typedef std::shared_ptr<ReadWindow> ReadWindowPtr;
 

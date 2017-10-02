@@ -4,6 +4,8 @@
 #include <iterator>
 #include <iostream>
 #include <fstream>
+#include <sys/time.h>
+#include <cstddef>
 #include "utils.h"
 #include "logger.h"
 
@@ -72,6 +74,11 @@ namespace utils{
         return true;
     }
 
+    unsigned long long GetTimeTick(){
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
+        return static_cast<unsigned long long>(1000000 * tv.tv_sec + tv.tv_usec);
+    }
 }
 
 

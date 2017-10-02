@@ -14,10 +14,10 @@ PageFrame::PageFrame(ofd::PagePtr page, const FrameRect &frameRect):
 PageFrame::~PageFrame(){
 }
 
-void PageFrame::Rebuild(double wallScaling){
+void PageFrame::RebuildFrame(double wallScaling){
     Rect canvasRect = m_frameRect.GetCanvasRect();
-    int canvasWidth = canvasRect.width * wallScaling;
-    int canvasHeight = canvasRect.height * wallScaling;
+    double canvasWidth = canvasRect.width * wallScaling;
+    double canvasHeight = canvasRect.height * wallScaling;
     if (m_ofdRender != nullptr){
         m_ofdRender->RebuildBackgroundImage(canvasWidth, canvasHeight);
     } else {
@@ -70,7 +70,7 @@ void PageFrame::RenderFrame(cairo_t *cr, Point originPoint, Rect canvasRect, dou
     if (m_ofdRender != nullptr){
         if (m_bRedraw){
             m_ofdRender->RenderBackgroundImage(m_page, 0, 0, scaling);
-            LOG_DEBUG("RenderFrame() redraw.");
+            //LOG_DEBUG("RenderFrame() redraw.");
             m_bRedraw = false;
         }
 
@@ -106,43 +106,148 @@ void PageFrame::RenderFrame(cairo_t *cr, Point originPoint, Rect canvasRect, dou
 }
 
 
-void PageFrame::ZoomIn(){
+void PageFrame::Zoom(double scaling){
+    RebuildFrame(scaling);
     if (m_ofdRender != nullptr){
-        m_ofdRender->ZoomIn();
+        m_ofdRender->SetScaling(scaling);
         m_bRedraw = true;
     }
-}
-
-void PageFrame::ZoomOut(){
-    if (m_ofdRender != nullptr){
-        m_ofdRender->ZoomOut();
-        m_bRedraw = true;
-    }
-}
-
-void PageFrame::ZoomFitBest(){
-    if (m_ofdRender != nullptr){
-        m_ofdRender->ZoomFitBest();
-        m_bRedraw = true;
-    }
-}
-
-void PageFrame::ZoomOriginal(){
 }
 
 // ===================== PageWall ====================
 
 PageWall::PageWall(int screenWidth, int screenHeight, int screenBPP){
-    Rebuild(screenWidth, screenHeight, screenBPP);
+    m_screenWidth = screenWidth;
+    m_screenHeight = screenHeight;
+    m_screenBPP = screenBPP;
 }
 
 PageWall::~PageWall(){
 }
 
-void PageWall::Rebuild(int screenWidth, int screenHeight, int screenBPP){
+double get_fit_scaling(double pageWidth, double pageHeight, double screenWidth, double screenHeight){
+    double scalingX = screenWidth / pageWidth;
+    return scalingX;
+    //double scalingY = screenHeight / pageHeight;
+    //double scaling = scalingX >= scalingY ? scalingX : scalingY;
+    //return scaling;
+}
+
+Size get_document_pixel_size(ofd::DocumentPtr document){
+    if (document != nullptr){
+        int pageMaxWidth = 0;
+        int pageMaxHeight = 0;
+        std::tie(pageMaxWidth, pageMaxHeight) = document->GetPageMaxPxielSize(g_resolutionX, g_resolutionY);
+        return Size(pageMaxWidth, pageMaxHeight);
+
+    } else {
+        return Size();
+    }
+}
+
+
+void PageWall::OnSize(int screenWidth, int screenHeight){
     m_screenWidth = screenWidth;
     m_screenHeight = screenHeight;
-    m_screenBPP = screenBPP;
+
+    double fitBestScaling = CalculateBestZoomScaling();
+    m_zoomFactor *= m_fitBestScaling / fitBestScaling;
+    m_fitBestScaling = fitBestScaling;
+    m_wallScaling = GetZoomScaling();
+
+    //rebuildWallRect();
+    RebuildWall();
+}
+
+void PageWall::Rebuild(ofd::DocumentPtr document, int rowPages){
+    if (document != nullptr){
+        m_document = document;
+    }
+    if (rowPages > 0){
+        m_rowPages = rowPages;
+    }
+
+    if (m_document != nullptr){
+        m_documentPixelSize = get_document_pixel_size(m_document);
+    } else {
+        m_documentPixelSize = Size(0,0);
+    }
+
+    size_t totalPages = 0;
+    if (m_document != nullptr){
+        totalPages = m_document->GetNumPages();
+    }
+
+    // -------- PageFrame Margins --------
+    m_frameRect = FrameRect(0, 0, m_documentPixelSize.width, m_documentPixelSize.height);
+    m_frameRect.margins.left = m_frameLeftMargin;
+    m_frameRect.margins.top = m_frameTopMargin;
+    m_frameRect.margins.right = m_frameRightMargin;
+    m_frameRect.margins.bottom = m_frameBottomMargin;
+
+    // -------- PageWall rows and cols --------
+    if (totalPages > 0){
+        m_wallCols = m_rowPages;
+        m_wallRows = (int)(totalPages / m_wallCols);
+        if (totalPages - m_rowPages * m_wallRows > 0){
+            m_wallRows++;
+        }
+    } else {
+        m_wallRows = 0;
+        m_wallCols = 0;
+    }
+
+    rebuildWallRect();
+    RebuildWall();
+}
+
+Size PageWall::getPagePixelSize() const{
+    double pagePixelWidth = m_frameLeftMargin + m_documentPixelSize.width + m_frameRightMargin;
+    double pagePixelHeight = m_frameTopMargin + m_documentPixelSize.height + m_frameBottomMargin;
+
+    return Size(pagePixelWidth, pagePixelHeight);
+}
+
+void PageWall::rebuildWallRect(){
+    Size pagePixelSize = getPagePixelSize();
+    double pagePixelWidth = pagePixelSize.width;
+    double pagePixelHeight = pagePixelSize.height;
+
+    m_wallRect = FrameRect(0, 0, pagePixelWidth * m_wallCols, pagePixelHeight * m_wallRows);
+    m_wallRect.margins.left = m_wallLeftMargin;
+    m_wallRect.margins.top = m_wallTopMargin;
+    m_wallRect.margins.right = m_wallRightMargin;
+    m_wallRect.margins.bottom = m_wallBottomMargin;
+}
+
+
+double PageWall::CalculateBestZoomScaling() const{
+    if (m_document == nullptr){
+        return 1.0;
+    }
+
+    Size pagePixelSize = getPagePixelSize();
+    double pagePixelWidth = pagePixelSize.width;
+    double pagePixelHeight = pagePixelSize.height;
+
+    double fitScaling = get_fit_scaling(pagePixelWidth * m_rowPages, pagePixelHeight, m_screenWidth, m_screenHeight);
+
+    return fitScaling;
+}
+
+double PageWall::GetZoomScaling() const{
+    double fitScaling = m_fitBestScaling;
+    //double factor = 1.0;
+    //double delta = m_zoomFactor - ZOOM_BASE;
+    //if ( delta >= 0.0 ){
+        //factor = log(m_zoomFactor);
+    //} else {
+        //factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
+    //}
+    //double scaling = fitScaling * factor;
+    double scaling = fitScaling * m_zoomFactor;
+
+    return scaling;
 }
 
 void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScaling){
@@ -156,107 +261,79 @@ void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScal
 //double X_STEP = 20;
 //double Y_STEP = 20;
 
-void PageWall::MoveUp(){
-    m_wallOffsetY -= Y_STEP;
+void PageWall::MoveUp(double accelerateRate){
+    m_wallOffsetY -= Y_STEP * accelerateRate;
+    if (m_wallOffsetY < 0) m_wallOffsetY = 0;
 }
 
-void PageWall::MoveDown(){
-    m_wallOffsetY += Y_STEP;
-}
-
-void PageWall::MoveLeft(){
-    m_wallOffsetX -= X_STEP;
-}
-
-void PageWall::MoveRight(){
-    m_wallOffsetX += X_STEP;
-}
-
-void PageWall::ZoomIn(){
-    m_zoomFactor += ZOOM_STEP;
-    InitZoomScaling();
-    for (auto pageFrame : m_pageFrames){
-        pageFrame->ZoomIn();
+void PageWall::MoveDown(double accelerateRate){
+    m_wallOffsetY += Y_STEP * accelerateRate;
+    if (m_wallOffsetY + m_screenHeight > m_wallRect.height){
+        m_wallOffsetY = m_wallRect.height - m_screenHeight;
     }
 }
 
-void PageWall::ZoomOut(){
-    m_zoomFactor -= ZOOM_STEP;
-    InitZoomScaling();
+void PageWall::MoveLeft(double accelerateRate){
+    m_wallOffsetX -= X_STEP * accelerateRate;
+    if (m_wallOffsetX < 0) m_wallOffsetX = 0;
+}
+
+void PageWall::MoveRight(double accelerateRate){
+    m_wallOffsetX += X_STEP * accelerateRate;
+    if (m_wallOffsetX + m_screenWidth > m_wallRect.width){
+        m_wallOffsetX = m_wallRect.width - m_screenWidth;
+    }
+}
+
+void PageWall::ZoomIn(double accelerateRate){
+    m_zoomFactor += ZOOM_STEP * accelerateRate;
+    m_wallScaling = GetZoomScaling();
     for (auto pageFrame : m_pageFrames){
-        pageFrame->ZoomOut();
+        //pageFrame->ZoomIn();
+        pageFrame->Zoom(m_wallScaling);
+    }
+}
+
+void PageWall::ZoomOut(double accelerateRate){
+    m_zoomFactor -= ZOOM_STEP * accelerateRate;
+    m_wallScaling = GetZoomScaling();
+    for (auto pageFrame : m_pageFrames){
+        //pageFrame->ZoomOut();
+        pageFrame->Zoom(m_wallScaling);
     }
 }
 
 void PageWall::ZoomFitBest(){
-    m_zoomFactor = ZOOM_BASE;
-    m_wallOffsetX = 0;
-    m_wallOffsetY = 0;
-    InitZoomScaling();
+    //m_zoomFactor = ZOOM_BASE;
+    m_zoomFactor = 1.0;
+    m_wallScaling = GetZoomScaling();
+    LOG_NOTICE("ZoomFitBest() m_wallRect:(%.3f, %.3f, %.3f, %.3f) m_wallScaling:%.3f", m_wallRect.x, m_wallRect.y, m_wallRect.width, m_wallRect.height, m_wallScaling);
+    LOG_NOTICE("ZoomFitBest() m_screenWidth:%d m_screenHeight:%d)", m_screenWidth, m_screenHeight);
     for (auto pageFrame : m_pageFrames){
-        pageFrame->ZoomFitBest();
+        //pageFrame->ZoomFitBest();
+        pageFrame->Zoom(m_wallScaling);
     }
 }
 
 void PageWall::ZoomOriginal(){
+    m_wallScaling = GetZoomScaling();
     for (auto pageFrame : m_pageFrames){
-        pageFrame->ZoomOriginal();
+        //pageFrame->ZoomOriginal();
+        pageFrame->Zoom(m_wallScaling);
     }
 }
 
-void PageWall::RebuildWall(ofd::DocumentPtr document, int rowPages){
+void PageWall::RebuildWall(){
 
-    m_document = document;
-    m_rowPages = rowPages;
     m_pageFrames.clear();
+    //m_wallScaling = GetZoomScaling();
+
+    if (m_document == nullptr) return;
 
     size_t totalPages = m_document->GetNumPages();
     if ( totalPages == 0 ){
         return;
     }
-
-    // from document.
-    // pixel unit in current scaling.
-    int pageMaxWidth = 0;
-    int pageMaxHeight = 0;
-    std::tie(pageMaxWidth, pageMaxHeight) = document->GetPageMaxPxielSize(g_resolutionX, g_resolutionY);
-    //int pageWidth = 0;
-    //int pageHeight = 0;
-
-    // -------- PageWall rows and cols --------
-    m_wallCols = m_rowPages;
-    m_wallRows = (int)(totalPages / m_wallCols);
-    if (totalPages - m_rowPages * m_wallRows > 0){
-        m_wallRows++;
-    }
-
-    // -------- PageFrame Margins --------
-    m_frameLeftMargin = 0;
-    m_frameTopMargin = 0;
-    m_frameRightMargin = 0;
-    m_frameBottomMargin = 0;
-
-    m_frameRect = FrameRect(0, 0, pageMaxWidth, pageMaxHeight);
-    m_frameRect.margins.left = 2;
-    m_frameRect.margins.top = 3;
-    m_frameRect.margins.right = 3;
-    m_frameRect.margins.bottom = 2;
-
-    // -------- PageWall Margins --------
-    m_wallLeftMargin = 10;
-    m_wallRightMargin = 10;
-    m_wallTopMargin = 10;
-    m_wallBottomMargin = 10;
-
-    int pageFrameWidth = pageMaxWidth + m_frameRect.margins.left + m_frameRect.margins.right;
-    int pageFrameHeight = pageMaxHeight + m_frameRect.margins.top + m_frameRect.margins.bottom;
-    m_wallRect = FrameRect(0, 0, pageFrameWidth * m_wallCols, pageFrameHeight * m_wallRows);
-    m_wallRect.margins.left = m_wallLeftMargin;
-    m_wallRect.margins.top = m_wallTopMargin;
-    m_wallRect.margins.right = m_wallRightMargin;
-    m_wallRect.margins.bottom = m_wallBottomMargin;
-
-    InitZoomScaling();
 
     // -------- Page frames in document ----------
     for (size_t i = 0 ; i < totalPages ; i++){
@@ -264,57 +341,45 @@ void PageWall::RebuildWall(ofd::DocumentPtr document, int rowPages){
         assert(page != nullptr);
 
         PageFramePtr pageFrame = std::make_shared<PageFrame>(page, m_frameRect);
-        pageFrame->Rebuild(m_wallScaling);
+        pageFrame->RebuildFrame(m_wallScaling);
         m_pageFrames.push_back(pageFrame);
     }
 
 }
 
-void PageWall::InitZoomScaling(){
-
-    if (m_pageFrames.size() == 0) return;
-
-    PagePtr page = m_pageFrames[0]->GetPage();
-    double fitScaling = page->GetFitScaling(m_screenWidth, m_screenHeight, g_resolutionX, g_resolutionY);
-
-    double factor = 1.0;
-    double delta = m_zoomFactor - ZOOM_BASE;
-    if ( delta >= 0.0 ){
-        factor = log(m_zoomFactor);
-    } else {
-        factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
-    }
-    double scaling = fitScaling * factor;
-    //scaling = fitScaling;
-    m_wallScaling = scaling;
-}
 
 void PageWall::RenderWall(cairo_t *cr){
     if (m_document == nullptr){
         LOG_WARN("m_document == nullptr in RenderWall()");
         return;
     }
+
+    size_t totalPages = GetTotalPages();
     // 判断当前屏幕上需要绘制哪些页面
-    int frameHeight = m_frameRect.GetFrameHeight();
-    int startRow = (m_wallOffsetY - m_wallTopMargin) / frameHeight;
-    int endRow = (m_wallOffsetY - m_wallTopMargin + m_screenHeight) / frameHeight;
-    int maxRows = (GetTotalPages() / m_rowPages) + 1;
+    int frameHeight = m_frameRect.GetFrameHeight() * m_wallScaling;
+    int startRow = (m_wallOffsetY * m_wallScaling - m_wallRect.margins.top) / frameHeight;
+    int endRow = (m_wallOffsetY * m_wallScaling - m_wallRect.margins.top + m_screenHeight) / frameHeight;
+    int maxRows = (totalPages / m_rowPages);
+    if (maxRows * m_rowPages - totalPages > 0){
+        maxRows++;
+    }
     if (endRow >= maxRows) endRow = maxRows - 1;
 
-    int frameWidth = m_frameRect.GetFrameWidth();
-    int startCol = (m_wallOffsetX - m_wallLeftMargin) / frameWidth;
-    int endCol = (m_wallOffsetX - m_wallLeftMargin + m_screenWidth) / frameWidth;
+    int frameWidth = m_frameRect.GetFrameWidth() * m_wallScaling;
+    int startCol = (m_wallOffsetX * m_wallScaling - m_wallRect.margins.left) / frameWidth;
+    int endCol = (m_wallOffsetX * m_wallScaling- m_wallRect.margins.left + m_screenWidth) / frameWidth;
     if (endCol >= m_rowPages) endCol = m_rowPages - 1;
 
-    LOG_DEBUG("RenderWall() rows(%d, %d) cols(%d, %d)", startRow, endRow, startCol, endCol);
+    LOG_DEBUG("RenderWall() rows(%d, %d) cols(%d, %d) origin:(%d, %d) scaling:%.3f", startRow, endRow, startCol, endCol, m_wallOffsetX, m_wallOffsetY, m_wallScaling);
 
-    for ( auto i = startCol ; i <= endCol ; i++ ){
-        for ( auto j = startRow ; j <= endRow ; j++ ){
+    for ( auto j = startRow ; j <= endRow ; j++ ){
+        for ( auto i = startCol ; i <= endCol ; i++ ){
             size_t pageIndex = j * m_rowPages + i;
-            if (pageIndex >= GetTotalPages()) break;
+            if (pageIndex >= totalPages) break;
+
             PageFramePtr pageFrame = m_pageFrames[pageIndex];
             Rect canvasRect = getPageCanvasRect(j, i);
-            Point originPoint(canvasRect.x - m_wallOffsetX, canvasRect.y - m_wallOffsetY);
+            Point originPoint(canvasRect.x - m_wallOffsetX * m_wallScaling, canvasRect.y - m_wallOffsetY * m_wallScaling);
 
             cairo_save(cr);
             double x0 = (double)originPoint.x - 0.5;
@@ -336,11 +401,6 @@ void PageWall::RenderWall(cairo_t *cr){
             pageFrame->RenderFrame(cr, originPoint, canvasRect, m_wallScaling);
         }
     }
-    // TODO
-    //PageFramePtr pageFrame = m_pageFrames[0];
-    //Rect canvasRect = getPageCanvasRect(0, 0);
-    //Point originPoint(canvasRect.x - m_wallOffsetX, canvasRect.y - m_wallOffsetY);
-    //pageFrame->RenderFrame(cr, originPoint, canvasRect, m_wallScaling);
 }
 
 
@@ -359,16 +419,16 @@ int PageWall::getPageIndexFromWallPoint(int x, int y) const{
 Rect PageWall::getPageFrameRect(int row, int col){
     int frameWidth = m_frameRect.GetFrameWidth() * m_wallScaling;
     int frameHeight = m_frameRect.GetFrameHeight() * m_wallScaling;
-    int x = m_wallLeftMargin + frameWidth * col;
-    int y = m_wallTopMargin + frameHeight * row;
+    int x = m_wallRect.margins.left + frameWidth * col;
+    int y = m_wallRect.margins.top + frameHeight * row;
     return Rect(x, y, frameWidth, frameHeight);
 }
 
 // 对PageWall而言，PageFrame的CanvasSize的像素尺寸
 Rect PageWall::getPageCanvasRect(int row, int col){
     Rect frameRect = getPageFrameRect(row, col);
-    int x = frameRect.x + m_frameRect.margins.left;
-    int y = frameRect.y + m_frameRect.margins.top;
+    int x = frameRect.x + m_frameRect.margins.left * m_wallScaling;
+    int y = frameRect.y + m_frameRect.margins.top * m_wallScaling;
     int canvasWidth = m_frameRect.GetCanvasWidth() * m_wallScaling;
     int canvasHeight = m_frameRect.GetCanvasHeight() * m_wallScaling;
     return Rect(x, y, canvasWidth, canvasHeight);
