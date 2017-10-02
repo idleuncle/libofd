@@ -385,11 +385,17 @@ __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, Gd
     return false;
 }
 
+static bool m_bFirst = true;
 static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
 
     assert(m_readWindow != nullptr);
-    m_readWindow->OnSize(allocation->width, allocation->height);
-
+    if (m_bFirst){
+        m_bFirst = false;
+        m_readWindow->OnSize(allocation->width, allocation->height);
+        //m_readWindow->CmdZoomFitBest();
+    } else {
+        m_readWindow->OnSize(allocation->width, allocation->height);
+    }
 }
 
 static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
@@ -640,7 +646,6 @@ static void activate(GApplication *app){
     g_signal_emit_by_name(G_OBJECT(drawingArea), "activate");
     gtk_widget_grab_focus(drawingArea);
 
-
     m_readWindow->CmdZoomFitBest();
 }
 
@@ -677,6 +682,7 @@ static void startup(GApplication *app){
             //int screenBPP = 32;
         //}
     }
+
 }
 
 static gint command_line(GApplication *app, GApplicationCommandLine *cmdline){

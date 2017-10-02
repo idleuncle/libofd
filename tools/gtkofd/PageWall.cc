@@ -149,6 +149,7 @@ Size get_document_pixel_size(ofd::DocumentPtr document){
 void PageWall::OnSize(int screenWidth, int screenHeight){
     m_screenWidth = screenWidth;
     m_screenHeight = screenHeight;
+    //m_bFitBest = true;
 
     double fitBestScaling = CalculateBestZoomScaling();
     m_zoomFactor *= m_fitBestScaling / fitBestScaling;
@@ -156,6 +157,7 @@ void PageWall::OnSize(int screenWidth, int screenHeight){
     m_wallScaling = GetZoomScaling();
 
     //rebuildWallRect();
+
     RebuildWall();
 }
 
@@ -231,29 +233,39 @@ double PageWall::CalculateBestZoomScaling() const{
     double pagePixelHeight = pagePixelSize.height;
 
     double fitScaling = get_fit_scaling(pagePixelWidth * m_rowPages, pagePixelHeight, m_screenWidth, m_screenHeight);
+    LOG_DEBUG("CalculateBestZoomScaling() pagePixelSize(%.2f, %.2f), screenSize(%.2f, %.2f), fitScaling:%.3f", pagePixelWidth * m_rowPages, pagePixelHeight, (double)m_screenWidth, (double)m_screenHeight, fitScaling); 
 
     return fitScaling;
 }
 
-double PageWall::GetZoomScaling() const{
-    double fitScaling = m_fitBestScaling;
-    //double factor = 1.0;
-    //double delta = m_zoomFactor - ZOOM_BASE;
-    //if ( delta >= 0.0 ){
-        //factor = log(m_zoomFactor);
+double PageWall::GetZoomScaling(){
+    double fitScaling;;
+    //if (m_bFitBest){
+        //fitScaling = CalculateBestZoomScaling();
+        //m_bFitBest = false;
     //} else {
-        //factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
+        fitScaling = m_fitBestScaling;
+        //double factor = 1.0;
+        //double delta = m_zoomFactor - ZOOM_BASE;
+        //if ( delta >= 0.0 ){
+            //factor = log(m_zoomFactor);
+        //} else {
+            //factor = 1.0 - (1.0 / ( 1.0 + exp(delta)) - 0.5) * 2;
+        //}
+        //double scaling = fitScaling * factor;
     //}
-    //double scaling = fitScaling * factor;
     double scaling = fitScaling * m_zoomFactor;
 
     return scaling;
 }
 
 void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScaling){
-    m_wallOffsetX = wallOffsetX;
-    m_wallOffsetY = wallOffsetY;
-    m_wallScaling = wallScaling;
+    if (wallOffsetX >=0)
+        m_wallOffsetX = wallOffsetX;
+    if (wallOffsetY >= 0)
+        m_wallOffsetY = wallOffsetY;
+    if (wallScaling > 0)
+        m_wallScaling = wallScaling;
 }
 
 //double ZOOM_BASE = exp(1.0);
@@ -306,8 +318,12 @@ void PageWall::ZoomOut(double accelerateRate){
 void PageWall::ZoomFitBest(){
     //m_zoomFactor = ZOOM_BASE;
     m_zoomFactor = 1.0;
+
+    m_fitBestScaling= CalculateBestZoomScaling();
     m_wallScaling = GetZoomScaling();
-    LOG_NOTICE("ZoomFitBest() m_wallRect:(%.3f, %.3f, %.3f, %.3f) m_wallScaling:%.3f", m_wallRect.x, m_wallRect.y, m_wallRect.width, m_wallRect.height, m_wallScaling);
+
+    LOG_NOTICE("ZoomFitBest() m_frameRect(%.2f, %.2f, %.2f, %.2f) margins(%.2f, %.2f, %.2f, %.2f)", m_frameRect.x, m_frameRect.y, m_frameRect.width, m_frameRect.height, m_frameLeftMargin, m_frameTopMargin, m_frameRightMargin, m_frameBottomMargin);
+    LOG_NOTICE("ZoomFitBest() m_wallRect:(%.2f, %.2f, %.2f, %.2f) m_wallScaling:%.3f", m_wallRect.x, m_wallRect.y, m_wallRect.width, m_wallRect.height, m_wallScaling);
     LOG_NOTICE("ZoomFitBest() m_screenWidth:%d m_screenHeight:%d)", m_screenWidth, m_screenHeight);
     for (auto pageFrame : m_pageFrames){
         //pageFrame->ZoomFitBest();

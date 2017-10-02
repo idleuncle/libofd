@@ -144,7 +144,7 @@ public:
 
     void Rebuild(ofd::DocumentPtr document = nullptr, int rowPages = -1);
     double CalculateBestZoomScaling() const;
-    double GetZoomScaling() const;
+    double GetZoomScaling();
 
     void SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScaling);
 
@@ -215,6 +215,7 @@ private:
     double m_wallScaling = 1.0;
 
     double m_zoomFactor = exp(1.0);
+    //bool m_bFitBest = true;
 
     const int m_wallLeftMargin = 0;
     const int m_wallRightMargin = 0;

@@ -28,8 +28,10 @@ DocumentPtr ReadWindow::OpenOFDFile(const std::string &filename){
     m_document = document;
 
     if (m_pageWall != nullptr){
+        m_pageWall->SetWallViewArea(0, 0, 0);
         m_pageWall->Rebuild(m_document, m_rowPages);
     }
+
 
     return document;
 }
