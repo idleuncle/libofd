@@ -33,7 +33,7 @@
   <menu id="menubar">
       <submenu>
           <attribute name="label" translatable="yes">文件(_F)</attribute>
-          <attribute name="use_underline">True</attribute>
+          <!--<attribute name="use_underline">True</attribute>-->
           <section>
               <item>
                   <attribute name="label" translatable="yes">打开</attribute>
@@ -41,187 +41,187 @@
                   <attribute name="accel">&lt;Primary&gt;o</attribute>
               </item>
               <submenu>
-                  <attribute name="label" translatable="yes">新建</attribute>
+                  <attribute name="label" translatable="yes">新建(_N)</attribute>
                   <item>
-                      <attribute name="label" translatable="yes">空白文档</attribute>
+                      <attribute name="label" translatable="yes">空白文档(_B)</attribute>
                       <attribute name="action">app.fileNew</attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">从文件</attribute>
+                      <attribute name="label" translatable="yes">从文件(_F)</attribute>
                       <attribute name="action">app.dark</attribute>
                       <attribute name="accel">&lt;Primary&gt;n</attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">从扫描仪</attribute>
+                      <attribute name="label" translatable="yes">从扫描仪(_S)</attribute>
                       <attribute name="action"></attribute>
                   </item>
               </submenu>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">保存</attribute>
+                  <attribute name="label" translatable="yes">保存(_S)</attribute>
                   <attribute name="action">win.fileSave</attribute>
                   <attribute name="accel">&lt;Primary&gt;s</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">另存为</attribute>
+                  <attribute name="label" translatable="yes">另存为(_A)</attribute>
                   <attribute name="action">win.fileSaveAs</attribute>
                   <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;S</attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">导出</attribute>
+                  <attribute name="label" translatable="yes">导出(_E)</attribute>
                   <attribute name="action">win.fileExport</attribute>
                   <attribute name="accel">&lt;Primary&gt;e</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">打印</attribute>
+                  <attribute name="label" translatable="yes">打印(_P)</attribute>
                   <attribute name="action">win.filePrint</attribute>
                   <attribute name="accel">&lt;Primary&gt;p</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">属性</attribute>
+                  <attribute name="label" translatable="yes">属性(_T)</attribute>
                   <attribute name="action">win.fileProperties</attribute>
                   <attribute name="accel">&lt;Primary&gt;d</attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">关闭</attribute>
+                  <attribute name="label" translatable="yes">关闭(_C)</attribute>
                   <attribute name="action">app.fileQuit</attribute>
                   <attribute name="accel">&lt;Primary&gt;w</attribute>
               </item>
           </section>  
       </submenu>
       <submenu>
-          <attribute name="label" translatable="yes">编辑</attribute>
+          <attribute name="label" translatable="yes">编辑(_E)</attribute>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">撤销</attribute>
+                  <attribute name="label" translatable="yes">撤销(_U)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;z</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">重做</attribute>
+                  <attribute name="label" translatable="yes">重做(_R)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;y</attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">复制</attribute>
+                  <attribute name="label" translatable="yes">复制(_C)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;c</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">粘贴</attribute>
+                  <attribute name="label" translatable="yes">粘贴(_P)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;v</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">剪切</attribute>
+                  <attribute name="label" translatable="yes">剪切(_T)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;x</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">删除</attribute>
+                  <attribute name="label" translatable="yes">删除(_D)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">全选</attribute>
+                  <attribute name="label" translatable="yes">全选(_L)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;A</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">全不选</attribute>
+                  <attribute name="label" translatable="yes">全不选(_E)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;A</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">查找</attribute>
+                  <attribute name="label" translatable="yes">查找(_F)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;F</attribute>
               </item>
           </section>
       </submenu>
       <submenu>
-          <attribute name="label" translatable="yes">视图</attribute>
+          <attribute name="label" translatable="yes">视图(_V)</attribute>
           <section>
               <submenu>
-                  <attribute name="label" translatable="yes">文档导航</attribute>
+                  <attribute name="label" translatable="yes">文档导航(_N)</attribute>
                   <item>
-                      <attribute name="label" translatable="yes">所有</attribute>
+                      <attribute name="label" translatable="yes">所有(_A)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">页面</attribute>
+                      <attribute name="label" translatable="yes">页面(_P)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">书签</attribute>
+                      <attribute name="label" translatable="yes">书签(_B)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">大纲</attribute>
+                      <attribute name="label" translatable="yes">大纲(_O)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">附件</attribute>
+                      <attribute name="label" translatable="yes">附件(_M)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">标引</attribute>
+                      <attribute name="label" translatable="yes">标引(_P)</attribute>
                       <attribute name="action"></attribute>
                   </item>
                   <item>
-                      <attribute name="label" translatable="yes">注释</attribute>
+                      <attribute name="label" translatable="yes">注释(_A)</attribute>
                       <attribute name="action"></attribute>
                   </item>
               </submenu>
               <item>
-                  <attribute name="label" translatable="yes">文档和版本</attribute>
+                  <attribute name="label" translatable="yes">文档和版本(_V)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">缩小</attribute>
+                  <attribute name="label" translatable="yes">缩小(_O)</attribute>
                   <attribute name="action">win.viewZoomOut</attribute>
                   <attribute name="accel">&lt;Primary&gt;minus</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">放大</attribute>
+                  <attribute name="label" translatable="yes">放大(_I)</attribute>
                   <attribute name="action">win.viewZoomIn</attribute>
                   <attribute name="accel">&lt;Primary&gt;plus</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">缩放为</attribute>
+                  <attribute name="label" translatable="yes">缩放为(_C)</attribute>
                   <attribute name="action"></attribute>
                   <attribute name="accel">&lt;Primary&gt;M</attribute>
               </item>
               <submenu>
-                  <attribute name="label" translatable="yes">缩放模式</attribute>
+                  <attribute name="label" translatable="yes">缩放模式(_Z)</attribute>
                   <section>
                       <item>
-                          <attribute name="label" translatable="yes">原始大小</attribute>
+                          <attribute name="label" translatable="yes">原始大小(_O)</attribute>
                           <attribute name="action">win.viewZoomOriginal</attribute>
                           <attribute name="accel">&lt;Primary&gt;1</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">适合页面</attribute>
+                          <attribute name="label" translatable="yes">适合页面(_P)</attribute>
                           <attribute name="action">win.viewZoomFitBest</attribute>
                           <attribute name="accel">&lt;Primary&gt;2</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">适合宽度</attribute>
+                          <attribute name="label" translatable="yes">适合宽度(_W)</attribute>
                           <attribute name="action">win.viewZoomFitWidth</attribute>
                           <attribute name="accel">&lt;Primary&gt;3</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">适合高度</attribute>
+                          <attribute name="label" translatable="yes">适合高度(_H)</attribute>
                           <attribute name="action">win.viewZoomFitHeight</attribute>
                           <attribute name="accel">&lt;Primary&gt;4</attribute>
                       </item>
@@ -230,50 +230,50 @@
           </section>
           <section>
               <submenu>
-                  <attribute name="label" translatable="yes">页面布局</attribute>
+                  <attribute name="label" translatable="yes">页面布局(_L)</attribute>
                   <section>
                       <item>
-                          <attribute name="label" translatable="yes">单页</attribute>
+                          <attribute name="label" translatable="yes">单页(_S)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;1</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">单页连续</attribute>
+                          <attribute name="label" translatable="yes">单页连续(_C)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;2</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">对开</attribute>
+                          <attribute name="label" translatable="yes">对开(_F)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;3</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">对开靠右</attribute>
+                          <attribute name="label" translatable="yes">对开靠右(E)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;4</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">对开连续</attribute>
+                          <attribute name="label" translatable="yes">对开连续(_T)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;5</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">连续靠右</attribute>
+                          <attribute name="label" translatable="yes">连续靠右(_R)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;6</attribute>
                       </item>
                   </section>
               </submenu>
               <submenu>
-                  <attribute name="label" translatable="yes">旋转视图</attribute>
+                  <attribute name="label" translatable="yes">旋转视图(_R)</attribute>
                   <section>
                       <item>
-                          <attribute name="label" translatable="yes">顺时针</attribute>
+                          <attribute name="label" translatable="yes">顺时针(_C)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;plus</attribute>
                       </item>
                       <item>
-                          <attribute name="label" translatable="yes">逆时针</attribute>
+                          <attribute name="label" translatable="yes">逆时针(_W)</attribute>
                           <attribute name="action"></attribute>
                           <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;minus</attribute>
                       </item>
@@ -282,11 +282,11 @@
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">显示或隐藏菜单档</attribute>
+                  <attribute name="label" translatable="yes">显示或隐藏菜单档(_T)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">显示或隐藏工具档</attribute>
+                  <attribute name="label" translatable="yes">显示或隐藏工具档(_M)</attribute>
                   <attribute name="action"></attribute>
               </item>
 
@@ -294,59 +294,59 @@
       </submenu>
 
       <submenu>
-          <attribute name="label" translatable="yes">文档</attribute>
+          <attribute name="label" translatable="yes">文档(_D)</attribute>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">首页</attribute>
+                  <attribute name="label" translatable="yes">首页(_F)</attribute>
                   <attribute name="action">win.docFirstPage</attribute>
                   <attribute name="accel">Home</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">上一页</attribute>
+                  <attribute name="label" translatable="yes">上一页(_P)</attribute>
                   <attribute name="action">win.docPreviousPage</attribute>
                   <attribute name="accel">PageUp</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">下一页</attribute>
+                  <attribute name="label" translatable="yes">下一页(_N)</attribute>
                   <attribute name="action">win.docNextPage</attribute>
                   <attribute name="accel">PageDown</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">末页</attribute>
+                  <attribute name="label" translatable="yes">末页(_L)</attribute>
                   <attribute name="action">win.docLastPage</attribute>
                   <attribute name="accel">End</attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">跳至页面</attribute>
+                  <attribute name="label" translatable="yes">跳至页面(_G)</attribute>
                   <attribute name="action">win.docGotoPage</attribute>
                   <attribute name="accel">&lt;Primary&gt;G</attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">应用模板</attribute>
+                  <attribute name="label" translatable="yes">应用模板(_T)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">插入页面</attribute>
+                  <attribute name="label" translatable="yes">插入页面(_I)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">删除页面</attribute>
+                  <attribute name="label" translatable="yes">删除页面(_D)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">提取页面</attribute>
+                  <attribute name="label" translatable="yes">提取页面(_S)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">附件</attribute>
+                  <attribute name="label" translatable="yes">附件(_M)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">水印</attribute>
+                  <attribute name="label" translatable="yes">水印(_W)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
@@ -355,33 +355,33 @@
           <attribute name="label" translatable="yes">工具(_T)</attribute>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">手型工具</attribute>
+                  <attribute name="label" translatable="yes">手型工具(_H)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">选择注释</attribute>
+                  <attribute name="label" translatable="yes">选择注释(_A)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">选择文本</attribute>
+                  <attribute name="label" translatable="yes">选择文本(_T)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">快照工具</attribute>
+                  <attribute name="label" translatable="yes">快照工具(_N)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
           <section>
               <item>
-                  <attribute name="label" translatable="yes">绘制线条</attribute>
+                  <attribute name="label" translatable="yes">绘制线条(_L)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">绘制矩形</attribute>
+                  <attribute name="label" translatable="yes">绘制矩形(_R)</attribute>
                   <attribute name="action"></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">绘制拆线</attribute>
+                  <attribute name="label" translatable="yes">绘制拆线(_P)</attribute>
                   <attribute name="action"></attribute>
               </item>
           </section>
@@ -389,20 +389,20 @@
     <submenu>
       <attribute name="label" translatable="yes">帮助(_H)</attribute>
       <item>
-        <attribute name="label" translatable="yes">产品信息</attribute>
+        <attribute name="label" translatable="yes">产品信息(_P)</attribute>
         <attribute name="action">win.about</attribute>
         <attribute name="accel">&lt;Primary&gt;a</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">用户说明</attribute>
+        <attribute name="label" translatable="yes">用户说明(_U)</attribute>
         <attribute name="action">win.about</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">命令行</attribute>
+        <attribute name="label" translatable="yes">命令行(_C)</attribute>
         <attribute name="action">win.about</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">快捷键</attribute>
+        <attribute name="label" translatable="yes">快捷键(_S)</attribute>
         <attribute name="action">win.about</attribute>
       </item>
     </submenu>

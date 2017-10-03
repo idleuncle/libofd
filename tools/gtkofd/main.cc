@@ -766,11 +766,11 @@ static void startup(GApplication *app){
     GtkBuilder *builder = gtk_builder_new_from_resource("/ui/menus.ui");
     //GtkBuilder *builder = gtk_builder_new_from_resource("/ui/appmenus.ui");
 
-    GObject *appMenu = gtk_builder_get_object(builder, "appmenu");
+    //GObject *appMenu = gtk_builder_get_object(builder, "appmenu");
     GObject *menuBar = gtk_builder_get_object(builder, "menubar");
     assert(menuBar != nullptr);
     //GObject *menuBar = gtk_builder_get_object(builder, "mainMenuBar");
-    gtk_application_set_app_menu(GTK_APPLICATION(app), G_MENU_MODEL(appMenu));
+    //gtk_application_set_app_menu(GTK_APPLICATION(app), G_MENU_MODEL(appMenu));
     gtk_application_set_menubar(GTK_APPLICATION(app), G_MENU_MODEL(menuBar));
 
     g_object_unref (builder);

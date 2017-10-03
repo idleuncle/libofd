@@ -105,7 +105,7 @@ void init_toolbar(GtkToolbar *mainToolbar){
     insert_toolbar_item(mainToolbar, "go-first", "首页", G_CALLBACK(on_toolbar_go_cb));
     insert_toolbar_item(mainToolbar, "go-previous", "上页", G_CALLBACK(on_toolbar_go_cb));
     insert_toolbar_item(mainToolbar, "go-next", "下页", G_CALLBACK(on_toolbar_go_cb));
-    insert_toolbar_item(mainToolbar, "go-last", "尾页", G_CALLBACK(on_toolbar_go_cb));
+    insert_toolbar_item(mainToolbar, "go-last", "末页", G_CALLBACK(on_toolbar_go_cb));
     insert_toolbar_item(mainToolbar, "go-jump", "跳转", G_CALLBACK(on_toolbar_go_cb));
 
     // -------- separator tool item --------
@@ -113,7 +113,7 @@ void init_toolbar(GtkToolbar *mainToolbar){
 
     insert_toolbar_item(mainToolbar, "zoom-in", "放大", G_CALLBACK(on_toolbar_zoom_cb));
     insert_toolbar_item(mainToolbar, "zoom-out", "缩小", G_CALLBACK(on_toolbar_zoom_cb));
-    insert_toolbar_item(mainToolbar, "zoom-fit-best", "合适", G_CALLBACK(on_toolbar_zoom_cb));
+    insert_toolbar_item(mainToolbar, "zoom-fit-best", "适合", G_CALLBACK(on_toolbar_zoom_cb));
     insert_toolbar_item(mainToolbar, "zoom-original", "原始", G_CALLBACK(on_toolbar_zoom_cb));
 
     // -------- separator tool item --------

@@ -168,8 +168,8 @@ public:
 
     double ZOOM_BASE = exp(1.0);
     double ZOOM_STEP = 0.1;
-    double X_STEP = 24;
-    double Y_STEP = 24;
+    double X_STEP = 12;
+    double Y_STEP = 12;
 
     void MoveUp(double accelerateRate=1.0);
     void MoveDown(double accelerateRate=1.0);
