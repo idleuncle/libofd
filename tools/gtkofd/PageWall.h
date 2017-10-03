@@ -217,20 +217,21 @@ private:
     double m_zoomFactor = exp(1.0);
     //bool m_bFitBest = true;
 
-    const int m_wallLeftMargin = 0;
-    const int m_wallRightMargin = 0;
+    const int m_wallLeftMargin = 8;
+    const int m_wallRightMargin = 8;
     const int m_wallTopMargin = 0;
-    const int m_wallBottomMargin = 0;
+    const int m_wallBottomMargin = 12;
 
-    double m_frameLeftMargin = 5;
-    double m_frameRightMargin = 5;
-    double m_frameTopMargin = 10;
-    double m_frameBottomMargin = 10;
+    double m_frameLeftMargin = 0;
+    double m_frameRightMargin = 0;
+    double m_frameTopMargin = 12;
+    double m_frameBottomMargin = 0;
 
     // PageFrame
     FrameRect m_frameRect;
     std::vector<PageFramePtr> m_pageFrames;
 
+    void ShowProperties() const;
 }; // class PageWall
 typedef std::shared_ptr<PageWall> PageWallPtr;
 

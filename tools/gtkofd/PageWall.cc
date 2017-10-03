@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include "PageWall.h"
 #include "utils/logger.h"
@@ -232,7 +233,9 @@ double PageWall::CalculateBestZoomScaling() const{
     double pagePixelWidth = pagePixelSize.width;
     double pagePixelHeight = pagePixelSize.height;
 
-    double fitScaling = get_fit_scaling(pagePixelWidth * m_rowPages, pagePixelHeight, m_screenWidth, m_screenHeight);
+    double fitScaling = get_fit_scaling(pagePixelWidth * m_rowPages, pagePixelHeight,
+            m_screenWidth - m_wallRect.margins.left - m_wallRect.margins.right, 
+            m_screenHeight - m_wallRect.margins.top - m_wallRect.margins.bottom);
     LOG_DEBUG("CalculateBestZoomScaling() pagePixelSize(%.2f, %.2f), screenSize(%.2f, %.2f), fitScaling:%.3f", pagePixelWidth * m_rowPages, pagePixelHeight, (double)m_screenWidth, (double)m_screenHeight, fitScaling); 
 
     return fitScaling;
@@ -274,27 +277,56 @@ void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScal
 //double Y_STEP = 20;
 
 void PageWall::MoveUp(double accelerateRate){
-    m_wallOffsetY -= Y_STEP * accelerateRate;
+    double offset = Y_STEP * accelerateRate;
+    m_wallOffsetY -= offset;
     if (m_wallOffsetY < 0) m_wallOffsetY = 0;
+    ShowProperties();
 }
 
 void PageWall::MoveDown(double accelerateRate){
-    m_wallOffsetY += Y_STEP * accelerateRate;
-    if (m_wallOffsetY + m_screenHeight > m_wallRect.height){
-        m_wallOffsetY = m_wallRect.height - m_screenHeight;
+    double screenPixels = m_screenHeight / m_wallScaling;
+    //if (m_wallRect.height - m_wallOffsetY <= screenPixels) return;
+
+    double offset = Y_STEP * accelerateRate;
+    //LOG_DEBUG("MoveDown() m_wallOffsetY:%.2f offset:%.2f", m_wallOffsetY, offset);
+    //LOG_DEBUG("Y_STEP * accelerateRate:(%.2f * %.2f)", Y_STEP, accelerateRate);
+    //LOG_DEBUG("Result m_wallOffsetY:%.2f", m_wallOffsetY + offset);
+    m_wallOffsetY += offset;
+
+    double wallFrameHeight = m_wallRect.GetFrameHeight();
+    if (wallFrameHeight - screenPixels < m_wallOffsetY){ 
+        if (wallFrameHeight - m_wallOffsetY < screenPixels){
+            m_wallOffsetY = wallFrameHeight - screenPixels;
+        }
     }
+    ShowProperties();
 }
 
 void PageWall::MoveLeft(double accelerateRate){
-    m_wallOffsetX -= X_STEP * accelerateRate;
+    double offset = X_STEP * accelerateRate;
+    LOG_DEBUG("MoveLeft() m_wallOffsetX:%.2f offset:%.2f (%.2f * %.2f) Result m_wallOffsetX:%.2f", m_wallOffsetX, offset, X_STEP, accelerateRate, m_wallOffsetX - offset);
+    m_wallOffsetX -= offset;
     if (m_wallOffsetX < 0) m_wallOffsetX = 0;
+    ShowProperties();
 }
 
 void PageWall::MoveRight(double accelerateRate){
-    m_wallOffsetX += X_STEP * accelerateRate;
-    if (m_wallOffsetX + m_screenWidth > m_wallRect.width){
-        m_wallOffsetX = m_wallRect.width - m_screenWidth;
+    double screenPixels = m_screenWidth / m_wallScaling;
+    //if (m_wallRect.width - m_wallOffsetX <= screenPixels) return;
+
+    double offset = X_STEP * accelerateRate;
+    //LOG_DEBUG("MoveRight() m_wallOffsetX:%.2f offset:%.2f", m_wallOffsetX, offset);
+    //LOG_DEBUG("X_STEP * accelerateRate:(%.2f * %.2f)", X_STEP, accelerateRate);
+    //LOG_DEBUG("Result m_wallOffsetX:%.2f", m_wallOffsetX + offset);
+    m_wallOffsetX += offset;
+
+    double wallFrameWidth = m_wallRect.GetFrameWidth();
+    if (wallFrameWidth - screenPixels < m_wallOffsetX ){
+        if (wallFrameWidth - m_wallOffsetX < screenPixels){
+            m_wallOffsetX = wallFrameWidth - screenPixels;
+        }
     }
+    ShowProperties();
 }
 
 void PageWall::ZoomIn(double accelerateRate){
@@ -318,6 +350,7 @@ void PageWall::ZoomOut(double accelerateRate){
 void PageWall::ZoomFitBest(){
     //m_zoomFactor = ZOOM_BASE;
     m_zoomFactor = 1.0;
+    m_wallOffsetX = 0;
 
     m_fitBestScaling= CalculateBestZoomScaling();
     m_wallScaling = GetZoomScaling();
@@ -329,14 +362,19 @@ void PageWall::ZoomFitBest(){
         //pageFrame->ZoomFitBest();
         pageFrame->Zoom(m_wallScaling);
     }
+
+    ShowProperties();
 }
 
 void PageWall::ZoomOriginal(){
-    m_wallScaling = GetZoomScaling();
+    m_zoomFactor = 1.0;
+    m_wallScaling = 1.0;
     for (auto pageFrame : m_pageFrames){
         //pageFrame->ZoomOriginal();
         pageFrame->Zoom(m_wallScaling);
     }
+
+    ShowProperties();
 }
 
 void PageWall::RebuildWall(){
@@ -410,7 +448,7 @@ void PageWall::RenderWall(cairo_t *cr){
             cairo_close_path(cr);
             cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
             cairo_fill(cr);
-            cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 0.8);
+            cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
             cairo_stroke(cr);
             cairo_restore(cr);
 
@@ -448,4 +486,19 @@ Rect PageWall::getPageCanvasRect(int row, int col){
     int canvasWidth = m_frameRect.GetCanvasWidth() * m_wallScaling;
     int canvasHeight = m_frameRect.GetCanvasHeight() * m_wallScaling;
     return Rect(x, y, canvasWidth, canvasHeight);
+}
+
+void PageWall::ShowProperties() const{
+    LOG_NOTICE("================ PageWall ================");
+    std::cout << "\n";
+    std::cout << "\tScreen Size:\t" << "(" << m_screenWidth << ", " << m_screenHeight << ")" << " " << "BPP: " << m_screenBPP << "\n";
+    std::cout << "\tDocument:\t" << "Pixels Size: (" << m_documentPixelSize.width << ", " << m_documentPixelSize.height << ") " << " " << m_rowPages << " pages/row (" << m_wallRows << " rows " << m_wallCols << " cols)" << "\n";
+    std::cout << "\tPages:\t" << "Total pages: " << GetTotalPages() << " Page frames size: " << m_pageFrames.size() << "\n";
+    std::cout << "\tScaling:\t" << "FitBestScaling: " << m_fitBestScaling << " ZoomFactor: " << m_zoomFactor << "\n";
+    std::cout << "\tWall Offset:\t" << "(" << m_wallOffsetX << ", " << m_wallOffsetY << ") " << " Wall Scaling: " << m_wallScaling << "\n"; 
+    std::cout << "\tWall Rect:\t" << "(" << m_wallRect.x << ", " << m_wallRect.y << ") (" << m_wallRect.width << ", " << m_wallRect.height << ")\n";
+    std::cout << "\tWall Margins:\t" << "(" << m_wallRect.margins.left << ", " << m_wallRect.margins.top << ", " << m_wallRect.margins.right << ", " << m_wallRect.margins.bottom << ")\n";
+    std::cout << "\tFrame Rect:\t" << "(" << m_frameRect.x << ", " << m_frameRect.y << ") (" << m_frameRect.width << ", " << m_frameRect.height << ")\n";
+    std::cout << "\tFrame Margins:\t" << "(" << m_frameRect.margins.left << ", " << m_frameRect.margins.top << ", " << m_frameRect.margins.right << ", " << m_frameRect.margins.bottom << ")\n";
+    std::cout << "\n";
 }

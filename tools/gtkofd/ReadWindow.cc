@@ -57,10 +57,10 @@ void ReadWindow::OnSize(int width, int height){
 
 void ReadWindow::OnDraw(cairo_t *cr){
     GdkRGBA rgba;
-    rgba.red = 0.5;
-    rgba.green = 0.5;
-    rgba.blue = 0.5;
-    rgba.alpha = 0.5;
+    rgba.red = 0.2;
+    rgba.green = 0.2;
+    rgba.blue = 0.2;
+    rgba.alpha = 0.6;
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_paint(cr);
 
@@ -179,20 +179,25 @@ double ReadWindow::applyScrollAccelerate(int scrollAction, double acceleration, 
         m_scrollAction = scrollAction;
         m_lastScrollTime = 0;
         m_scrollAcceRate = 1.0;
+        m_scrollCount = 0;
     }
 
+    m_scrollCount++;
     double scrollAcceRate = m_scrollAcceRate;
 
     unsigned long long scrollTime = utils::GetTimeTick();
     if (m_lastScrollTime != 0){
         if (scrollTime - m_lastScrollTime < SCROLL_TIME_DELTA){
-            scrollAcceRate = m_scrollAcceRate * acceleration;
-            if (scrollAcceRate >= maxAcceleration){
-                scrollAcceRate = maxAcceleration;
+            if (m_scrollCount % 2 == 0){
+                scrollAcceRate = m_scrollAcceRate * acceleration;
+                if (scrollAcceRate >= maxAcceleration){
+                    scrollAcceRate = maxAcceleration;
+                }
+                LOG_NOTICE("scrollAcceRate:%.6f", scrollAcceRate);
             }
-            LOG_NOTICE("scrollAcceRate:%.6f", scrollAcceRate);
         } else {
             scrollAcceRate = 1.0;
+            m_scrollCount = 0;
             LOG_INFO("scrollAcceRate set to 1.0");
         }
     }

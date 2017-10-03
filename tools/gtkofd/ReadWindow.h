@@ -78,6 +78,7 @@ public:
     int m_scrollAction = -1;
     unsigned long long m_lastScrollTime = 0;
     double m_scrollAcceRate = 1.0;
+    uint32_t m_scrollCount = 0;
 private:
     double applyScrollAccelerate(int scrollAction, double acceleration, double maxAcceleration);
 }; // class ReadWindow
