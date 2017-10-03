@@ -43,6 +43,12 @@ void ReadWindow::CmdFileOpen(){
     }
 }
 
+void ReadWindow::CmdFileSave(){
+}
+
+void ReadWindow::CmdFileSaveAs(){
+}
+
 void ReadWindow::CmdFirstPage(){
     FirstPage();
     RedrawPage();
@@ -63,7 +69,7 @@ void ReadWindow::CmdPreviousPage(){
     RedrawPage();
 }
 
-void ReadWindow::CmdJumpPage(){
+void ReadWindow::CmdGotoPage(){
     RedrawPage();
 }
 

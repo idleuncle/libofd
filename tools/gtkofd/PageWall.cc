@@ -302,6 +302,7 @@ void PageWall::MoveDown(double accelerateRate){
     ShowProperties();
 }
 
+
 void PageWall::MoveLeft(double accelerateRate){
     double offset = X_STEP * accelerateRate;
     LOG_DEBUG("MoveLeft() m_wallOffsetX:%.2f offset:%.2f (%.2f * %.2f) Result m_wallOffsetX:%.2f", m_wallOffsetX, offset, X_STEP, accelerateRate, m_wallOffsetX - offset);
@@ -326,6 +327,41 @@ void PageWall::MoveRight(double accelerateRate){
             m_wallOffsetX = wallFrameWidth - screenPixels;
         }
     }
+    ShowProperties();
+}
+
+void PageWall::MoveFirstPage(){
+    m_wallOffsetY = 0;
+    ShowProperties();
+}
+
+void PageWall::MovePreviousPage(){
+    double screenPixels = m_screenHeight / m_wallScaling;
+    double offset = screenPixels;
+    m_wallOffsetY -= offset;
+    if (m_wallOffsetY < 0) m_wallOffsetY = 0;
+    ShowProperties();
+}
+
+void PageWall::MoveNextPage(){
+    double screenPixels = m_screenHeight / m_wallScaling;
+    double offset = screenPixels;
+    m_wallOffsetY += offset;
+
+    double wallFrameHeight = m_wallRect.GetFrameHeight();
+    if (wallFrameHeight - screenPixels < m_wallOffsetY){ 
+        if (wallFrameHeight - m_wallOffsetY < screenPixels){
+            m_wallOffsetY = wallFrameHeight - screenPixels;
+        }
+    }
+    ShowProperties();
+}
+
+void PageWall::MoveLastPage(){
+    double screenPixels = m_screenHeight / m_wallScaling;
+    double wallFrameHeight = m_wallRect.GetFrameHeight();
+    m_wallOffsetY = wallFrameHeight - screenPixels;
+    if (m_wallOffsetY < 0) m_wallOffsetY = 0;
     ShowProperties();
 }
 

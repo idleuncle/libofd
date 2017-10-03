@@ -180,6 +180,11 @@ public:
     void ZoomFitBest();
     void ZoomOriginal();
 
+    void MoveFirstPage();
+    void MovePreviousPage();
+    void MoveNextPage();
+    void MoveLastPage();
+
 private:
     Size getPagePixelSize() const;
     int getPageIndexFromWallPoint(int x, int y) const;
@@ -217,14 +222,14 @@ private:
     double m_zoomFactor = exp(1.0);
     //bool m_bFitBest = true;
 
-    const int m_wallLeftMargin = 8;
-    const int m_wallRightMargin = 8;
-    const int m_wallTopMargin = 0;
-    const int m_wallBottomMargin = 12;
+    const double m_wallLeftMargin = 13;
+    const double m_wallRightMargin = 13;
+    const double m_wallTopMargin = 0;
+    const double m_wallBottomMargin = 13;
 
     double m_frameLeftMargin = 0;
     double m_frameRightMargin = 0;
-    double m_frameTopMargin = 12;
+    double m_frameTopMargin = 13;
     double m_frameBottomMargin = 0;
 
     // PageFrame

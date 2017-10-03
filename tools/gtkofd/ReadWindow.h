@@ -39,7 +39,7 @@ public:
     void CmdNextPage();
     void CmdPreviousPage();
     void CmdLastPage();
-    void CmdJumpPage();
+    void CmdGotoPage();
     void CmdZoomIn();
     void CmdZoomOut();
     void CmdZoomFitBest();
@@ -50,6 +50,8 @@ public:
     void CmdMoveRight();
 
     void CmdFileOpen();
+    void CmdFileSave();
+    void CmdFileSaveAs();
 
     GtkWindow *m_mainWindow = nullptr;
     GtkToolbar *m_mainToolbar = nullptr;

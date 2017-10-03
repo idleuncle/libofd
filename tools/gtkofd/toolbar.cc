@@ -31,7 +31,7 @@ static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
     } else if (name == "go-last"){
         readWindow->CmdLastPage();
     } else if (name == "go-jump"){
-        readWindow->CmdJumpPage();
+        readWindow->CmdGotoPage();
     }
 }
 

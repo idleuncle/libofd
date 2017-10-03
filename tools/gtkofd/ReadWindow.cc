@@ -57,9 +57,9 @@ void ReadWindow::OnSize(int width, int height){
 
 void ReadWindow::OnDraw(cairo_t *cr){
     GdkRGBA rgba;
-    rgba.red = 0.2;
-    rgba.green = 0.2;
-    rgba.blue = 0.2;
+    rgba.red = 0.25;
+    rgba.green = 0.25;
+    rgba.blue = 0.25;
     rgba.alpha = 0.6;
     gdk_cairo_set_source_rgba(cr, &rgba);
     cairo_paint(cr);
@@ -83,6 +83,8 @@ void ReadWindow::FirstPage(){
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
+
+    m_pageWall->MoveFirstPage();
 }
 
 void ReadWindow::LastPage(){
@@ -92,6 +94,8 @@ void ReadWindow::LastPage(){
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
+
+    m_pageWall->MoveLastPage();
 }
 
 void ReadWindow::NextPage(){
@@ -102,9 +106,9 @@ void ReadWindow::NextPage(){
     } else {
         m_pageIndex = 0;
     }
-    //m_ofdRender->SetOffsetX(0.0);
-    //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
+
+    m_pageWall->MoveNextPage();
 }
 
 void ReadWindow::PreviousPage(){
@@ -118,6 +122,8 @@ void ReadWindow::PreviousPage(){
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
+
+    m_pageWall->MovePreviousPage();
 }
 
 void ReadWindow::ZoomIn(){

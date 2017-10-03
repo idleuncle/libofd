@@ -2,6 +2,7 @@
 <gresources>
     <gresource prefix="/">
         <file preprocess="xml-stripblanks">ui/app.ui</file>
+        <file preprocess="xml-stripblanks">ui/appmenus.ui</file>
         <file preprocess="xml-stripblanks">ui/menus.ui</file>
         <file>themes/OSX-Arc-White/gtk-3.22/gtk-light.css</file>
         <file>themes/OSX-Arc-White/gtk-3.22/gtk-darker.css</file>

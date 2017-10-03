@@ -40,6 +40,20 @@ typedef struct{
 } ApplicationWindowContext;
 
 
+__attribute__((unused)) static gint my_popup_handler(GtkWidget *widget, GdkEvent *event){
+    GtkMenu *menu = GTK_MENU(widget);
+
+    if (event->type == GDK_BUTTON_PRESS){
+        GdkEventButton *event_button = (GdkEventButton*)event;
+        if (event_button->button == GDK_BUTTON_SECONDARY){
+            gtk_menu_popup_at_pointer(menu, event);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer user_data){
 
     GtkApplication *app = (GtkApplication*)user_data;
@@ -66,6 +80,62 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
             nullptr);
 }
 
+static void activate_fileOpen(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFileOpen();
+}
+
+static void activate_fileSave(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFileSave();
+}
+
+static void activate_fileSaveAs(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFileSaveAs();
+}
+
+static void activate_viewZoomIn(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomIn();
+}
+
+static void activate_viewZoomOut(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomOut();
+}
+
+static void activate_viewZoomOriginal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomOriginal();
+}
+
+static void activate_viewZoomFitBest(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomFitBest();
+}
+
+static void activate_viewZoomFitWidth(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomFitBest();
+}
+
+static void activate_viewZoomFitHeight(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdZoomFitBest();
+}
+
+static void activate_docFirstPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFirstPage();
+}
+
+static void activate_docPreviousPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdPreviousPage();
+}
+
+static void activate_docNextPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdNextPage();
+}
+
+static void activate_docLastPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdLastPage();
+}
+
+static void activate_docGotoPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdGotoPage();
+}
+
 static void activate_quit (GSimpleAction *action, GVariant *parameter, gpointer user_data){
 
     GtkApplication *app = (GtkApplication*)user_data;
@@ -89,16 +159,52 @@ __attribute__((unused)) static void activate_run(GSimpleAction *action, GVariant
 
 // https://developer.gnome.org/gtk3/3.2/GtkWidget.html#Signal-Details
 
+bool no_special_keys(GdkEventKey *event){
+    return !(event->state & GDK_CONTROL_MASK) && 
+        !(event->state & GDK_SUPER_MASK) && 
+        !(event->state & GDK_META_MASK);
+}
+
 static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
     assert(m_readWindow != nullptr);
 
     switch (event->keyval){
+    case GDK_KEY_Page_Down:
+        LOG_DEBUG("Page Down KEY PRESSED!");
+        m_readWindow->CmdNextPage();
+        break;
+    case GDK_KEY_Page_Up:
+        LOG_DEBUG("Page Up KEY PRESSED!");
+        m_readWindow->CmdPreviousPage();
+        break;
+    case GDK_KEY_Down:
+        LOG_DEBUG("Down KEY PRESSED!");
+        m_readWindow->CmdMoveDown();
+        break;
+    case GDK_KEY_Up:
+        LOG_DEBUG("Up KEY PRESSED!");
+        m_readWindow->CmdMoveUp();
+        break;
+    case GDK_KEY_Left:
+        LOG_DEBUG("Left KEY PRESSED!");
+        m_readWindow->CmdMoveLeft();
+        break;
+    case GDK_KEY_Right:
+        LOG_DEBUG("Right KEY PRESSED!");
+        m_readWindow->CmdMoveRight();
+        break;
     case GDK_KEY_i:
-        m_readWindow->CmdZoomIn();    
+        if (no_special_keys(event)){
+            m_readWindow->CmdZoomIn();    
+        } else {
+            return false;
+        }
         break;
     case GDK_KEY_o:
-        if (!(event->state & GDK_CONTROL_MASK)){
+        if (no_special_keys(event)){
             m_readWindow->CmdZoomOut();    
+        } else {
+            return false;
         }
         break;
     case GDK_KEY_f:
@@ -148,7 +254,7 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_minus:
         if (event->state & GDK_CONTROL_MASK){
             // 缩小 Ctrl + -
-            m_readWindow->CmdZoomIn();
+            m_readWindow->CmdZoomOut();
             LOG_DEBUG("Key Ctrl+- released. keyval: 0x%x", event->keyval);
         }
         break;
@@ -183,30 +289,6 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         break;
     case GDK_KEY_End:
         m_readWindow->CmdLastPage();
-        break;
-    case GDK_KEY_Page_Down:
-        LOG_DEBUG("Page Down KEY RELEASED!");
-        m_readWindow->CmdNextPage();
-        break;
-    case GDK_KEY_Page_Up:
-        LOG_DEBUG("Page Up KEY RELEASED!");
-        m_readWindow->CmdPreviousPage();
-        break;
-    case GDK_KEY_Down:
-        LOG_DEBUG("Down KEY RELEASED!");
-        m_readWindow->CmdMoveDown();
-        break;
-    case GDK_KEY_Up:
-        LOG_DEBUG("Up KEY RELEASED!");
-        m_readWindow->CmdMoveUp();
-        break;
-    case GDK_KEY_Left:
-        LOG_DEBUG("Left KEY RELEASED!");
-        m_readWindow->CmdMoveLeft();
-        break;
-    case GDK_KEY_Right:
-        LOG_DEBUG("Right KEY RELEASED!");
-        m_readWindow->CmdMoveRight();
         break;
     case GDK_KEY_space:
         LOG_DEBUG("SPACE KEY RELEASED!");
@@ -548,6 +630,19 @@ static void activate(GApplication *app){
     // -------- Widgets callbacks --------
 
     static GActionEntry win_entries[] = {
+        { "fileSave", activate_fileSave, nullptr, nullptr, nullptr },
+        { "fileSaveAs", activate_fileSaveAs, nullptr, nullptr, nullptr },
+        { "viewZoomIn", activate_viewZoomIn, nullptr, nullptr, nullptr },
+        { "viewZoomOut", activate_viewZoomOut, nullptr, nullptr, nullptr },
+        { "viewZoomOriginal", activate_viewZoomOriginal, nullptr, nullptr, nullptr },
+        { "viewZoomFitBest", activate_viewZoomFitBest, nullptr, nullptr, nullptr },
+        { "viewZoomFitWidth", activate_viewZoomFitWidth, nullptr, nullptr, nullptr },
+        { "viewZoomFitHeight", activate_viewZoomFitHeight, nullptr, nullptr, nullptr },
+        { "docFirstPage", activate_docFirstPage, nullptr, nullptr, nullptr },
+        { "docPreviousPage", activate_docPreviousPage, nullptr, nullptr, nullptr },
+        { "docNextPage", activate_docNextPage, nullptr, nullptr, nullptr },
+        { "docLastPage", activate_docLastPage, nullptr, nullptr, nullptr },
+        { "docGotoPage", activate_docGotoPage, nullptr, nullptr, nullptr },
         //{ "run", activate_run, nullptr, nullptr, nullptr },
         { "bold", activate_about, nullptr, nullptr, nullptr },
     };
@@ -649,6 +744,14 @@ static void activate(GApplication *app){
     m_readWindow->CmdZoomFitBest();
 }
 
+GtkWidget* create_menubar(){
+    GtkWidget *menubar = gtk_menu_bar_new();
+    //GtkWidget *menuitem = gtk_menu_item_new_with_label("文件");
+    //gtk_menu_bar_append(GTK_MENU_BAR(menubar), menuitem);
+
+    return menubar;
+}
+
 static void startup(GApplication *app){
 
     GResource *resource = gtkofd_get_resource();
@@ -660,13 +763,14 @@ static void startup(GApplication *app){
 
     //GtkBuilder *builder = gtk_builder_new_from_file("./app.ui");
     //GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
-    //GtkBuilder *builder = gtk_builder_new_from_file("./menus.ui");
     GtkBuilder *builder = gtk_builder_new_from_resource("/ui/menus.ui");
+    //GtkBuilder *builder = gtk_builder_new_from_resource("/ui/appmenus.ui");
 
-    //GObject *appMenu = gtk_builder_get_object(builder, "appmenu");
+    GObject *appMenu = gtk_builder_get_object(builder, "appmenu");
     GObject *menuBar = gtk_builder_get_object(builder, "menubar");
+    assert(menuBar != nullptr);
     //GObject *menuBar = gtk_builder_get_object(builder, "mainMenuBar");
-    //gtk_application_set_app_menu(GTK_APPLICATION(app), G_MENU_MODEL(appMenu));
+    gtk_application_set_app_menu(GTK_APPLICATION(app), G_MENU_MODEL(appMenu));
     gtk_application_set_menubar(GTK_APPLICATION(app), G_MENU_MODEL(menuBar));
 
     g_object_unref (builder);
@@ -738,6 +842,8 @@ int main(int argc, char *argv[]){
 
     GtkApplication *app;
     static GActionEntry app_entries[] = {
+        { "fileOpen", activate_fileOpen, nullptr, nullptr, nullptr },
+        { "fileQuit", activate_quit, nullptr, nullptr, nullptr },
         { "about", activate_about, nullptr, nullptr, nullptr },
         { "quit", activate_quit, nullptr, nullptr, nullptr },
         { "dark", activate_toggle, nullptr, "false", change_theme_state },
