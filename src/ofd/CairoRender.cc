@@ -329,7 +329,8 @@ void DrawFreeTypeString(double X, double Y, const std::string &text, cairo_t *cr
 
     cairo_font_options_t *font_options = cairo_font_options_create();
     cairo_get_font_options(cr, font_options);
-    cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_DEFAULT);
+    //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_DEFAULT);
+    cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_BEST);
 
     cairo_scaled_font_t *scaled_font = cairo_scaled_font_create(font_face, font_matrix, ctm, font_options);
 
@@ -473,8 +474,9 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
         return;
     }
 
-    cairo_matrix_t fontMatrix;
     double fontSize = textObject->GetFontSize();
+
+    cairo_matrix_t fontMatrix;
     cairo_matrix_init_scale(&fontMatrix, fontSize, fontSize);
     cairo_set_font_matrix(cr, &fontMatrix);
 
@@ -486,6 +488,8 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
     double X = textCode.X + textObject->Boundary.XMin;
     double Y = textCode.Y + textObject->Boundary.YMin;
     std::string text = textCode.Text;
+    //LOG_NOTICE("Draw Text: %s", text.c_str());
+
     std::vector<std::string> char_list;
     size_t numChars = utf8_string_to_char_list(text, char_list);
     //LOG_NOTICE("text len: %d text:%s", numChars, text.c_str());
@@ -505,6 +509,7 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
                     if (n > 0){
                         if (bDeltaX) x += textCode.DeltaX[n-1];
                         if (bDeltaY) y += textCode.DeltaY[n-1];
+                        //LOG_DEBUG("x:%.3f", textCode.DeltaX[n-1]);
                     }
                     std::string ch = char_list[n];
                     DrawFreeTypeString(x, y, ch, cr, font_face, &font_matrix, &font_ctm, nullptr/*m_strokePattern*/);

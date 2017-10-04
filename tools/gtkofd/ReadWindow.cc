@@ -201,12 +201,12 @@ double ReadWindow::applyScrollAccelerate(int scrollAction, double acceleration, 
                 if (scrollAcceRate >= maxAcceleration){
                     scrollAcceRate = maxAcceleration;
                 }
-                LOG_NOTICE("scrollAcceRate:%.6f", scrollAcceRate);
+                //LOG_NOTICE("scrollAcceRate:%.6f", scrollAcceRate);
             }
         } else {
             scrollAcceRate = 1.0;
             m_scrollCount = 0;
-            LOG_INFO("scrollAcceRate set to 1.0");
+            //LOG_INFO("scrollAcceRate set to 1.0");
         }
     }
     m_lastScrollTime = scrollTime;
