@@ -280,7 +280,7 @@ void PageWall::MoveUp(double accelerateRate){
     double offset = Y_STEP * accelerateRate;
     m_wallOffsetY -= offset;
     if (m_wallOffsetY < 0) m_wallOffsetY = 0;
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MoveDown(double accelerateRate){
@@ -299,7 +299,7 @@ void PageWall::MoveDown(double accelerateRate){
             m_wallOffsetY = wallFrameHeight - screenPixels;
         }
     }
-    ShowProperties();
+    //ShowProperties();
 }
 
 
@@ -308,7 +308,7 @@ void PageWall::MoveLeft(double accelerateRate){
     LOG_DEBUG("MoveLeft() m_wallOffsetX:%.2f offset:%.2f (%.2f * %.2f) Result m_wallOffsetX:%.2f", m_wallOffsetX, offset, X_STEP, accelerateRate, m_wallOffsetX - offset);
     m_wallOffsetX -= offset;
     if (m_wallOffsetX < 0) m_wallOffsetX = 0;
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MoveRight(double accelerateRate){
@@ -327,12 +327,12 @@ void PageWall::MoveRight(double accelerateRate){
             m_wallOffsetX = wallFrameWidth - screenPixels;
         }
     }
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MoveFirstPage(){
     m_wallOffsetY = 0;
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MovePreviousPage(){
@@ -340,7 +340,7 @@ void PageWall::MovePreviousPage(){
     double offset = screenPixels;
     m_wallOffsetY -= offset;
     if (m_wallOffsetY < 0) m_wallOffsetY = 0;
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MoveNextPage(){
@@ -354,7 +354,7 @@ void PageWall::MoveNextPage(){
             m_wallOffsetY = wallFrameHeight - screenPixels;
         }
     }
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::MoveLastPage(){
@@ -362,7 +362,7 @@ void PageWall::MoveLastPage(){
     double wallFrameHeight = m_wallRect.GetFrameHeight();
     m_wallOffsetY = wallFrameHeight - screenPixels;
     if (m_wallOffsetY < 0) m_wallOffsetY = 0;
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::ZoomIn(double accelerateRate){
@@ -399,7 +399,7 @@ void PageWall::ZoomFitBest(){
         pageFrame->Zoom(m_wallScaling);
     }
 
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::ZoomOriginal(){
@@ -410,7 +410,7 @@ void PageWall::ZoomOriginal(){
         pageFrame->Zoom(m_wallScaling);
     }
 
-    ShowProperties();
+    //ShowProperties();
 }
 
 void PageWall::RebuildWall(){
@@ -460,7 +460,7 @@ void PageWall::RenderWall(cairo_t *cr){
     int endCol = (m_wallOffsetX * m_wallScaling- m_wallRect.margins.left + m_screenWidth) / frameWidth;
     if (endCol >= m_rowPages) endCol = m_rowPages - 1;
 
-    LOG_DEBUG("RenderWall() rows(%d, %d) cols(%d, %d) origin:(%d, %d) scaling:%.3f", startRow, endRow, startCol, endCol, m_wallOffsetX, m_wallOffsetY, m_wallScaling);
+    //LOG_DEBUG("RenderWall() rows(%d, %d) cols(%d, %d) origin:(%d, %d) scaling:%.3f", startRow, endRow, startCol, endCol, m_wallOffsetX, m_wallOffsetY, m_wallScaling);
 
     for ( auto j = startRow ; j <= endRow ; j++ ){
         for ( auto i = startCol ; i <= endCol ; i++ ){

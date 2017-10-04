@@ -218,9 +218,28 @@ bool TextObject::IterateElementsXML(utils::XMLElementPtr childElement){
         //std::string strDeltaY;
         //std::tie(strDeltaY, std::ignore) = childElement->GetStringAttribute("DeltaY");
 
+        std::string strDeltaX;
+        std::tie(strDeltaX, std::ignore) = childElement->GetStringAttribute("DeltaX");
+        LOG_INFO("DeltaX:%s", strDeltaX.c_str());
+        std::string strDeltaY;
+        std::tie(strDeltaY, std::ignore) = childElement->GetStringAttribute("DeltaY");
+        LOG_INFO("DeltaY:%s", strDeltaY.c_str());
+
         std::tie(textCode.Text, std::ignore) = childElement->GetStringValue();
 
-        //LOG_DEBUG("X: %.3f Y: %.3f textCode.Y Text:%s", textCode.X, textCode.Y, textCode.Text.c_str());
+        LOG_DEBUG("X: %.3f Y: %.3f textCode.Y Text:%s", textCode.X, textCode.Y, textCode.Text.c_str());
+
+        std::vector<std::string> xTokens = utils::SplitString(strDeltaX);
+        for (size_t i = 0 ; i < xTokens.size() ; i++){
+            double value = atof(xTokens[0].c_str());
+            textCode.DeltaX.push_back(value);
+        }
+        std::vector<std::string> yTokens = utils::SplitString(strDeltaY);
+        for (size_t i = 0 ; i < yTokens.size() ; i++){
+            double value = atof(yTokens[0].c_str());
+            textCode.DeltaY.push_back(value);
+        }
+
         m_textCodes.push_back(textCode);
 
         ok = true;

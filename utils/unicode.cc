@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "utils.h"
 
 /***************************************************************************** 
  * 将一个字符的Unicode(UCS-2和UCS-4)编码转换成UTF-8编码. 
@@ -199,4 +200,33 @@ int enc_utf8_to_unicode_one(const unsigned char* pInput, unsigned long *Unic)
     return utfbytes;  
 }  
 
+size_t utf8_string_to_char_list(const std::string &utf8_string, std::vector<std::string> &char_list){
+    std::string ch;
+    for (size_t i=0, len=0 ; i < utf8_string.length() ; i+=len){
+        unsigned char b = (unsigned char)utf8_string[i];
+        if (b >= 0xfc) len = 6;
+        else if (b >= 0xf8) len = 5;
+        else if (b >= 0xf0) len = 4;
+        else if (b >= 0xe0) len = 3;
+        else if (b >= 0xc0) len = 2;
+        else len = 1;
+        ch = utf8_string.substr(i, len);
+        char_list.push_back(ch);
+    }
+    return char_list.size();
+}
 
+size_t get_utf8_string_length(const std::string &utf8_string){
+    size_t length = 0;
+    for (size_t i=0, len=0 ; i < utf8_string.length() ; i+=len){
+        unsigned char b = (unsigned char)utf8_string[i];
+        if (b >= 0xfc) len = 6;
+        else if (b >= 0xf8) len = 5;
+        else if (b >= 0xf0) len = 4;
+        else if (b >= 0xe0) len = 3;
+        else if (b >= 0xc0) len = 2;
+        else len = 1;
+        length++;
+    }
+    return length;
+}

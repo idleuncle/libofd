@@ -478,16 +478,45 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
     cairo_matrix_init_scale(&fontMatrix, fontSize, fontSize);
     cairo_set_font_matrix(cr, &fontMatrix);
 
+    cairo_matrix_t font_matrix = {fontSize, 0.0, 0.0, fontSize, 0.0, 0.0};
+    cairo_matrix_t font_ctm = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0}; 
+
     // -------- Draw Text --------
     const Text::TextCode &textCode = textObject->GetTextCode(0);
     double X = textCode.X + textObject->Boundary.XMin;
     double Y = textCode.Y + textObject->Boundary.YMin;
     std::string text = textCode.Text;
+    std::vector<std::string> char_list;
+    size_t numChars = utf8_string_to_char_list(text, char_list);
+    //LOG_NOTICE("text len: %d text:%s", numChars, text.c_str());
 
-    cairo_matrix_t font_matrix = {fontSize, 0.0, 0.0, fontSize, 0.0, 0.0};
-    cairo_matrix_t font_ctm = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0}; 
-    DrawFreeTypeString(X, Y, text, cr, font_face,
-            &font_matrix, &font_ctm, nullptr/*m_strokePattern*/);
+    bool bDrawChars = false;
+
+    //if (text.c_str()[0] > 0xc0){
+        size_t numDeltaX = textCode.DeltaX.size();
+        size_t numDeltaY = textCode.DeltaY.size();
+        if (numDeltaX > 0 || numDeltaY > 0){
+            bool bDeltaX = numChars == numDeltaX + 1;
+            bool bDeltaY = numChars == numDeltaY + 1;
+            if (bDeltaX || bDeltaY){
+                double x = X;
+                double y = Y;
+                for (size_t n = 0 ; n < numChars ; n++ ){
+                    if (n > 0){
+                        if (bDeltaX) x += textCode.DeltaX[n-1];
+                        if (bDeltaY) y += textCode.DeltaY[n-1];
+                    }
+                    std::string ch = char_list[n];
+                    DrawFreeTypeString(x, y, ch, cr, font_face, &font_matrix, &font_ctm, nullptr/*m_strokePattern*/);
+                }
+                bDrawChars = true;
+            }
+        } 
+    //}
+
+    if (!bDrawChars){
+        DrawFreeTypeString(X, Y, text, cr, font_face, &font_matrix, &font_ctm, nullptr/*m_strokePattern*/);
+    }
 }
 
 void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
