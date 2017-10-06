@@ -12,7 +12,7 @@ namespace utils{
             Point(double _x, double _y):x(_x), y(_y){};
             void Offset(double cx, double cy){x+=cx; y+=cy;};
 
-        } *Point_t;
+        } *_Point_t;
 
         typedef struct Size{
             double width = 0;

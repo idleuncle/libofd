@@ -1,33 +1,50 @@
 #include <assert.h>
 #include "ofd/TextPage.h"
 
-using namespace ofd;
+namespace ofd{
+    namespace text{
 
 // ==================== class TextLine ====================
 
-TextLine::TextLine(TextParagraphPtr textParagraph):
-    m_textParagraph(textParagraph)
+TextLine::TextLine(TextParagraphPtr textParagraph)
+    //m_textParagraph(textParagraph)
 {
 }
 
 TextLine::~TextLine(){
 }
 
-const TextParagraphPtr TextLine::GetParagraph() const{
-    return m_textParagraph.lock();
-}
+//const TextParagraphPtr TextLine::GetParagraph() const{
+    //return m_textParagraph.lock();
+//}
 
-TextParagraphPtr TextLine::GetParagraph(){
-    return m_textParagraph.lock();
-}
+//TextParagraphPtr TextLine::GetParagraph(){
+    //return m_textParagraph.lock();
+//}
 
 void TextLine::AddTextObject(ObjectPtr object){
+    double x0 = object->Boundary.XMin;
+    double y0 = object->Boundary.YMin;
+    double width = object->Boundary.Width();
+    double height = object->Boundary.Height();
+    double x1 = x0 + width;
+    double y1 = y0 + height;
     if (m_objects.size() == 0){
-        m_boundary.x = object->Boundary.XMin;
-        m_boundary.y = object->Boundary.YMin;
-        m_boundary.width = object->Boundary.Width();
-        m_boundary.height = object->Boundary.Height();
+        m_boundary.x = x0;
+        m_boundary.y = y0;
+        m_boundary.width = width;
+        m_boundary.height = height;
     } else {
+        double xx0 = m_boundary.x;
+        double yy0 = m_boundary.y;
+        double xx1 = xx0 + m_boundary.width;
+        double yy1 = yy0 + m_boundary.height;
+        m_boundary.x = xx0 <= x0 ? xx0 : x0;
+        m_boundary.y = yy0 <= y0 ? yy0 : y0;
+        xx1 = xx1 >= x1 ? xx1 : x1;
+        yy1 = yy1 >= y1 ? yy1 : y1;
+        m_boundary.width = xx1 - xx0;
+        m_boundary.height = yy1 - yy0;
     }
 
     m_objects.push_back(object);
@@ -35,21 +52,21 @@ void TextLine::AddTextObject(ObjectPtr object){
 
 // ==================== class TextParagraph ====================
 
-TextParagraph::TextParagraph(TextPagePtr textPage):
-    m_textPage(textPage)
+TextParagraph::TextParagraph(TextPagePtr textPage)
+    //m_textPage(textPage)
 {
 }
 
 TextParagraph::~TextParagraph(){
 }
 
-const TextPagePtr TextParagraph::GetPage() const{
-    return m_textPage.lock();
-}
+//const TextPagePtr TextParagraph::GetPage() const{
+    //return m_textPage.lock();
+//}
 
-TextPagePtr TextParagraph::GetPage(){
-    return m_textPage.lock();
-}
+//TextPagePtr TextParagraph::GetPage(){
+    //return m_textPage.lock();
+//}
 
 TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
     TextLinePtr theLine = nullptr;
@@ -79,9 +96,11 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
 }
 
 // ==================== class TextPage ====================
-
+ 
 TextPage::TextPage(){
-    m_textParagraphs.push_back(std::make_shared<TextParagraph>(GetSelf()));
+    TextParagraphPtr textParagraph = std::make_shared<TextParagraph>(nullptr);
+    //TextParagraphPtr textParagraph = std::make_shared<TextParagraph>(GetSelf());
+    m_textParagraphs.push_back(textParagraph);
 }
 
 TextPage::~TextPage(){
@@ -91,3 +110,6 @@ TextLinePtr TextPage::AddTextObject(ObjectPtr object){
     //TextObject *textObject = (TextObject*)object.get();
     return m_textParagraphs[0]->AddTextObject(object);
 }
+
+}; // namespace text
+}; // namespace ofd

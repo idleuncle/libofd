@@ -458,12 +458,12 @@ struct GdkEventFocus {
 };
  */
 __attribute__((unused)) static gboolean focus_in_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
-    LOG_DEBUG("Keyboard FOCUS in EVENT. Gained keyboard focus:%d", event->in);
+    //LOG_DEBUG("Keyboard FOCUS in EVENT. Gained keyboard focus:%d", event->in);
     return false;
 }
 
 __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data){
-    LOG_DEBUG("Keyboard FOCUS out EVENT. Gained keyboard focus:%d", event->in);
+    //LOG_DEBUG("Keyboard FOCUS out EVENT. Gained keyboard focus:%d", event->in);
     return false;
 }
 

@@ -167,7 +167,7 @@ namespace ofd{
             std::string to_xmlstring() const {
                 std::stringstream ss;
                 utils::SetStringStreamPrecision(ss, 3);
-                ss << XMin << " " << YMin << " " << XMax << " " << YMax; 
+                ss << XMin << " " << YMin << " " << (XMax - XMin) << " " << (YMax - YMin); 
                 return ss.str();
             }
 

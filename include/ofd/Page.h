@@ -6,6 +6,7 @@
 #include <tuple>
 #include "ofd/Common.h"
 #include "ofd/Layer.h"
+#include "ofd/TextPage.h"
 
 namespace ofd{
 
@@ -47,6 +48,7 @@ namespace ofd{
             bool IsOpened() const {return m_opened;};
             const DocumentPtr GetDocument() const {return m_document.lock();};
             DocumentPtr GetDocument(){return m_document.lock();};
+            ofd::text::TextPagePtr GetTextPage() const{return m_textPage;};
 
         private:
             std::weak_ptr<Document> m_document;
@@ -60,6 +62,8 @@ namespace ofd{
             bool fromPageXML(const std::string &strPageXML);
             bool fromContentXML(utils::XMLElementPtr contentElement);
             LayerPtr fromLayerXML(utils::XMLElementPtr layerElement);
+
+            ofd::text::TextPagePtr m_textPage;
 
     }; // class Page;
 

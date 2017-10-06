@@ -18,7 +18,10 @@ using namespace utils;
 Page::Page(DocumentPtr document) :
     ID(0),
     m_document(document), 
-    m_opened(false){
+    m_opened(false)
+{
+    m_textPage = std::make_shared<ofd::text::TextPage>();
+
 }
 
 Page::~Page(){
@@ -388,6 +391,11 @@ LayerPtr Page::fromLayerXML(XMLElementPtr layerElement){
 
         if ( object != nullptr ){
             layer->AddObject(object);
+            if (m_textPage != nullptr){
+                if ( object->Type == ofd::ObjectType::TEXT ) {
+                    m_textPage->AddTextObject(object);
+                }
+            }
         }
 
         childElement = childElement->GetNextSiblingElement();
