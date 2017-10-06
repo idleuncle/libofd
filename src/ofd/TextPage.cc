@@ -79,7 +79,7 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
         for (auto textLine : m_textLines){
             Rect lineBoundary = textLine->GetBoundary();
             double y = object->Boundary.YMin;
-            if (fabs(y - lineBoundary.y) < 1e-3){
+            if (fabs(y - lineBoundary.y) < 4){
                 textLine->AddTextObject(object);
                 theLine = textLine;
                 break;
@@ -88,6 +88,7 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
         if (theLine == nullptr){
             theLine = std::make_shared<TextLine>(GetSelf());
             theLine->AddTextObject(object);
+            m_textLines.push_back(theLine);
         }
     }
 

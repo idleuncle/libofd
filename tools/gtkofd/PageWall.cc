@@ -271,6 +271,11 @@ void PageWall::SetWallViewArea(double wallOffsetX, double wallOffsetY, double wa
         m_wallScaling = wallScaling;
 }
 
+void PageWall::OffsetViewArea(double offsetX, double offsetY){
+    m_wallOffsetX += offsetX;
+    m_wallOffsetY += offsetY;
+}
+
 //double ZOOM_BASE = exp(1.0);
 //double ZOOM_STEP = 0.1;
 //double X_STEP = 20;
@@ -491,7 +496,7 @@ void PageWall::RenderWall(cairo_t *cr){
 }
 
 
-int PageWall::getPageIndexFromWallPoint(int x, int y) const{
+int PageWall::GetPageIndexFromWallPoint(int x, int y) const{
     assert(x>=0 && y >=0);
 
     int row = (y - m_wallRect.margins.top) / (m_frameRect.GetFrameHeight());

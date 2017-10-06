@@ -80,6 +80,8 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
             nullptr);
 }
 
+// ==================== File Submenu ====================
+
 static void activate_fileOpen(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     m_readWindow->CmdFileOpen();
 }
@@ -91,6 +93,8 @@ static void activate_fileSave(GSimpleAction *action, GVariant *parameter, gpoint
 static void activate_fileSaveAs(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     m_readWindow->CmdFileSaveAs();
 }
+
+// ==================== View Submenu ====================
 
 static void activate_viewZoomIn(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     m_readWindow->CmdZoomIn();
@@ -116,9 +120,74 @@ static void activate_viewZoomFitHeight(GSimpleAction *action, GVariant *paramete
     m_readWindow->CmdZoomFitBest();
 }
 
+// ==================== Tools Submenu ====================
+        
+static void activate_toolsNormal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    //m_readWindow->CmdToolsNormal();
+    g_signal_emit_by_name(G_OBJECT(m_readWindow->m_mainWindow), "change-state", g_variant_new_boolean(true));
+}
+
+static void change_state_toolsNormal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    gboolean bCheck = g_variant_get_boolean(parameter);
+    LOG_DEBUG("change_state_toolsNormal()");
+    if (bCheck){
+        m_readWindow->ChangeAction(ReadWindow::Action::Type::NORMAL);
+    }
+}
+
+static void activate_toolsSelectAnnotation(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsSelectAnnotation();
+}
+
+static void change_state_toolsSelectAnnotation(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::SELECTANNOTATION);
+}
+
+static void activate_toolsSelectText(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsSelectText();
+}
+
+static void change_state_toolsSelectText(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::SELECTTEXT);
+}
+
+static void activate_toolsSnapshot(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsSnapshot();
+}
+
+static void change_state_toolsSnapshot(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::SNAPSHOT);
+}
+
+static void activate_toolsDrawLine(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsDrawLine();
+}
+
+static void change_state_toolsDrawLine(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWLINE);
+}
+
+static void activate_toolsDrawRect(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsDrawRect();
+}
+
+static void change_state_toolsDrawRect(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWRECT);
+}
+
+static void activate_toolsDrawPolyline(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdToolsDrawPolyline();
+}
+
+static void change_state_toolsDrawPolyline(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWPOLYLINE);
+}
+
 static void activate_docFirstPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     m_readWindow->CmdFirstPage();
 }
+
+// ==================== Document Submenu ====================
 
 static void activate_docPreviousPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     m_readWindow->CmdPreviousPage();
@@ -315,19 +384,49 @@ struct GdkEventButton {
   gdouble x_root, y_root;
 };
  */
+
+ReadWindow::Action::KeyStatus gdk_event_status_to_key_status(uint32_t event_state){
+    //ReadWindow::Action::KeyStatus keyStatus;
+    //if (event_state & GDK_CONTROL_MASK) keyStatus.m_ctrlPressing = true;
+    //if (event_state & GDK_SHIFT_MASK) keyStatus.m_shiftPressing = true;
+    //if (event_state & GDK_ALT_MASK) keyStatus.m_altPressing = true;
+    //if (event_state & GDK_META_MASK) keyStatus.m_metaPressing = true;
+    //return keyStatus;
+    return ReadWindow::Action::KeyStatus(
+            event_state & GDK_CONTROL_MASK, 
+            event_state & GDK_SHIFT_MASK,
+            event_state & GDK_META_MASK,
+            event_state & GDK_SUPER_MASK
+            );
+}
 static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
+    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+
+    ReadWindow::ActionPtr action = m_readWindow->GetAction();
+    assert(action != nullptr);
     if (event->button == GDK_BUTTON_PRIMARY){
-        //LOG_DEBUG("LEFT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
-        //next_page();
+        LOG_DEBUG("LEFT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
+        action->OnLButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     } else if (event->button == GDK_BUTTON_SECONDARY){
         LOG_DEBUG("RIGHT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
-        //prev_page();
+        action->OnRButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     }
 
     return false;
 }
 
 __attribute__((unused)) static gboolean button_release_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
+    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+    ReadWindow::ActionPtr action = m_readWindow->GetAction();
+    assert(action != nullptr);
+
+    if (event->button == GDK_BUTTON_PRIMARY){
+        LOG_DEBUG("LEFT BUTTON RELEASE! x:%d y:%d", event->x, event->y);
+        action->OnLButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+    } else if (event->button == GDK_BUTTON_SECONDARY){
+        LOG_DEBUG("RIGHT BUTTON RELEASE! x:%d y:%d", event->x, event->y);
+        action->OnRButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+    }
     return false;
 }
 
@@ -354,9 +453,78 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
     //if (state & GDK_BUTTON1_MASK){
         //LOG(DEBUG) << "MOTION NOTIFY! x:" << x << " y:" << y;
     //}
+
+    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+    ReadWindow::ActionPtr action = m_readWindow->GetAction();
+    assert(action != nullptr);
+    action->OnMotionNotify(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+
     return true;
 }
 
+/*
+struct GdkEventTouch {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  gdouble *axes;
+  guint state;
+  GdkEventSequence *sequence;
+  gboolean emulating_pointer;
+  GdkDevice *device;
+  gdouble x_root, y_root;
+};
+ */
+gboolean touch_update_event_cb(GtkWidget *widget, GdkEventTouch *event, gpointer user_data){
+    LOG_DEBUG("Touch Update. x:%.2f y:%.2f", event->x, event->y);
+    return false;
+}
+/*
+struct GdkEventTouchpadSwipe {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  gint8 phase;
+  gint8 n_fingers;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  gdouble dx;
+  gdouble dy;
+  gdouble x_root, y_root;
+  guint state;
+};
+ */
+gboolean touchpad_swipe_event_cb(GtkWidget *widget, GdkEventTouchpadSwipe *event, gpointer user_data){
+    LOG_DEBUG("Touchpad Swipe. fingers:%d dx:%.2f dy:%.2f", event->n_fingers, event->dx, event->dy);
+    return false;
+}
+
+/*
+struct GdkEventTouchpadPinch {
+  GdkEventType type;
+  GdkWindow *window;
+  gint8 send_event;
+  gint8 phase;
+  gint8 n_fingers;
+  guint32 time;
+  gdouble x;
+  gdouble y;
+  gdouble dx;
+  gdouble dy;
+  gdouble angle_delta;
+  gdouble scale;
+  gdouble x_root, y_root;
+  guint state;
+};
+ */
+gboolean touchpad_pinch_event_cb(GtkWidget *widget, GdkEventTouchpadPinch *event, gpointer user_data){
+    LOG_DEBUG("Touchpad Pinch. fingers:%d dx:%.2f dy:%.2f", event->n_fingers, event->dx, event->dy);
+    return false;
+}
 /*
 struct GdkEventScroll {
   GdkEventType type;
@@ -638,13 +806,22 @@ static void activate(GApplication *app){
         { "viewZoomFitBest", activate_viewZoomFitBest, nullptr, nullptr, nullptr },
         { "viewZoomFitWidth", activate_viewZoomFitWidth, nullptr, nullptr, nullptr },
         { "viewZoomFitHeight", activate_viewZoomFitHeight, nullptr, nullptr, nullptr },
+
+        { "toolsNormal", activate_toolsNormal, nullptr, "yes", change_state_toolsNormal},
+        { "toolsSelectAnnotation", activate_toolsSelectAnnotation, nullptr, "no", change_state_toolsSelectAnnotation},
+        { "toolsSelectText", activate_toolsSelectText, nullptr, "no", change_state_toolsSelectText},
+        { "toolsSnapshot", activate_toolsSnapshot, nullptr, "no", change_state_toolsSnapshot},
+        { "toolsDrawLine", activate_toolsDrawLine, nullptr, "no", change_state_toolsDrawLine},
+        { "toolsDrawRect", activate_toolsDrawRect, nullptr, "no", change_state_toolsDrawRect},
+        { "toolsDrawPolyline", activate_toolsDrawPolyline, nullptr, "no", change_state_toolsDrawPolyline},
+
         { "docFirstPage", activate_docFirstPage, nullptr, nullptr, nullptr },
         { "docPreviousPage", activate_docPreviousPage, nullptr, nullptr, nullptr },
         { "docNextPage", activate_docNextPage, nullptr, nullptr, nullptr },
         { "docLastPage", activate_docLastPage, nullptr, nullptr, nullptr },
         { "docGotoPage", activate_docGotoPage, nullptr, nullptr, nullptr },
         //{ "run", activate_run, nullptr, nullptr, nullptr },
-        { "bold", activate_about, nullptr, nullptr, nullptr },
+        //{ "bold", activate_about, nullptr, nullptr, nullptr },
     };
     g_action_map_add_action_entries(G_ACTION_MAP(mainWindow),
             win_entries, G_N_ELEMENTS(win_entries), mainWindow);
@@ -660,6 +837,7 @@ static void activate(GApplication *app){
     g_signal_connect(G_OBJECT(mainWindow), "key-release-event", G_CALLBACK(key_release_cb), nullptr);
 
     g_signal_connect(G_OBJECT(drawingWidget), "button-press-event", G_CALLBACK(button_press_cb), nullptr);
+    g_signal_connect(G_OBJECT(drawingWidget), "button-release-event", G_CALLBACK(button_release_cb), nullptr);
     g_signal_connect(G_OBJECT(drawingWidget), "motion-notify-event", G_CALLBACK(motion_notify_cb), nullptr);
     //g_signal_connect(G_OBJECT(drawingWidget), "enter-notify-event", G_CALLBACK(enter_notify_cb), nullptr);
     //g_signal_connect(G_OBJECT(drawingWidget), "leave-notify-event", G_CALLBACK(leave_notify_cb), nullptr);
@@ -669,12 +847,23 @@ static void activate(GApplication *app){
 
     g_signal_connect(G_OBJECT(drawingWidget), "scroll-event", G_CALLBACK(scroll_event_cb), nullptr);
 
+    g_signal_connect(G_OBJECT(drawingWidget), "touchpad-event", G_CALLBACK(touch_update_event_cb), nullptr);
+
+    g_signal_connect(G_OBJECT(drawingWidget), "touchpad-swipe-event", G_CALLBACK(touchpad_swipe_event_cb), nullptr);
+
+    g_signal_connect(G_OBJECT(drawingWidget), "touchpad-pinch-event", G_CALLBACK(touchpad_pinch_event_cb), nullptr);
+
     gtk_widget_set_events(drawingWidget, gtk_widget_get_events(drawingWidget)
             | GDK_KEY_PRESS_MASK
+            | GDK_KEY_RELEASE_MASK
             | GDK_ENTER_NOTIFY_MASK
             | GDK_LEAVE_NOTIFY_MASK
             | GDK_BUTTON_PRESS_MASK
+            | GDK_BUTTON_RELEASE_MASK
             | GDK_SCROLL_MASK
+            //| GDK_SMOOTH_SCROLL_MASK
+            | GDK_TOUCH_MASK
+            | GDK_TOUCHPAD_GESTURE_MASK
             | GDK_POINTER_MOTION_MASK
             | GDK_POINTER_MOTION_HINT_MASK);
 

@@ -102,6 +102,7 @@ public:
     double GetZoomScaling();
 
     void SetWallViewArea(double wallOffsetX, double wallOffsetY, double wallScaling);
+    void OffsetViewArea(double offsetX, double offsetY);
 
     std::tuple<double, double, double> GetWallViewArea() const{
         return std::make_tuple(m_wallOffsetX, m_wallOffsetY, m_wallScaling);
@@ -140,9 +141,10 @@ public:
     void MoveNextPage();
     void MoveLastPage();
 
+    int GetPageIndexFromWallPoint(int x, int y) const;
+    ofd::DocumentPtr GetDocument() const {return m_document;};
 private:
     Size getPagePixelSize() const;
-    int getPageIndexFromWallPoint(int x, int y) const;
 
     // 对PageWall而言，PageFrame的FrameSize的像素尺寸
     Rect getPageFrameRect(int row, int col);

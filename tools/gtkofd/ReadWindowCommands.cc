@@ -118,3 +118,48 @@ void ReadWindow::CmdMoveRight(){
     //RedrawPage();
     ScrollRight();
 }
+
+
+// ==================== Tools Submenu ====================
+
+void ReadWindow::CmdToolsNormal(){
+    if (m_action->GetType() != Action::Type::NORMAL){
+        m_action = ActionFactory::CreateAction(Action::Type::NORMAL);
+    }
+}
+
+void ReadWindow::CmdToolsSelectAnnotation(){
+    if (m_action->GetType() != Action::Type::SELECTANNOTATION){
+        m_action = ActionFactory::CreateAction(Action::Type::SELECTANNOTATION);
+    }
+}
+
+void ReadWindow::CmdToolsSelectText(){
+    if (m_action->GetType() != Action::Type::SELECTTEXT){
+        m_action = ActionFactory::CreateAction(Action::Type::SELECTTEXT);
+    }
+}
+
+void ReadWindow::CmdToolsSnapshot(){
+    if (m_action->GetType() != Action::Type::SNAPSHOT){
+        m_action = ActionFactory::CreateAction(Action::Type::SNAPSHOT);
+    }
+}
+
+void ReadWindow::CmdToolsDrawLine(){
+    if (m_action->GetType() != Action::Type::DRAWLINE){
+        m_action = ActionFactory::CreateAction(Action::Type::DRAWLINE);
+    }
+}
+
+void ReadWindow::CmdToolsDrawRect(){
+    if (m_action->GetType() != Action::Type::DRAWRECT){
+        m_action = ActionFactory::CreateAction(Action::Type::DRAWRECT);
+    }
+}
+
+void ReadWindow::CmdToolsDrawPolyline(){
+    if (m_action->GetType() != Action::Type::DRAWPOLYLINE){
+        m_action = ActionFactory::CreateAction(Action::Type::DRAWPOLYLINE);
+    }
+}

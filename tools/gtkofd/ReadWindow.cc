@@ -249,3 +249,23 @@ void ReadWindow::ScrollOut(){
     m_pageWall->ZoomOut(m_scrollAcceRate);
     RedrawPage();
 }
+
+void ReadWindow::OffsetPageWall(double offsetX, double offsetY){
+    if (m_pageWall != nullptr){
+        m_pageWall->OffsetViewArea(offsetX, offsetY);
+    }
+}
+
+void ReadWindow::SelectText(double x0, double y0, double x1, double y1){
+    if (m_pageWall != nullptr){
+        int pageIndex = m_pageWall->GetPageIndexFromWallPoint(x0, y0);
+        LOG_DEBUG("SelectText() pageIndex=%d", pageIndex);
+        ofd::DocumentPtr document = m_pageWall->GetDocument();
+        ofd::PagePtr page = document->GetPage(pageIndex);
+        ofd::text::TextPagePtr textPage = page->GetTextPage();
+        for (size_t i = 0 ; i < textPage->GetTextLinesCount() ; i++){
+            ofd::text::TextLinePtr textLine = textPage->GetTextLine(i);
+            // TODO
+        }
+    }
+}

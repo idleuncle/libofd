@@ -20,8 +20,8 @@ ${PDF2OFD}: build
 ${OFDVIEWER}: build
 ${OFDTEST}: build
 
-run: ${IMOFD}
-	${IMOFD} ./data/1.ofd --v=1
+run: ${GTKOFD}
+	${GTKOFD} ./data/1.ofd --v=1
 
 run-gtkofd: ${GTKOFD}
 	${GTKOFD} ./data/1.ofd --v=1

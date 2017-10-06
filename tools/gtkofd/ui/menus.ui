@@ -304,12 +304,12 @@
               <item>
                   <attribute name="label" translatable="yes">上一页(_P)</attribute>
                   <attribute name="action">win.docPreviousPage</attribute>
-                  <attribute name="accel">PageUp</attribute>
+                  <attribute name="accel">PgUp</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">下一页(_N)</attribute>
                   <attribute name="action">win.docNextPage</attribute>
-                  <attribute name="accel">PageDown</attribute>
+                  <attribute name="accel">PgDn</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">末页(_L)</attribute>
@@ -356,33 +356,33 @@
           <section>
               <item>
                   <attribute name="label" translatable="yes">手型工具(_H)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsNormal</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">选择注释(_A)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsSelectAnnotation</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">选择文本(_T)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsSelectText</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">快照工具(_N)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsSnapshot</attribute>
               </item>
           </section>
           <section>
               <item>
                   <attribute name="label" translatable="yes">绘制线条(_L)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsDrawLine</attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">绘制矩形(_R)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsDrawRect></attribute>
               </item>
               <item>
                   <attribute name="label" translatable="yes">绘制拆线(_P)</attribute>
-                  <attribute name="action"></attribute>
+                  <attribute name="action">win.toolsDrawPolyline</attribute>
               </item>
           </section>
       </submenu>
