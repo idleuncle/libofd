@@ -262,7 +262,7 @@ double PageWall::GetZoomScaling(){
     return scaling;
 }
 
-void PageWall::SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScaling){
+void PageWall::SetWallViewArea(double wallOffsetX, double wallOffsetY, double wallScaling){
     if (wallOffsetX >=0)
         m_wallOffsetX = wallOffsetX;
     if (wallOffsetY >= 0)
@@ -305,7 +305,7 @@ void PageWall::MoveDown(double accelerateRate){
 
 void PageWall::MoveLeft(double accelerateRate){
     double offset = X_STEP * accelerateRate;
-    LOG_DEBUG("MoveLeft() m_wallOffsetX:%.2f offset:%.2f (%.2f * %.2f) Result m_wallOffsetX:%.2f", m_wallOffsetX, offset, X_STEP, accelerateRate, m_wallOffsetX - offset);
+    //LOG_DEBUG("MoveLeft() m_wallOffsetX:%.2f offset:%.2f (%.2f * %.2f) Result m_wallOffsetX:%.2f", (double)m_wallOffsetX, offset, X_STEP, accelerateRate, (double)m_wallOffsetX - offset);
     m_wallOffsetX -= offset;
     if (m_wallOffsetX < 0) m_wallOffsetX = 0;
     //ShowProperties();
@@ -316,9 +316,6 @@ void PageWall::MoveRight(double accelerateRate){
     //if (m_wallRect.width - m_wallOffsetX <= screenPixels) return;
 
     double offset = X_STEP * accelerateRate;
-    //LOG_DEBUG("MoveRight() m_wallOffsetX:%.2f offset:%.2f", m_wallOffsetX, offset);
-    //LOG_DEBUG("X_STEP * accelerateRate:(%.2f * %.2f)", X_STEP, accelerateRate);
-    //LOG_DEBUG("Result m_wallOffsetX:%.2f", m_wallOffsetX + offset);
     m_wallOffsetX += offset;
 
     double wallFrameWidth = m_wallRect.GetFrameWidth();

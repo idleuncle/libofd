@@ -146,9 +146,9 @@ public:
     double CalculateBestZoomScaling() const;
     double GetZoomScaling();
 
-    void SetWallViewArea(int wallOffsetX, int wallOffsetY, double wallScaling);
+    void SetWallViewArea(double wallOffsetX, double wallOffsetY, double wallScaling);
 
-    std::tuple<int, int, double> GetWallViewArea() const{
+    std::tuple<double, double, double> GetWallViewArea() const{
         return std::make_tuple(m_wallOffsetX, m_wallOffsetY, m_wallScaling);
     }
 
@@ -215,8 +215,8 @@ private:
     double m_fitBestScaling = 1.0;
 
     // PageWall
-    int m_wallOffsetX = 0;
-    int m_wallOffsetY = 0;
+    double m_wallOffsetX = 0;
+    double m_wallOffsetY = 0;
     double m_wallScaling = 1.0;
 
     double m_zoomFactor = exp(1.0);
