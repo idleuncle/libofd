@@ -38,6 +38,8 @@ namespace ofd{
             double       LineWidth;
             int          Alpha;
 
+            uint64_t     Flags = 0;
+
             // =============== Public Methods ================
         public:
             virtual std::string to_string() const;

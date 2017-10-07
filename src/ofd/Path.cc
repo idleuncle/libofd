@@ -35,19 +35,24 @@ std::string Subpath::to_string() const{
 
 Boundary Subpath::CalculateBoundary() const{
     Boundary boundary;
+    double xMin = 0;
+    double yMin = 0;
+    double xMax = 0;
+    double yMax = 0;
     size_t numPoints = m_points.size();
     if ( numPoints > 0 ){
-        boundary.XMin = m_points[0].X;
-        boundary.XMax = m_points[0].X;
-        boundary.YMin = m_points[0].Y;
-        boundary.YMax = m_points[0].Y;
+        xMin = m_points[0].X;
+        xMax = m_points[0].X;
+        yMin = m_points[0].Y;
+        yMax = m_points[0].Y;
         for ( size_t i = 1 ; i < numPoints ; i++ ){
-            boundary.XMin = std::min(boundary.XMin, m_points[i].X);
-            boundary.XMax = std::max(boundary.XMax, m_points[i].X);
-            boundary.YMin = std::min(boundary.YMin, m_points[i].Y);
-            boundary.YMax = std::max(boundary.YMax, m_points[i].Y);
+            xMin = std::min(xMin, m_points[i].X);
+            xMax = std::max(xMax, m_points[i].X);
+            yMin = std::min(yMin, m_points[i].Y);
+            yMax = std::max(yMax, m_points[i].Y);
         }
     }
+    boundary = ofd::Boundary(xMin, yMin, xMax, yMax);
     return boundary;
 }
 

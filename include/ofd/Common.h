@@ -132,52 +132,63 @@ namespace ofd{
 
 
     typedef struct Boundary{
+        private:
+            double _XMin;
+            double _YMin;
+            double _XMax;
+            double _YMax;
         public:
-            double XMin;
-            double YMin;
-            double XMax;
-            double YMax;
 
             Boundary():
-                XMin(0.0), YMin(0.0), XMax(0.0), YMax(0.0){
+                _XMin(0.0), _YMin(0.0), _XMax(0.0), _YMax(0.0){
             }
 
             Boundary(double xMin, double yMin, double xMax, double yMax){
-                XMin = std::min(xMin, xMax);
-                XMax = std::max(xMin, xMax);
-                YMin = std::min(yMin, yMax);
-                YMax = std::max(yMin, yMax);
+                _XMin = std::min(xMin, xMax);
+                _XMax = std::max(xMin, xMax);
+                _YMin = std::min(yMin, yMax);
+                _YMax = std::max(yMin, yMax);
+            }
+            Boundary(const Boundary& other):
+                _XMin(other._XMin), _YMin(other._YMin),
+                _XMax(other._XMax), _YMax(other._YMax)
+            {
             }
 
             double Width() const{
-                return fabs(XMax - XMin);
+                return fabs(_XMax - _XMin);
             }
 
             double Height() const{
-                return fabs(YMax - YMin);
+                return fabs(_YMax - _YMin);
             }
+
+            double XMin() const{return _XMin;};
+            double XMax() const{return _XMax;};
+            double YMin() const{return _YMin;};
+            double YMax() const{return _YMax;};
 
             std::string to_string() const {
                 std::stringstream ss;
                 utils::SetStringStreamPrecision(ss, 3);
-                ss << "(" << XMin << "," << YMin << "," << XMax << "," << YMax << ")"; 
+                ss << "(" << _XMin << "," << _YMin << "," << _XMax << "," << _YMax << ")"; 
                 return ss.str();
             }
 
             std::string to_xmlstring() const {
                 std::stringstream ss;
                 utils::SetStringStreamPrecision(ss, 3);
-                ss << XMin << " " << YMin << " " << (XMax - XMin) << " " << (YMax - YMin); 
+                ss << _XMin << " " << _YMin << " " << (_XMax - _XMin) << " " << (_YMax - _YMin); 
                 return ss.str();
             }
 
             void clear(){
-                XMin = YMin = XMax = YMax = 0.0;
+                _XMin = _YMin = _XMax = _YMax = 0.0;
             }
 
             bool IsEmpty() const{
-                if ( XMin == 0.0 && XMax == 0.0 &&
-                        YMin == 0.0 && YMax == 0.0 ){
+                if ( _XMin == 0.0 && _XMax == 0.0 &&
+                        _YMin == 0.0 && _YMax == 0.0 ){
                     return true;
                 } else {
                     return false;
@@ -186,16 +197,16 @@ namespace ofd{
 
             void Union(const Boundary& other){
                 if ( IsEmpty() ){
-                    XMin = other.XMin;
-                    XMax = other.XMax;
-                    YMin = other.YMin;
-                    YMax = other.YMax;
+                    _XMin = other._XMin;
+                    _XMax = other._XMax;
+                    _YMin = other._YMin;
+                    _YMax = other._YMax;
                 } else {
                     if ( !other.IsEmpty() ){
-                        XMin = std::min(XMin, other.XMin);
-                        XMax = std::max(XMax, other.XMax);
-                        YMin = std::min(YMin, other.YMin);
-                        YMax = std::max(YMax, other.YMax);
+                        _XMin = std::min(_XMin, other._XMin);
+                        _XMax = std::max(_XMax, other._XMax);
+                        _YMin = std::min(_YMin, other._YMin);
+                        _YMax = std::max(_YMax, other._YMax);
                     }
                 }
             }
@@ -204,14 +215,14 @@ namespace ofd{
                 if ( IsEmpty() || other.IsEmpty() ){
                     return;
                 } 
-                if ( XMin > other.XMax || XMax < other.XMin ||
-                        YMin > other.YMax || YMax < other.YMin ){
+                if ( _XMin > other._XMax || _XMax < other._XMin ||
+                        _YMin > other._YMax || _YMax < other._YMin ){
                     clear();
                 } else {
-                    XMin = std::max(XMin, other.XMin);
-                    XMax = std::min(XMax, other.XMax);
-                    YMin = std::max(YMin, other.YMin);
-                    YMax = std::min(YMax, other.YMax);
+                    _XMin = std::max(_XMin, other._XMin);
+                    _XMax = std::min(_XMax, other._XMax);
+                    _YMin = std::max(_YMin, other._YMin);
+                    _YMax = std::min(_YMax, other._YMax);
                 }
             }
 

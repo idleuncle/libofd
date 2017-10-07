@@ -267,10 +267,11 @@ bool Object::FromAttributesXML(utils::XMLElementPtr objectElement){
             top -= height;
             height = fabs(height);
         }
-        Boundary.XMin = left;
-        Boundary.YMin = top;
-        Boundary.XMax = left + width;
-        Boundary.YMax = top + height;
+        Boundary = ofd::Boundary(left, top, left+width, top+height);
+        //Boundary.XMin = left;
+        //Boundary.YMin = top;
+        //Boundary.XMax = left + width;
+        //Boundary.YMax = top + height;
         ok = true;
     } else {
         LOG_ERROR("Box String tokens size >= 4 failed. boxString:%s element name:%s", 

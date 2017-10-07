@@ -507,8 +507,8 @@ void doDrawTextObject(cairo_t *cr, TextObject *textObject){
 
     // -------- Draw Text --------
     const Text::TextCode &textCode = textObject->GetTextCode(0);
-    double X = textCode.X + textObject->Boundary.XMin;
-    double Y = textCode.Y + textObject->Boundary.YMin;
+    double X = textCode.X + textObject->Boundary.XMin();
+    double Y = textCode.Y + textObject->Boundary.YMin();
     std::string text = textCode.Text;
     //LOG_NOTICE("Draw Text: %s", text.c_str());
 
@@ -561,6 +561,38 @@ void CairoRender::ImplCls::DrawTextObject(cairo_t *cr, TextObject *textObject){
     }
 
     doDrawTextObject(cr, textObject);
+
+    // Draw selected frame
+    if (textObject->Flags != 0){
+        const Text::TextCode &textCode = textObject->GetTextCode(0);
+        LOG_DEBUG("textObject->Flags != 0 text:%s", textCode.Text.c_str());
+        cairo_save(cr);
+
+        double x0 = textCode.X + textObject->Boundary.XMin();
+        double y0 = textCode.Y + textObject->Boundary.YMin();
+        double x1 = x0 + textObject->Boundary.Width();
+        double y1 = y0 - textObject->Boundary.Height();
+        cairo_move_to(cr, x0, y0); 
+        cairo_line_to(cr, x1, y0);
+        cairo_line_to(cr, x1, y1);
+        cairo_line_to(cr, x0, y1);
+        cairo_close_path(cr);
+
+        double r = 1.0;
+        double g = 0.0;
+        double b = 0.0;
+        double a = 0.7;
+        if (utils::IsColorBGR()){
+            cairo_set_source_rgba(cr, b, g, r, a);
+        } else {
+            cairo_set_source_rgba(cr, r, g, b, a);
+        }
+        cairo_set_line_width(cr, 0.5);
+        cairo_stroke(cr);
+
+        cairo_restore(cr);
+    }
+
     return;
 
     //if ( textObject == nullptr ) return;
@@ -943,8 +975,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
     objMatrix.yx = imageObject->CTM[1];
     objMatrix.xy = imageObject->CTM[2];
     objMatrix.yy = imageObject->CTM[3];
-    objMatrix.x0 = imageObject->CTM[4] + imageObject->Boundary.XMin;
-    objMatrix.y0 = imageObject->CTM[5] + imageObject->Boundary.YMin;
+    objMatrix.x0 = imageObject->CTM[4] + imageObject->Boundary.XMin();
+    objMatrix.y0 = imageObject->CTM[5] + imageObject->Boundary.YMin();
     cairo_transform(cr, &objMatrix);
 
     cairo_get_matrix(cr, &matrix);
@@ -1259,7 +1291,7 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
 
     PathPtr drawPath = std::make_shared<Path>();
     drawPath->Append(path);
-    drawPath->Offset(pathObject->Boundary.XMin, pathObject->Boundary.YMin);
+    drawPath->Offset(pathObject->Boundary.XMin(), pathObject->Boundary.YMin());
 
     DoCairoPath(cr, drawPath);
 
@@ -1301,10 +1333,10 @@ void CairoRender::ImplCls::doDrawPathObject(cairo_t *cr, PathObject *pathObject)
         //}
 
             Boundary boundary = path->CalculateBoundary(); 
-            double xMin = boundary.XMin + pathObject->Boundary.XMin;
-            double yMin = boundary.YMin + pathObject->Boundary.YMin;
-            double xMax = boundary.XMax + pathObject->Boundary.XMin;
-            double yMax = boundary.YMax + pathObject->Boundary.YMin;
+            double xMin = boundary.XMin() + pathObject->Boundary.XMin();
+            double yMin = boundary.YMin() + pathObject->Boundary.YMin();
+            double xMax = boundary.XMax() + pathObject->Boundary.XMin();
+            double yMax = boundary.YMax() + pathObject->Boundary.YMin();
             cairo_move_to(cr, xMin, yMin);
             cairo_line_to(cr, xMin, yMax);
             cairo_line_to(cr, xMax, yMax);
@@ -1336,10 +1368,10 @@ void CairoRender::ImplCls::doRadialShFill(cairo_t *cr, PathObject *pathObject){
     if ( shading == nullptr ) return;
 
     double *ctm = &pathObject->CTM[0];
-    double xMin = pathObject->Boundary.XMin;
-    double yMin = pathObject->Boundary.YMin;
-    double xMax = pathObject->Boundary.XMax;
-    double yMax = pathObject->Boundary.YMax;
+    double xMin = pathObject->Boundary.XMin();
+    double yMin = pathObject->Boundary.YMin();
+    double xMax = pathObject->Boundary.XMax();
+    double yMax = pathObject->Boundary.YMax();
 
     double x0, y0, r0, x1, y1, r1, t0, t1;
     //int nComps;
@@ -1410,7 +1442,7 @@ void CairoRender::ImplCls::doRadialShFill(cairo_t *cr, PathObject *pathObject){
         //sMin = 1;
         //sMax = 0;
         //// solve for x(s) + r(s) = xMin
-        //if ((x1 + r1) - (x0 + r0) != 0) {
+        //if ((x0 + r1) - (x0 + r0) != 0) {
             //sa = (xMin - (x0 + r0)) / ((x1 + r1) - (x0 + r0));
             //if (sa < sMin) {
                 //sMin = sa;

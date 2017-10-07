@@ -32,6 +32,8 @@ namespace ofd{
         void AddTextObject(ObjectPtr object);
 
         Rect GetBoundary() const {return m_boundary;};
+        void SelectText(double x0, double y0, double x1, double y1);
+        void UnselectText();
 
     private:
         Rect m_boundary;
@@ -54,6 +56,8 @@ namespace ofd{
         TextLinePtr GetTextLine(size_t idx) const {return m_textLines[idx];};
 
         Rect GetBoundary() const {return m_boundary;};
+        void SelectText(double x0, double y0, double x1, double y1);
+        void UnselectText();
 
     private:
         Rect m_boundary;
@@ -73,6 +77,9 @@ namespace ofd{
         TextLinePtr AddTextObject(ObjectPtr object);
         size_t GetTextLinesCount() const{return m_textParagraphs[0]->GetTextLinesCount();};
         TextLinePtr GetTextLine(size_t idx) const {return m_textParagraphs[0]->GetTextLine(idx);};
+
+        void SelectText(double x0, double y0, double x1, double y1);
+        void UnselectText();
 
     private:
         Rect m_boundary;

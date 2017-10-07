@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "ofd/TextPage.h"
+#include "utils/logger.h"
 
 namespace ofd{
     namespace text{
@@ -23,8 +24,8 @@ TextLine::~TextLine(){
 //}
 
 void TextLine::AddTextObject(ObjectPtr object){
-    double x0 = object->Boundary.XMin;
-    double y0 = object->Boundary.YMin;
+    double x0 = object->Boundary.XMin();
+    double y0 = object->Boundary.YMin();
     double width = object->Boundary.Width();
     double height = object->Boundary.Height();
     double x1 = x0 + width;
@@ -48,6 +49,54 @@ void TextLine::AddTextObject(ObjectPtr object){
     }
 
     m_objects.push_back(object);
+}
+
+void TextLine::SelectText(double x0, double y0, double x1, double y1){
+    double xx0 = m_boundary.x;
+    double yy0 = m_boundary.y;
+    double xx1 = xx0 + m_boundary.width;
+    double yy1 = yy0 + m_boundary.height;
+    //LOG_DEBUG("SelectText() point:(%.2f, %.2f, %.2f, %.2f)", x0, y0, x1, y1);
+    //LOG_DEBUG("SelectText() text:(%.2f, %.2f, %.2f, %.2f)", xx0, yy0, xx1, yy1);
+    if (!(x0 > xx1 || x1 < xx0 || y0 > yy1 || y1 < yy0)){
+        for (auto obj : m_objects){
+            if (obj->Type == ObjectType::TEXT){
+                //TextObject *textObject = (TextObject*)obj.get();
+                //const Text::TextCode &textCode = textObject->GetTextCode(0);
+                //LOG_NOTICE("SelectText() %s", textCode.Text.c_str());
+                //uint32_t startIndex = (uint32_t)-1;
+                //uint32_t endIndex = (uint32_t)-1;
+                //uint64_t flags = (uint64_t)startIndex << 32 & (uint64_t)endIndex;
+                obj->Flags = 999;
+            }
+        }
+    }
+
+    //for (auto obj : m_objects){
+        //if (obj->Type == ObjectType::TEXT){
+            //TextObject *textObject = (TextObject*)obj.get();
+            //double xx0 = obj->Boundary.XMin();
+            //double yy0 = obj->Boundary.YMin();
+            //double xx1 = obj->Boundary.XMax();
+            //double yy1 = obj->Boundary.YMax();
+            //if (!(x0 > xx1 || x1 < xx0 || y0 > yy1 || y1 < yy0)){
+                //const Text::TextCode &textCode = textObject->GetTextCode(0);
+                //LOG_NOTICE("SelectText() %s", textCode.Text.c_str());
+                //uint32_t startIndex = (uint32_t)-1;
+                //uint32_t endIndex = (uint32_t)-1;
+                //uint64_t flags = (uint64_t)startIndex << 32 & (uint64_t)endIndex;
+                //obj->Flags = flags;
+            //}
+        //}
+    //}
+}
+
+void TextLine::UnselectText(){
+    for (auto obj : m_objects){
+        if (obj->Type == ObjectType::TEXT){
+            obj->Flags = 0;
+        }
+    }
 }
 
 // ==================== class TextParagraph ====================
@@ -78,7 +127,7 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
     } else {
         for (auto textLine : m_textLines){
             Rect lineBoundary = textLine->GetBoundary();
-            double y = object->Boundary.YMin;
+            double y = object->Boundary.YMin();
             if (fabs(y - lineBoundary.y) < 4){
                 textLine->AddTextObject(object);
                 theLine = textLine;
@@ -96,6 +145,18 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
     return theLine;
 }
 
+void TextParagraph::SelectText(double x0, double y0, double x1, double y1){
+    for (auto textLine : m_textLines){
+        textLine->SelectText(x0, y0, x1, y1);
+    }
+}
+
+void TextParagraph::UnselectText(){
+    for (auto textLine : m_textLines){
+        textLine->UnselectText();
+    }
+}
+
 // ==================== class TextPage ====================
  
 TextPage::TextPage(){
@@ -110,6 +171,19 @@ TextPage::~TextPage(){
 TextLinePtr TextPage::AddTextObject(ObjectPtr object){
     //TextObject *textObject = (TextObject*)object.get();
     return m_textParagraphs[0]->AddTextObject(object);
+}
+
+
+void TextPage::SelectText(double x0, double y0, double x1, double y1){
+    for (auto textParagraph : m_textParagraphs){
+        textParagraph->SelectText(x0, y0, x1, y1);
+    }
+}
+
+void TextPage::UnselectText(){
+    for (auto textParagraph : m_textParagraphs){
+        textParagraph->UnselectText();
+    }
 }
 
 }; // namespace text
