@@ -405,10 +405,10 @@ static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpoint
     ReadWindow::ActionPtr action = m_readWindow->GetAction();
     assert(action != nullptr);
     if (event->button == GDK_BUTTON_PRIMARY){
-        LOG_DEBUG("LEFT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
+        LOG_DEBUG("LEFT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
         action->OnLButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     } else if (event->button == GDK_BUTTON_SECONDARY){
-        LOG_DEBUG("RIGHT BUTTON PRESSED! x:%d y:%d", event->x, event->y);
+        LOG_DEBUG("RIGHT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
         action->OnRButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     }
 
@@ -421,10 +421,10 @@ __attribute__((unused)) static gboolean button_release_cb(GtkWidget *widget, Gdk
     assert(action != nullptr);
 
     if (event->button == GDK_BUTTON_PRIMARY){
-        LOG_DEBUG("LEFT BUTTON RELEASE! x:%d y:%d", event->x, event->y);
+        LOG_DEBUG("LEFT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
         action->OnLButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     } else if (event->button == GDK_BUTTON_SECONDARY){
-        LOG_DEBUG("RIGHT BUTTON RELEASE! x:%d y:%d", event->x, event->y);
+        LOG_DEBUG("RIGHT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
         action->OnRButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
     }
     return false;
@@ -450,9 +450,9 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
 
     gdk_window_get_device_position(event->window, event->device, &x, &y, &state);
 
-    //if (state & GDK_BUTTON1_MASK){
-        //LOG(DEBUG) << "MOTION NOTIFY! x:" << x << " y:" << y;
-    //}
+    if (state & GDK_BUTTON1_MASK){
+        LOG_DEBUG("MOTION NOTIFY! x:%d y:%d", x, y);
+    }
 
     ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
     ReadWindow::ActionPtr action = m_readWindow->GetAction();

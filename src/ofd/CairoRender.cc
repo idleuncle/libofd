@@ -273,26 +273,26 @@ void CairoRender::ImplCls::DrawPage(PagePtr page, ViewArea viewArea){
     }
 
     // Draw text line
-    cairo_save(m_cr);
-    cairo_set_source_rgba(m_cr, 0, 1.0, 0, 0.5);
-    cairo_set_line_width(m_cr, 0.5);
-    ofd::text::TextPagePtr textPage = page->GetTextPage();
-    for (size_t i = 0 ; i < textPage->GetTextLinesCount() ; i++){
-        ofd::text::TextLinePtr textLine = textPage->GetTextLine(i);
-        Rect boundary = textLine->GetBoundary();
-        double x0 = boundary.x;
-        double y0 = boundary.y;
-        double x1 = x0 + boundary.width;
-        double y1 = y0 + boundary.height;
-        cairo_move_to(m_cr, x0, y0);
-        cairo_line_to(m_cr, x1, y0);
-        cairo_line_to(m_cr, x1, y1);
-        cairo_line_to(m_cr, x0, y1);
-        //cairo_line_to(m_cr, x0, y0);
-        cairo_close_path(m_cr);
-        cairo_stroke(m_cr);
-    }
-    cairo_restore(m_cr);
+    //cairo_save(m_cr);
+    //cairo_set_source_rgba(m_cr, 0, 1.0, 0, 0.5);
+    //cairo_set_line_width(m_cr, 0.5);
+    //ofd::text::TextPagePtr textPage = page->GetTextPage();
+    //for (size_t i = 0 ; i < textPage->GetTextLinesCount() ; i++){
+        //ofd::text::TextLinePtr textLine = textPage->GetTextLine(i);
+        //Rect boundary = textLine->GetBoundary();
+        //double x0 = boundary.x;
+        //double y0 = boundary.y;
+        //double x1 = x0 + boundary.width;
+        //double y1 = y0 + boundary.height;
+        //cairo_move_to(m_cr, x0, y0);
+        //cairo_line_to(m_cr, x1, y0);
+        //cairo_line_to(m_cr, x1, y1);
+        //cairo_line_to(m_cr, x0, y1);
+        ////cairo_line_to(m_cr, x0, y0);
+        //cairo_close_path(m_cr);
+        //cairo_stroke(m_cr);
+    //}
+    //cairo_restore(m_cr);
 
     //cairo_t *cr = m_cr;
     //cairo_set_source_rgb(cr, 0, 0, 1.0);

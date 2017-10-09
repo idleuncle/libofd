@@ -56,18 +56,27 @@ void TextLine::SelectText(double x0, double y0, double x1, double y1){
     double yy0 = m_boundary.y;
     double xx1 = xx0 + m_boundary.width;
     double yy1 = yy0 + m_boundary.height;
-    //LOG_DEBUG("SelectText() point:(%.2f, %.2f, %.2f, %.2f)", x0, y0, x1, y1);
-    //LOG_DEBUG("SelectText() text:(%.2f, %.2f, %.2f, %.2f)", xx0, yy0, xx1, yy1);
-    if (!(x0 > xx1 || x1 < xx0 || y0 > yy1 || y1 < yy0)){
-        for (auto obj : m_objects){
-            if (obj->Type == ObjectType::TEXT){
-                //TextObject *textObject = (TextObject*)obj.get();
-                //const Text::TextCode &textCode = textObject->GetTextCode(0);
-                //LOG_NOTICE("SelectText() %s", textCode.Text.c_str());
+    bool bSelected = false;
+    if (x0 > xx1 || x1 < xx0 || y0 > yy1 || y1 < yy0){
+        bSelected = false;
+    } else {
+        LOG_DEBUG("SelectText() point:(%.2f, %.2f), (%.2f, %.2f)", x0, x1, y0, y1);
+        LOG_NOTICE("SelectText() text:(%.2f, %.2f), (%.2f, %.2f)", xx0, xx1, yy0, yy1);
+        LOG_INFO("x0 > xx1:%d x1 < xx0:%d y0 > yy1:%d y1 < yy0:%d", x0 > xx1, x0 < xx0, y0 > yy1, y1 < yy0);
+        bSelected = true;
+    }
+    for (auto obj : m_objects){
+        if (obj->Type == ObjectType::TEXT){
+            if (bSelected){
+                TextObject *textObject = (TextObject*)obj.get();
+                const Text::TextCode &textCode = textObject->GetTextCode(0);
+                LOG_NOTICE("SelectText() %s", textCode.Text.c_str());
                 //uint32_t startIndex = (uint32_t)-1;
                 //uint32_t endIndex = (uint32_t)-1;
                 //uint64_t flags = (uint64_t)startIndex << 32 & (uint64_t)endIndex;
-                obj->Flags = 999;
+                obj->Flags = 998;
+            } else {
+                obj->Flags = 0;
             }
         }
     }

@@ -185,8 +185,8 @@ public:
     ActionPtr GetAction() const {return m_action;};
 
 private:
-    //ActionPtr m_action = ActionFactory::CreateAction(Action::Type::NORMAL);
-    ActionPtr m_action = ActionFactory::CreateAction(Action::Type::SELECTTEXT);
+    ActionPtr m_action = ActionFactory::CreateAction(Action::Type::NORMAL);
+    //ActionPtr m_action = ActionFactory::CreateAction(Action::Type::SELECTTEXT);
 
 }; // class ReadWindow
 typedef std::shared_ptr<ReadWindow> ReadWindowPtr;

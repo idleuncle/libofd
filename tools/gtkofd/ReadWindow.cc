@@ -2,6 +2,10 @@
 #include "ReadWindow.h"
 #include "utils/logger.h"
 #include "utils/utils.h"
+#include "utils/Geometry.h"
+
+//defined in OFDRender
+extern double g_resolutionX;
 
 ReadWindow::ReadWindow(){
 }
@@ -259,6 +263,16 @@ void ReadWindow::OffsetPageWall(double offsetX, double offsetY){
 // 
 void ReadWindow::SelectText(double x0, double y0, double x1, double y1){
     if (m_pageWall != nullptr){
+
+        double wallOffsetX = 0;
+        double wallOffsetY = 0;
+        double wallScaling = 1.0;
+        std::tie(wallOffsetX, wallOffsetY, wallScaling) = m_pageWall->GetWallViewArea();
+        double xx0 = utils::geometry::pixel_to_mm((x0 + wallOffsetX) / wallScaling, g_resolutionX);
+        double yy0 = utils::geometry::pixel_to_mm((y0 + wallOffsetY) / wallScaling, g_resolutionX);
+        double xx1 = utils::geometry::pixel_to_mm((x1 + wallOffsetX) / wallScaling, g_resolutionX);
+        double yy1 = utils::geometry::pixel_to_mm((y1 + wallOffsetY) / wallScaling, g_resolutionX);
+
         int pageIndex = m_pageWall->GetPageIndexFromWallPoint(x0, y0);
         //LOG_DEBUG("SelectText() pageIndex=%d", pageIndex);
         ofd::DocumentPtr document = m_pageWall->GetDocument();
@@ -266,7 +280,7 @@ void ReadWindow::SelectText(double x0, double y0, double x1, double y1){
         ofd::text::TextPagePtr textPage = page->GetTextPage();
         for (size_t i = 0 ; i < textPage->GetTextLinesCount() ; i++){
             ofd::text::TextLinePtr textLine = textPage->GetTextLine(i);
-            textLine->SelectText(x0, y0, x1, y1);
+            textLine->SelectText(xx0, yy0, xx1, yy1);
         }
     }
 }

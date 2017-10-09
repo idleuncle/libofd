@@ -52,6 +52,18 @@ namespace utils{
 
         } *Rect_t;
 
+        inline double mm_to_inch(double mm){return mm / 25.4;};
+        inline double mm_to_pixel(double mm, double dpi){return mm * dpi / 25.4;};
+        inline double mm_to_point(double mm){return mm * 72 / 25.4;};
+        inline double pixel_to_mm(double pixel, double dpi){return pixel * 25.4 / dpi;};
+        inline double pixel_to_point(double pixel, double dpi){return pixel * 72 / dpi;};
+        inline double pixel_to_inch(double pixel, double dpi){return pixel / dpi;};
+        inline double point_to_mm(double point){return point * 25.4 / 72;};
+        inline double point_to_pixel(double point, double dpi){return point * dpi / 72;};
+        inline double point_to_inch(double point){return point / 72;};
+        inline double inch_to_mm(double inch){return inch * 25.4;};
+        inline double inch_to_point(double inch){return inch * 71;};
+        inline double inch_to_pixel(double inch, double dpi){return inch * dpi;};
     } // namespace geometry
 } // namespace utils
 
