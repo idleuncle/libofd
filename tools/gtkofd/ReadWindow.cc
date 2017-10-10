@@ -49,6 +49,14 @@ bool ReadWindow::SaveOFDFile(const std::string &filename) const {
     return m_package->Save(filename);
 }
 
+void ReadWindow::CloseOFDFile(){
+    //m_pageWall = nullptr;
+    m_document = nullptr;
+    m_package = nullptr;
+    m_pageWall->Rebuild(nullptr, m_rowPages);
+    RedrawPage();
+}
+
 void ReadWindow::RedrawPage(){
     gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
 }
@@ -228,36 +236,42 @@ double ReadWindow::applyScrollAccelerate(int scrollAction, double acceleration, 
 }
 
 void ReadWindow::ScrollUp(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(0, SCROLL_MOVE_ACCELERATION, SCROLL_MAX_MOVE_ACCELERATION);
     m_pageWall->MoveUp(m_scrollAcceRate);
     RedrawPage();
 }
 
 void ReadWindow::ScrollDown(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(1, SCROLL_MOVE_ACCELERATION, SCROLL_MAX_MOVE_ACCELERATION);
     m_pageWall->MoveDown(m_scrollAcceRate);
     RedrawPage();
 }
 
 void ReadWindow::ScrollLeft(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(2, SCROLL_MOVE_ACCELERATION, SCROLL_MAX_MOVE_ACCELERATION);
     m_pageWall->MoveLeft(m_scrollAcceRate);
     RedrawPage();
 }
 
 void ReadWindow::ScrollRight(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(3, SCROLL_MOVE_ACCELERATION, SCROLL_MAX_MOVE_ACCELERATION);
     m_pageWall->MoveRight(m_scrollAcceRate);
     RedrawPage();
 }
 
 void ReadWindow::ScrollIn(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(4, SCROLL_ZOOM_ACCELERATION, SCROLL_MAX_ZOOM_ACCELERATION);
     m_pageWall->ZoomIn(m_scrollAcceRate);
     RedrawPage();
 }
 
 void ReadWindow::ScrollOut(){
+    if (m_pageWall == nullptr) return;
     m_scrollAcceRate = applyScrollAccelerate(5, SCROLL_ZOOM_ACCELERATION, SCROLL_MAX_ZOOM_ACCELERATION);
     m_pageWall->ZoomOut(m_scrollAcceRate);
     RedrawPage();

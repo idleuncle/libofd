@@ -104,6 +104,7 @@ public:
 
     DocumentPtr OpenOFDFile(const std::string &filename);
     bool SaveOFDFile(const std::string &filename) const;
+    void CloseOFDFile();
     void RedrawPage();
 
     void OnSize(int width, int height);
@@ -139,6 +140,10 @@ public:
     void CmdFileOpen();
     void CmdFileSave();
     void CmdFileSaveAs();
+    void CmdFileExport();
+    void CmdFilePrint();
+    void CmdFileProperties();
+    void CmdFileClose();
 
     void CmdToolsNormal();
     void CmdToolsSelectAnnotation();

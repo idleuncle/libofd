@@ -97,6 +97,24 @@ static void activate_fileSaveAs(GSimpleAction *action, GVariant *parameter, gpoi
     m_readWindow->CmdFileSaveAs();
 }
 
+static void activate_fileExport(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFileExport();
+}
+
+static void activate_filePrint(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFilePrint();
+}
+
+static void activate_fileProperties(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    m_readWindow->CmdFileProperties();
+}
+
+static void activate_fileClose(GSimpleAction *action, GVariant *parameter, gpointer user_data){
+    if (m_readWindow != nullptr){
+        m_readWindow->CmdFileClose();
+    }
+}
+
 // ==================== View Submenu ====================
 
 static void activate_viewZoomIn(GSimpleAction *action, GVariant *parameter, gpointer user_data){
@@ -811,6 +829,10 @@ static void activate(GApplication *app){
     static GActionEntry win_entries[] = {
         { "fileSave", activate_fileSave, nullptr, nullptr, nullptr },
         { "fileSaveAs", activate_fileSaveAs, nullptr, nullptr, nullptr },
+        { "fileExport", activate_fileExport, nullptr, nullptr, nullptr },
+        { "filePrint", activate_filePrint, nullptr, nullptr, nullptr },
+        { "fileProperties", activate_fileProperties, nullptr, nullptr, nullptr },
+
         { "viewZoomIn", activate_viewZoomIn, nullptr, nullptr, nullptr },
         { "viewZoomOut", activate_viewZoomOut, nullptr, nullptr, nullptr },
         { "viewZoomOriginal", activate_viewZoomOriginal, nullptr, nullptr, nullptr },
@@ -977,15 +999,17 @@ static void startup(GApplication *app){
 
     //std::string filename = "./data/1.ofd";
     std::string filename = g_cmdParameters->m_filename;
-    ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
-    if (document != nullptr){
-        size_t total_pages = document->GetNumPages();
-        LOG_INFO("%d pages in %s", total_pages, filename.c_str());
-        //if ( total_pages > 0 ){
-            //int screenWidth = 794;
-            //int screenHeight = 1122;
-            //int screenBPP = 32;
-        //}
+    if (!filename.empty()){
+        ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
+        if (document != nullptr){
+            size_t total_pages = document->GetNumPages();
+            LOG_INFO("%d pages in %s", total_pages, filename.c_str());
+            //if ( total_pages > 0 ){
+                //int screenWidth = 794;
+                //int screenHeight = 1122;
+                //int screenBPP = 32;
+            //}
+        }
     }
 
 }
@@ -1035,12 +1059,13 @@ static void change_theme_state(GSimpleAction *action, GVariant *state, gpointer 
     g_simple_action_set_state(action, state);
 }
 
-void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
+void run_app(int argc, char *argv[]){
     assert(m_readWindow != nullptr);
     GtkApplication *app;
     static GActionEntry app_entries[] = {
         { "fileOpen", activate_fileOpen, nullptr, nullptr, nullptr },
-        { "fileQuit", activate_quit, nullptr, nullptr, nullptr },
+        { "fileClose", activate_fileClose, nullptr, nullptr, nullptr },
+        //{ "fileQuit", activate_quit, nullptr, nullptr, nullptr },
         { "about", activate_about, nullptr, nullptr, nullptr },
         { "quit", activate_quit, nullptr, nullptr, nullptr },
         { "dark", activate_toggle, nullptr, "false", change_theme_state },
@@ -1060,6 +1085,11 @@ void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
     //g_signal_connect(app, "handle-local-options", G_CALLBACK(local_options), NULL);
 
     g_application_run(G_APPLICATION(app), argc, argv);
+}
+
+void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
+    LOG_DEBUG("Do Open. file:%s", parameters.m_filename.c_str());
+    run_app(argc, argv);
 }
 
 void cmd_saveas(const CmdSaveAsParameters &parameters){

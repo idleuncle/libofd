@@ -163,6 +163,7 @@ void PageWall::OnSize(int screenWidth, int screenHeight){
 }
 
 void PageWall::Rebuild(ofd::DocumentPtr document, int rowPages){
+    m_document = nullptr;
     if (document != nullptr){
         m_document = document;
     }
@@ -442,7 +443,7 @@ void PageWall::RebuildWall(){
 
 void PageWall::RenderWall(cairo_t *cr){
     if (m_document == nullptr){
-        LOG_WARN("m_document == nullptr in RenderWall()");
+        //LOG_WARN("m_document == nullptr in RenderWall()");
         return;
     }
 

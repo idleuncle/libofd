@@ -49,6 +49,19 @@ void ReadWindow::CmdFileSave(){
 void ReadWindow::CmdFileSaveAs(){
 }
 
+void ReadWindow::CmdFileExport(){
+}
+
+void ReadWindow::CmdFilePrint(){
+}
+
+void ReadWindow::CmdFileProperties(){
+}
+
+void ReadWindow::CmdFileClose(){
+    CloseOFDFile();
+}
+
 void ReadWindow::CmdFirstPage(){
     FirstPage();
     RedrawPage();

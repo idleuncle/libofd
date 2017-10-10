@@ -89,7 +89,7 @@
           <section>
               <item>
                   <attribute name="label" translatable="yes">关闭(_C)</attribute>
-                  <attribute name="action">app.fileQuit</attribute>
+                  <attribute name="action">app.fileClose</attribute>
                   <attribute name="accel">&lt;Primary&gt;w</attribute>
               </item>
           </section>  

@@ -167,9 +167,12 @@ CmdParameters* OFDCmdLine::ParseCmdLine(int argc, char *argv[]){
     //gflags::ParseCommandLineFlags(&argc, &argv, true);
 
     if (argc <= 1){
-        LOG_WARN("File name must be given.");
-        usage(argv[0]);
-        return nullptr;
+        // Open blank window.
+        return new CmdOpenParameters();
+        
+        //LOG_WARN("File name must be given.");
+        //usage(argv[0]);
+        //return nullptr;
     }
 
     std::string filename = argv[1];
