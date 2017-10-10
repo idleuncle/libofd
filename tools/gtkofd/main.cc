@@ -2,6 +2,7 @@
 #include <iostream>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdkscreen.h>
 #include <assert.h>
 
@@ -452,9 +453,9 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
 
     gdk_window_get_device_position(event->window, event->device, &x, &y, &state);
 
-    if (state & GDK_BUTTON1_MASK){
-        LOG_DEBUG("MOTION NOTIFY! x:%d y:%d", x, y);
-    }
+    //if (state & GDK_BUTTON1_MASK){
+        //LOG_DEBUG("MOTION NOTIFY! x:%d y:%d", x, y);
+    //}
 
     ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
     ReadWindow::ActionPtr action = m_readWindow->GetAction();
@@ -768,6 +769,14 @@ static void activate(GApplication *app){
     g_signal_connect_swapped(G_OBJECT(mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
     m_readWindow->m_mainWindow = mainWindow;
 
+    std::string appIcon = "/icons/ofd/16.ico";
+    GdkPixbuf *iconPixbuf = gdk_pixbuf_new_from_resource(appIcon.c_str(), nullptr);
+    if (iconPixbuf == nullptr){
+        LOG_WARN("Icon %s is not in resource.", appIcon.c_str());
+    } else {
+        gtk_window_set_icon(mainWindow, iconPixbuf);
+    }
+
     // -------- mainToolbar --------
     GtkToolbar *mainToolbar = (GtkToolbar*)gtk_builder_get_object(builder, "mainToolbar");
     assert(mainToolbar != nullptr);
@@ -1027,8 +1036,7 @@ static void change_theme_state(GSimpleAction *action, GVariant *state, gpointer 
 }
 
 void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
-    m_readWindow = std::make_shared<ReadWindow>();
-
+    assert(m_readWindow != nullptr);
     GtkApplication *app;
     static GActionEntry app_entries[] = {
         { "fileOpen", activate_fileOpen, nullptr, nullptr, nullptr },
@@ -1055,15 +1063,28 @@ void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
 }
 
 void cmd_saveas(const CmdSaveAsParameters &parameters){
+    assert(m_readWindow != nullptr);
     std::string destFilename = parameters.m_destFilename;
+    std::string srcFilename = parameters.m_filename;
+    assert(!srcFilename.empty());
     if (!destFilename.empty()){
-        LOG_DEBUG("Do SaveAS. file:%s", parameters.m_destFilename.c_str());
+        LOG_DEBUG("Do SaveAS. file:%s", destFilename.c_str());
+        if (m_readWindow->OpenOFDFile(parameters.m_filename)){
+            if (m_readWindow->SaveOFDFile(destFilename)){
+                LOG_ERROR("Save OFD file %s success.", destFilename.c_str());
+            } else {
+                LOG_ERROR("Save OFD file %s failed.", destFilename.c_str());
+            }
+        } else {
+            LOG_ERROR("Open OFD file %s failed.", srcFilename.c_str());
+        }
     } else {
         LOG_WARN("Save as file name must be given. /a [file=xxx.ofd]");
     }
 }
 
 void cmd_export(const CmdExportParameters &parameters){
+    assert(m_readWindow != nullptr);
     if (!parameters.m_textFilename.empty()){
         // Export text
         LOG_DEBUG("Do export text. file:%s", parameters.m_textFilename.c_str());
@@ -1080,6 +1101,7 @@ void cmd_export(const CmdExportParameters &parameters){
 }
 
 void cmd_print(const CmdPrintParameters &parameters){
+    assert(m_readWindow != nullptr);
     LOG_DEBUG("Do print. printer:%s copies:%d", parameters.m_printer.c_str(), parameters.m_copies);
     LOG_DEBUG("autorotate:%d autozoom:%d zoomratio:%.3f layers:0x%x", 
             parameters.m_autoRotate, parameters.m_autoZoom,
@@ -1089,6 +1111,8 @@ void cmd_print(const CmdPrintParameters &parameters){
 int main(int argc, char *argv[]){
 
     utils::Logger::Initialize(1);
+
+    m_readWindow = std::make_shared<ReadWindow>();
 
     OFDCmdLine cmdline;
     g_cmdParameters = cmdline.ParseCmdLine(argc, argv);

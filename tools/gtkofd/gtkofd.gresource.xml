@@ -9,6 +9,14 @@
         <file>themes/Adwaita/gtk-3.22/gtk-light.css</file>
         <file>themes/Adwaita/gtk-3.22/gtk-dark.css</file>  
 
+        <file>icons/ofd/16.ico</file>
+        <file>icons/ofd/32.ico</file>
+        <!--<file>icons/ofd/48.ico</file>-->
+        <file>icons/ofd/64.ico</file>
+        <!--<file>icons/ofd/96.ico</file>-->
+        <!--<file>icons/ofd/128.ico</file>-->
+        <!--<file>icons/ofd/512.ico</file>-->
+
         <!--<file>icons/gtkofd/faenza/24/application-exit.png</file>-->
         <!--<file>icons/gtkofd/faenza/24/document-new.png</file>-->
         <!--<file>icons/gtkofd/faenza/24/document-open.png</file>-->

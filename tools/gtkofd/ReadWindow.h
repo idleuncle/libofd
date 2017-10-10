@@ -103,6 +103,7 @@ public:
     virtual ~ReadWindow();
 
     DocumentPtr OpenOFDFile(const std::string &filename);
+    bool SaveOFDFile(const std::string &filename) const;
     void RedrawPage();
 
     void OnSize(int width, int height);

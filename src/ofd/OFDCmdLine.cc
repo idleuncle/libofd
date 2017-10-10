@@ -167,13 +167,14 @@ CmdParameters* OFDCmdLine::ParseCmdLine(int argc, char *argv[]){
     //gflags::ParseCommandLineFlags(&argc, &argv, true);
 
     if (argc <= 1){
+        LOG_WARN("File name must be given.");
         usage(argv[0]);
         return nullptr;
     }
 
     std::string filename = argv[1];
     if (!utils::FileExist(filename)){
-        LOG_WARN("File name must be given.");
+        LOG_WARN("File %s is not exist.", filename.c_str());
         usage(argv[0]);
         return nullptr;
     }

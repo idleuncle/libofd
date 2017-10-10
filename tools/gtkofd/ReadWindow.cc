@@ -40,6 +40,15 @@ DocumentPtr ReadWindow::OpenOFDFile(const std::string &filename){
     return document;
 }
 
+bool ReadWindow::SaveOFDFile(const std::string &filename) const {
+    if (m_package == nullptr){
+        LOG_WARN("No OFD package opened.");
+        return false;
+    }
+
+    return m_package->Save(filename);
+}
+
 void ReadWindow::RedrawPage(){
     gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
 }
