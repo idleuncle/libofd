@@ -161,46 +161,44 @@ void usage(const std::string& appname){
     std::cout << "Usage: " << appname << " <filename> [cmd] [options]" << std::endl;
 }
 
-bool OFDCmdLine::ParseCmdLine(int argc, char *argv[]){
+CmdParameters* OFDCmdLine::ParseCmdLine(int argc, char *argv[]){
     //gflags::SetVersionString("1.0.0");
     //gflags::SetUsageMessage("Usage: ofdviewer <pdffile>");
     //gflags::ParseCommandLineFlags(&argc, &argv, true);
 
     if (argc <= 1){
         usage(argv[0]);
-        return false;
+        return nullptr;
     }
 
-    m_filename = argv[1];
-    if (!utils::FileExist(m_filename)){
+    std::string filename = argv[1];
+    if (!utils::FileExist(filename)){
         LOG_WARN("File name must be given.");
         usage(argv[0]);
-        return false;
+        return nullptr;
     }
 
-    if (argc <= 2){
-        usage(argv[0]);
-        return false;
-    }
-
-    std::string cmd = argv[2];
+    std::string cmd; 
     std::string options;
-    if (argc >= 3){
-        options = argv[3];
-    }
+    if (argc >= 3) cmd = argv[2];
+    if (argc >= 4) options = argv[3];
 
+    CmdParameters* parameters = nullptr;
     if (cmd == "/a"){
-        return ParseCmdSaveAs(argv[0], options);
+        parameters = ParseCmdSaveAs(argv[0], options);
     } else if (cmd == "/e"){
-        return ParseCmdExport(argv[0], options);
+        parameters = ParseCmdExport(argv[0], options);
     } else if (cmd == "/p"){
-        return ParseCmdPrint(argv[0], options);
+        parameters = ParseCmdPrint(argv[0], options);
     } else {
         options = cmd;
-        return ParseCmdOpen(argv[0], options);
+        parameters = ParseCmdOpen(argv[0], options);
+    }
+    if ( parameters != nullptr){
+        parameters->m_filename = filename;
     }
 
-    return true;
+    return parameters;
 }
 
 void usage_open(const std::string& appname){
@@ -216,11 +214,23 @@ std::pair<std::string, std::string> parse_option(const std::string &str){
     }
 }
 
-bool OFDCmdLine::ParseCmdOpen(const std::string &appname, const std::string &options){
-    m_cmd = CmdType::OPEN;
+bool boolean_option(const std::string &_optValue){
+    std::string optValue = _optValue;
+    std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
+    if (optValue == "true")
+        return true;
+    else
+        return false;
+}
+
+CmdParameters* OFDCmdLine::ParseCmdOpen(const std::string &appname, const std::string &options){
+    CmdOpenParameters *parameters = new CmdOpenParameters();
 
     size_t len = options.length();
-    if (len < 2 || options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
+    if (len < 2){
+        return parameters;
+    }
+    if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_open(appname);
     }
     std::string cmd_options = options.substr(1,len-2);
@@ -239,88 +249,155 @@ bool OFDCmdLine::ParseCmdOpen(const std::string &appname, const std::string &opt
         } else if (optName == "tabdisplay"){
             vps.TabDisplay = optValue;
         } else if (optName == "hidetoolbar"){
-            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
-            if (optValue == "true")
-                vps.HideToolbar = true;
-            else
-                vps.HideToolbar = false;
+            vps.HideToolbar = boolean_option(optValue);
         } else if (optName == "hidemenubar"){
-            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
-            if (optValue == "true")
-                vps.HideMenubar = true;
-            else
-                vps.HideMenubar = false;
+            vps.HideMenubar = boolean_option(optValue);
         } else if (optName == "hidewindowui"){
-            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
-            if (optValue == "true")
-                vps.HideWindowUI = true;
-            else
-                vps.HideWindowUI = false;
+            vps.HideWindowUI = boolean_option(optValue);
         } else if (optName == "zoommode"){
             vps.ZoomMode = optValue;
         } else if (optName == "zoom"){
             vps.Zoom = atof(optValue.c_str());
         } else if (optName == "singlemode"){
-            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
-            if (optValue == "true")
-                m_singleMode = true;
-            else
-                m_singleMode = false;
+            parameters->m_singleMode = boolean_option(optValue);
         } else if (optName == "safemode"){
-            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
-            if (optValue == "true")
-                m_safeMode = true;
-            else
-                m_safeMode = false;
+            parameters->m_safeMode = boolean_option(optValue);
         }
     }
 
-    m_appPreferences.FromCTVPreferences(vps);
+    parameters->m_appPreferences.FromCTVPreferences(vps);
 
-    return true;
+    return parameters;
 }
 
 void usage_saveas(const std::string& appname){
-    std::cout << "Usage: " << appname << " <filename> /a [options]" << std::endl;
+    std::cout << "Usage: " << appname << " <filename> /e [file=xxx.txt]" << std::endl;
 }
-bool OFDCmdLine::ParseCmdSaveAs(const std::string &appname, const std::string &options){
-    m_cmd = CmdType::SAVEAS;
+CmdParameters* OFDCmdLine::ParseCmdSaveAs(const std::string &appname, const std::string &options){
+    CmdSaveAsParameters *parameters = new CmdSaveAsParameters();
 
     size_t len = options.length();
-    if (len < 2 || options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
+    if (len < 2) return parameters;
+    if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_saveas(appname);
     }
     std::string cmd_options = options.substr(1,len-2);
 
-    return true;
+    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    for (auto t : tokens){
+        std::string optName;
+        std::string optValue;
+        std::tie(optName, optValue) = parse_option(t);
+        std::transform(optName.begin(), optName.end(), optName.begin(), ::tolower);
+
+        if (optName == "file"){
+            parameters->m_destFilename = optValue;
+        } else if (optName == "embed"){
+            parameters->m_embed = boolean_option(optValue);
+        } else if (optName == "linearize"){
+            parameters->m_linearize = boolean_option(optValue);
+        }
+    }
+
+    return parameters;
 }
 
 void usage_export(const std::string& appname){
-    std::cout << "Usage: " << appname << " <filename> /e [options]" << std::endl;
+    std::cout << "Usage: " << appname << " <filename> /e [file=xxx.txt|dir=xxx]" << std::endl;
 }
-bool OFDCmdLine::ParseCmdExport(const std::string &appname, const std::string &options){
-    m_cmd = CmdType::EXPORT;
+CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std::string &options){
+    CmdExportParameters *parameters = new CmdExportParameters();
 
     size_t len = options.length();
-    if (len < 2 || options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
+    if (len < 2) return parameters;
+    if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_export(appname);
     }
     std::string cmd_options = options.substr(1,len-2);
 
-    return true;
+    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    for (auto t : tokens){
+        std::string optName;
+        std::string optValue;
+        std::tie(optName, optValue) = parse_option(t);
+        std::transform(optName.begin(), optName.end(), optName.begin(), ::tolower);
+
+        if (optName == "dpi"){
+            int dpi = atoi(optValue.c_str());
+            if (dpi != 96 || dpi != 200 || dpi != 300){
+                LOG_WARN("dpi must be 96/200/300, parameter = %d", dpi);
+                dpi = 96;
+            }
+            parameters->m_dpi = dpi;
+        } else if (optName == "format") {
+            std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
+            std::string format = optValue;
+            if (format != "bmp" || format != "jpg" || format != "png"){
+                LOG_WARN("format must be bmp|jpg|png. parameter = %s", format.c_str());
+                format = "bmp"; 
+            }
+            if (format == "bmp")
+                parameters->m_format = FormatType::BMP;
+            else if (format == "jpg")
+                parameters->m_format = FormatType::JPG;
+            else if (format == "png")
+                parameters->m_format = FormatType::PNG;
+        } else if (optName == "dir") {
+            parameters->m_dir = optValue;
+        } else if (optName == "layer") {
+            uint32_t outputLayers = 
+                (uint32_t)OutputLayerType::TEMPLATES |
+                (uint32_t)OutputLayerType::CONTENTS |
+                (uint32_t)OutputLayerType::ANNOTS |
+                (uint32_t)OutputLayerType::SEALS;
+            parameters->m_outputLayers = outputLayers;
+        } else if (optName == "file") {
+            parameters->m_textFilename = optValue;
+        }
+    }
+
+    return parameters;
 }
 
 void usage_print(const std::string& appname){
     std::cout << "Usage: " << appname << " <filename> /p [options]" << std::endl;
 }
-bool OFDCmdLine::ParseCmdPrint(const std::string &appname, const std::string &options){
-    m_cmd = CmdType::PRINT;
+CmdParameters* OFDCmdLine::ParseCmdPrint(const std::string &appname, const std::string &options){
+    CmdPrintParameters* parameters = new CmdPrintParameters();
 
     size_t len = options.length();
-    if (len < 2 || options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
+    if (len < 2) return parameters;
+    if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_print(appname);
     }
     std::string cmd_options = options.substr(1,len-2);
 
-    return true;
+    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    for (auto t : tokens){
+        std::string optName;
+        std::string optValue;
+        std::tie(optName, optValue) = parse_option(t);
+        std::transform(optName.begin(), optName.end(), optName.begin(), ::tolower);
+
+        if (optName == "printer"){
+            parameters->m_printer = optValue;
+        } else if (optName == "copies") {
+            parameters->m_copies = atoi(optValue.c_str());
+        } else if (optName == "autorotate") {
+            parameters->m_autoRotate = boolean_option(optValue);
+        } else if (optName == "autozoom") {
+            parameters->m_autoZoom = boolean_option(optValue);
+        } else if (optName == "zoomratio") {
+            parameters->m_zoomRatio = atof(optValue.c_str());
+        } else if (optName == "layer") {
+            uint32_t outputLayers = 
+                (uint32_t)OutputLayerType::TEMPLATES |
+                (uint32_t)OutputLayerType::CONTENTS |
+                (uint32_t)OutputLayerType::ANNOTS |
+                (uint32_t)OutputLayerType::SEALS;
+            parameters->m_outputLayers = outputLayers;
+        }
+    }
+
+    return parameters;
 }

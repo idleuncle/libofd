@@ -11,6 +11,7 @@
 #include "utils/logger.h"
 #include "utils/utils.h"
 #include "ofd/CairoRender.h"
+#include "ofd/OFDCmdLine.h"
 using namespace ofd;
 
 extern "C"{
@@ -21,6 +22,7 @@ extern "C"{
 #include "ReadWindow.h"
 
 
+CmdParameters *g_cmdParameters = nullptr;
 ReadWindowPtr m_readWindow = nullptr;
 
 typedef struct{
@@ -964,7 +966,8 @@ static void startup(GApplication *app){
 
     g_object_unref (builder);
 
-    std::string filename = "./data/1.ofd";
+    //std::string filename = "./data/1.ofd";
+    std::string filename = g_cmdParameters->m_filename;
     ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
     if (document != nullptr){
         size_t total_pages = document->GetNumPages();
@@ -1023,10 +1026,7 @@ static void change_theme_state(GSimpleAction *action, GVariant *state, gpointer 
     g_simple_action_set_state(action, state);
 }
 
-int main(int argc, char *argv[]){
-
-    utils::Logger::Initialize(1);
-
+void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
     m_readWindow = std::make_shared<ReadWindow>();
 
     GtkApplication *app;
@@ -1052,6 +1052,69 @@ int main(int argc, char *argv[]){
     //g_signal_connect(app, "handle-local-options", G_CALLBACK(local_options), NULL);
 
     g_application_run(G_APPLICATION(app), argc, argv);
+}
+
+void cmd_saveas(const CmdSaveAsParameters &parameters){
+    std::string destFilename = parameters.m_destFilename;
+    if (!destFilename.empty()){
+        LOG_DEBUG("Do SaveAS. file:%s", parameters.m_destFilename.c_str());
+    } else {
+        LOG_WARN("Save as file name must be given. /a [file=xxx.ofd]");
+    }
+}
+
+void cmd_export(const CmdExportParameters &parameters){
+    if (!parameters.m_textFilename.empty()){
+        // Export text
+        LOG_DEBUG("Do export text. file:%s", parameters.m_textFilename.c_str());
+    } else if (!parameters.m_dir.empty()){
+        // Export image
+        LOG_DEBUG("Do export image. dir:%s", parameters.m_dir.c_str());
+        LOG_DEBUG("dpi:%d format:%s layer:0x%x", 
+                parameters.m_dpi, 
+                get_format_type_label(parameters.m_format).c_str(),
+                parameters.m_outputLayers);
+    } else {
+        LOG_WARN("file or dir parameter must be given. /e [file=xxx.txt|dir=xxx]");
+    }
+}
+
+void cmd_print(const CmdPrintParameters &parameters){
+    LOG_DEBUG("Do print. printer:%s copies:%d", parameters.m_printer.c_str(), parameters.m_copies);
+    LOG_DEBUG("autorotate:%d autozoom:%d zoomratio:%.3f layers:0x%x", 
+            parameters.m_autoRotate, parameters.m_autoZoom,
+            parameters.m_zoomRatio, parameters.m_outputLayers);
+}
+
+int main(int argc, char *argv[]){
+
+    utils::Logger::Initialize(1);
+
+    OFDCmdLine cmdline;
+    g_cmdParameters = cmdline.ParseCmdLine(argc, argv);
+    if (g_cmdParameters == nullptr){
+        return -1;
+    }
+
+    switch (g_cmdParameters->m_cmd){
+        case CmdType::OPEN:
+            cmd_open(*((CmdOpenParameters*)g_cmdParameters), argc, argv);
+            break;
+        case CmdType::SAVEAS:
+            cmd_saveas(*((CmdSaveAsParameters*)g_cmdParameters));
+
+            break;
+        case CmdType::EXPORT:
+            cmd_export(*((CmdExportParameters*)g_cmdParameters));
+
+            break;
+        case CmdType::PRINT:
+            cmd_print(*((CmdPrintParameters*)g_cmdParameters));
+
+            break;
+    };
+
+    delete g_cmdParameters;
 
     return 0;
 }
