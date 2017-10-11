@@ -10,15 +10,17 @@ using namespace utils::geometry;
 namespace ofd{
     namespace text{
 
-    class TextParagraph;
-    typedef std::shared_ptr<TextParagraph> TextParagraphPtr;
-    //typedef std::weak_ptr<TextParagraph> TextParagraphRef;
     class TextPage;
     typedef std::shared_ptr<TextPage> TextPagePtr;
-    //typedef std::weak_ptr<TextPage> TextPageRef;
+    typedef std::weak_ptr<TextPage> TextPageRef;
+
+    class TextParagraph;
+    typedef std::shared_ptr<TextParagraph> TextParagraphPtr;
+    typedef std::weak_ptr<TextParagraph> TextParagraphRef;
+
     class TextLine;
     typedef std::shared_ptr<TextLine> TextLinePtr;
-    //typedef std::weak_ptr<TextLine> TextLineRef;
+    typedef std::weak_ptr<TextLine> TextLineRef;
 
     class TextLine : public std::enable_shared_from_this<TextLine> {
     public:
@@ -26,8 +28,8 @@ namespace ofd{
         virtual ~TextLine();
 
         TextLinePtr GetSelf(){return shared_from_this();};
-        //const TextParagraphPtr GetParagraph() const;
-        //TextParagraphPtr GetParagraph();
+        const TextParagraphPtr GetParagraph() const;
+        TextParagraphPtr GetParagraph();
 
         void AddTextObject(ObjectPtr object);
 
@@ -37,7 +39,7 @@ namespace ofd{
 
     private:
         Rect m_boundary;
-        //TextParagraphRef m_textParagraph;
+        TextParagraphRef m_textParagraph;
         std::vector<ObjectPtr> m_objects;
 
     }; // class TextLine
@@ -47,9 +49,10 @@ namespace ofd{
         TextParagraph(TextPagePtr textPage);
         virtual ~TextParagraph();
 
+        TextLinePtr CreateNewLine();
         TextParagraphPtr GetSelf(){return shared_from_this();};
-        //const TextPagePtr GetPage() const;
-        //TextPagePtr GetPage();
+        const TextPagePtr GetPage() const;
+        TextPagePtr GetPage();
 
         TextLinePtr AddTextObject(ObjectPtr object);
         size_t GetTextLinesCount() const {return m_textLines.size();};
@@ -61,7 +64,7 @@ namespace ofd{
 
     private:
         Rect m_boundary;
-        //TextPageRef m_textPage;
+        TextPageRef m_textPage;
         std::vector<TextLinePtr> m_textLines;
 
     }; // TextParagraph
@@ -70,6 +73,9 @@ namespace ofd{
     public:
         TextPage();
         virtual ~TextPage();
+
+        TextParagraphPtr CreateNewParagraph();
+        void AddDefaultParagraph();
 
         TextPagePtr GetSelf(){return shared_from_this();};
         Rect GetBoundary() const {return m_boundary;};

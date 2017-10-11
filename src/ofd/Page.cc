@@ -21,7 +21,7 @@ Page::Page(DocumentPtr document) :
     m_opened(false)
 {
     m_textPage = std::make_shared<ofd::text::TextPage>();
-
+    m_textPage->AddDefaultParagraph();
 }
 
 Page::~Page(){

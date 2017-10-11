@@ -8,20 +8,20 @@ namespace ofd{
 // ==================== class TextLine ====================
 
 TextLine::TextLine(TextParagraphPtr textParagraph)
-    //m_textParagraph(textParagraph)
+    : m_textParagraph(textParagraph)
 {
 }
 
 TextLine::~TextLine(){
 }
 
-//const TextParagraphPtr TextLine::GetParagraph() const{
-    //return m_textParagraph.lock();
-//}
+const TextParagraphPtr TextLine::GetParagraph() const{
+    return m_textParagraph.lock();
+}
 
-//TextParagraphPtr TextLine::GetParagraph(){
-    //return m_textParagraph.lock();
-//}
+TextParagraphPtr TextLine::GetParagraph(){
+    return m_textParagraph.lock();
+}
 
 void TextLine::AddTextObject(ObjectPtr object){
     double x0 = object->Boundary.XMin();
@@ -111,26 +111,31 @@ void TextLine::UnselectText(){
 // ==================== class TextParagraph ====================
 
 TextParagraph::TextParagraph(TextPagePtr textPage)
-    //m_textPage(textPage)
+    :m_textPage(textPage)
 {
 }
 
 TextParagraph::~TextParagraph(){
 }
 
-//const TextPagePtr TextParagraph::GetPage() const{
-    //return m_textPage.lock();
-//}
+TextLinePtr TextParagraph::CreateNewLine(){
+    TextLinePtr textLine = std::make_shared<TextLine>(GetSelf());
+    return textLine;
+}
 
-//TextPagePtr TextParagraph::GetPage(){
-    //return m_textPage.lock();
-//}
+const TextPagePtr TextParagraph::GetPage() const{
+    return m_textPage.lock();
+}
+
+TextPagePtr TextParagraph::GetPage(){
+    return m_textPage.lock();
+}
 
 TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
     TextLinePtr theLine = nullptr;
 
     if (m_textLines.size() == 0){
-        theLine = std::make_shared<TextLine>(GetSelf());
+        theLine = CreateNewLine();
         theLine->AddTextObject(object);
         m_textLines.push_back(theLine);
     } else {
@@ -144,7 +149,7 @@ TextLinePtr TextParagraph::AddTextObject(ObjectPtr object){
             }
         }
         if (theLine == nullptr){
-            theLine = std::make_shared<TextLine>(GetSelf());
+            theLine = CreateNewLine();
             theLine->AddTextObject(object);
             m_textLines.push_back(theLine);
         }
@@ -169,12 +174,19 @@ void TextParagraph::UnselectText(){
 // ==================== class TextPage ====================
  
 TextPage::TextPage(){
-    TextParagraphPtr textParagraph = std::make_shared<TextParagraph>(nullptr);
-    //TextParagraphPtr textParagraph = std::make_shared<TextParagraph>(GetSelf());
-    m_textParagraphs.push_back(textParagraph);
 }
 
 TextPage::~TextPage(){
+}
+
+TextParagraphPtr TextPage::CreateNewParagraph(){
+    TextParagraphPtr textParagraph = std::make_shared<TextParagraph>(GetSelf());
+    return textParagraph;
+}
+
+void TextPage::AddDefaultParagraph(){
+    TextParagraphPtr textParagraph = CreateNewParagraph();
+    m_textParagraphs.push_back(textParagraph);
 }
 
 TextLinePtr TextPage::AddTextObject(ObjectPtr object){
