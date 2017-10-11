@@ -20,7 +20,7 @@ public:
         FATAL
     };
     //static void Initialize(int argc, char *argv[]);
-    static void Initialize(int loggerLevel = 0);
+    static void Initialize(int loggerLevel = 0, const std::string &logfilename="");
 
     void debug(const char *file, const char *func, int line, const char *format, ...);
     void info(const char *file, const char *func, int line, const char *format, ...);

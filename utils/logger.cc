@@ -51,26 +51,28 @@ std::string vform(const char* format, va_list args) {
 }
 
 // ==================== log4cpp ===================
-void Logger::Initialize(int loggerLevel) {
+void Logger::Initialize(int loggerLevel, const std::string &logfilename) {
     log4cpp::Appender *consoleAppender = new log4cpp::OstreamAppender("console", &std::cout);
     //consoleAppender->setLayout(new log4cpp::BasicLayout());
     log4cpp::PatternLayout *consoleLayout = new log4cpp::PatternLayout();
     consoleLayout->setConversionPattern("%d{%H:%M:%S,%l} %x [%p] %m%n");
     consoleAppender->setLayout(consoleLayout);
 
-    log4cpp::Appender *logfileAppender = new log4cpp::FileAppender("default", "app.log");
-    //logfileAppender->setLayout(new log4cpp::BasicLayout());
-    log4cpp::PatternLayout *logfileLayout = new log4cpp::PatternLayout();
-    logfileLayout->setConversionPattern("%d [%p] %m%n");
-    logfileAppender->setLayout(logfileLayout);
-
     log4cpp::Category &rootCategory = log4cpp::Category::getRoot();
     rootCategory.setPriority(log4cpp::Priority::DEBUG);
     rootCategory.addAppender(consoleAppender);
     
-    log4cpp::Category& logfileCategory = log4cpp::Category::getInstance("logfile");
-    logfileCategory.setPriority(log4cpp::Priority::INFO);
-    logfileCategory.addAppender(logfileAppender);
+    if (!logfilename.empty()){
+        log4cpp::Appender *logfileAppender = new log4cpp::FileAppender("default", logfilename.c_str());
+        //logfileAppender->setLayout(new log4cpp::BasicLayout());
+        log4cpp::PatternLayout *logfileLayout = new log4cpp::PatternLayout();
+        logfileLayout->setConversionPattern("%d [%p] %m%n");
+        logfileAppender->setLayout(logfileLayout);
+
+        log4cpp::Category& logfileCategory = log4cpp::Category::getInstance("logfile");
+        logfileCategory.setPriority(log4cpp::Priority::INFO);
+        logfileCategory.addAppender(logfileAppender);
+    }
 
     // log examples
     //rootCategory << log4cpp::Priority::DEBUG << "log messges";
