@@ -20,11 +20,26 @@ extern "C"{
 }
 #include "OFDRender.h"
 #include "PageWall.h"
-#include "ReadWindow.h"
-
 
 CmdParameters *g_cmdParameters = nullptr;
-ReadWindowPtr m_readWindow = nullptr;
+
+//#include "ReadWindow.h"
+//ReadWindowPtr m_readWindow = nullptr;
+//ReadWindowPtr getDocumentView(){
+    //return m_readWindow;
+//}
+//ReadWindowPtr getPackageView(){
+    //return m_readWindow;
+//}
+#include "PackageView.h"
+#include "DocumentView.h"
+ofd::PackageViewPtr m_packageView = nullptr;
+ofd::DocumentViewPtr getDocumentView(){
+    return m_packageView->GetCurrentDocumentView();
+}
+ofd::PackageViewPtr getPackageView(){
+    return m_packageView;
+}
 
 typedef struct{
     GtkApplicationWindow parentWindow;
@@ -86,144 +101,142 @@ static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer 
 // ==================== File Submenu ====================
 
 static void activate_fileOpen(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFileOpen();
+    getPackageView()->CmdFileOpen();
 }
 
 static void activate_fileSave(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFileSave();
+    getDocumentView()->CmdFileSave();
 }
 
 static void activate_fileSaveAs(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFileSaveAs();
+    getDocumentView()->CmdFileSaveAs();
 }
 
 static void activate_fileExport(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFileExport();
+    getDocumentView()->CmdFileExport();
 }
 
 static void activate_filePrint(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFilePrint();
+    getDocumentView()->CmdFilePrint();
 }
 
 static void activate_fileProperties(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFileProperties();
+    getDocumentView()->CmdFileProperties();
 }
 
 static void activate_fileClose(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    if (m_readWindow != nullptr){
-        m_readWindow->CmdFileClose();
-    }
+    getPackageView()->CmdFileClose();
 }
 
 // ==================== View Submenu ====================
 
 static void activate_viewZoomIn(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomIn();
+    getDocumentView()->CmdZoomIn();
 }
 
 static void activate_viewZoomOut(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomOut();
+    getDocumentView()->CmdZoomOut();
 }
 
 static void activate_viewZoomOriginal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomOriginal();
+    getDocumentView()->CmdZoomOriginal();
 }
 
 static void activate_viewZoomFitBest(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomFitBest();
+    getDocumentView()->CmdZoomFitBest();
 }
 
 static void activate_viewZoomFitWidth(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomFitBest();
+    getDocumentView()->CmdZoomFitBest();
 }
 
 static void activate_viewZoomFitHeight(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdZoomFitBest();
+    getDocumentView()->CmdZoomFitBest();
 }
 
 // ==================== Tools Submenu ====================
         
 static void activate_toolsNormal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    //m_readWindow->CmdToolsNormal();
-    g_signal_emit_by_name(G_OBJECT(m_readWindow->m_mainWindow), "change-state", g_variant_new_boolean(true));
+    //getDocumentView()->CmdToolsNormal();
+    g_signal_emit_by_name(G_OBJECT(getPackageView()->m_mainWindow), "change-state", g_variant_new_boolean(true));
 }
 
 static void change_state_toolsNormal(GSimpleAction *action, GVariant *parameter, gpointer user_data){
     gboolean bCheck = g_variant_get_boolean(parameter);
     LOG_DEBUG("change_state_toolsNormal()");
     if (bCheck){
-        m_readWindow->ChangeAction(ReadWindow::Action::Type::NORMAL);
+        getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::NORMAL);
     }
 }
 
 static void activate_toolsSelectAnnotation(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsSelectAnnotation();
+    getDocumentView()->CmdToolsSelectAnnotation();
 }
 
 static void change_state_toolsSelectAnnotation(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::SELECTANNOTATION);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::SELECTANNOTATION);
 }
 
 static void activate_toolsSelectText(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsSelectText();
+    getDocumentView()->CmdToolsSelectText();
 }
 
 static void change_state_toolsSelectText(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::SELECTTEXT);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::SELECTTEXT);
 }
 
 static void activate_toolsSnapshot(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsSnapshot();
+    getDocumentView()->CmdToolsSnapshot();
 }
 
 static void change_state_toolsSnapshot(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::SNAPSHOT);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::SNAPSHOT);
 }
 
 static void activate_toolsDrawLine(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsDrawLine();
+    getDocumentView()->CmdToolsDrawLine();
 }
 
 static void change_state_toolsDrawLine(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWLINE);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::DRAWLINE);
 }
 
 static void activate_toolsDrawRect(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsDrawRect();
+    getDocumentView()->CmdToolsDrawRect();
 }
 
 static void change_state_toolsDrawRect(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWRECT);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::DRAWRECT);
 }
 
 static void activate_toolsDrawPolyline(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdToolsDrawPolyline();
+    getDocumentView()->CmdToolsDrawPolyline();
 }
 
 static void change_state_toolsDrawPolyline(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->ChangeAction(ReadWindow::Action::Type::DRAWPOLYLINE);
+    getDocumentView()->ChangeAction(ofd::DocumentView::Action::Type::DRAWPOLYLINE);
 }
 
 static void activate_docFirstPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdFirstPage();
+    getDocumentView()->CmdFirstPage();
 }
 
 // ==================== Document Submenu ====================
 
 static void activate_docPreviousPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdPreviousPage();
+    getDocumentView()->CmdPreviousPage();
 }
 
 static void activate_docNextPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdNextPage();
+    getDocumentView()->CmdNextPage();
 }
 
 static void activate_docLastPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdLastPage();
+    getDocumentView()->CmdLastPage();
 }
 
 static void activate_docGotoPage(GSimpleAction *action, GVariant *parameter, gpointer user_data){
-    m_readWindow->CmdGotoPage();
+    getDocumentView()->CmdGotoPage();
 }
 
 static void activate_quit (GSimpleAction *action, GVariant *parameter, gpointer user_data){
@@ -256,67 +269,65 @@ bool no_special_keys(GdkEventKey *event){
 }
 
 static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer user_data){
-    assert(m_readWindow != nullptr);
-
     switch (event->keyval){
     case GDK_KEY_Page_Down:
-        LOG_DEBUG("Page Down KEY PRESSED!");
-        m_readWindow->CmdNextPage();
+        //LOG_DEBUG("Page Down KEY PRESSED!");
+        getDocumentView()->CmdNextPage();
         break;
     case GDK_KEY_Page_Up:
-        LOG_DEBUG("Page Up KEY PRESSED!");
-        m_readWindow->CmdPreviousPage();
+        //LOG_DEBUG("Page Up KEY PRESSED!");
+        getDocumentView()->CmdPreviousPage();
         break;
     case GDK_KEY_Down:
-        LOG_DEBUG("Down KEY PRESSED!");
-        m_readWindow->CmdMoveDown();
+        //LOG_DEBUG("Down KEY PRESSED!");
+        getDocumentView()->CmdMoveDown();
         break;
     case GDK_KEY_Up:
-        LOG_DEBUG("Up KEY PRESSED!");
-        m_readWindow->CmdMoveUp();
+        //LOG_DEBUG("Up KEY PRESSED!");
+        getDocumentView()->CmdMoveUp();
         break;
     case GDK_KEY_Left:
-        LOG_DEBUG("Left KEY PRESSED!");
-        m_readWindow->CmdMoveLeft();
+        //LOG_DEBUG("Left KEY PRESSED!");
+        getDocumentView()->CmdMoveLeft();
         break;
     case GDK_KEY_Right:
-        LOG_DEBUG("Right KEY PRESSED!");
-        m_readWindow->CmdMoveRight();
+        //LOG_DEBUG("Right KEY PRESSED!");
+        getDocumentView()->CmdMoveRight();
         break;
     case GDK_KEY_i:
         if (no_special_keys(event)){
-            m_readWindow->CmdZoomIn();    
+            getDocumentView()->CmdZoomIn();    
         } else {
             return false;
         }
         break;
     case GDK_KEY_o:
         if (no_special_keys(event)){
-            m_readWindow->CmdZoomOut();    
+            getDocumentView()->CmdZoomOut();    
         } else {
             return false;
         }
         break;
     case GDK_KEY_f:
-        m_readWindow->CmdZoomFitBest();
+        getDocumentView()->CmdZoomFitBest();
         break;
     case GDK_KEY_h:
-        m_readWindow->CmdMoveLeft();
+        getDocumentView()->CmdMoveLeft();
         break;
     case GDK_KEY_j:
-        m_readWindow->CmdMoveDown();
+        getDocumentView()->CmdMoveDown();
         break;
     case GDK_KEY_k:
-        m_readWindow->CmdMoveUp();
+        getDocumentView()->CmdMoveUp();
         break;
     case GDK_KEY_l:
-        m_readWindow->CmdMoveRight();
+        getDocumentView()->CmdMoveRight();
         break;
     case GDK_KEY_n:
-        m_readWindow->CmdNextPage();
+        getDocumentView()->CmdNextPage();
         break;
     case GDK_KEY_p:
-        m_readWindow->CmdPreviousPage();
+        getDocumentView()->CmdPreviousPage();
         break;
     default:
         //LOG(DEBUG) << "Key pressed. keyval:" << event->keyval;
@@ -331,34 +342,34 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
     case GDK_KEY_o:
         if (event->state & GDK_CONTROL_MASK){
             LOG_DEBUG("Key Ctrl+o released. keyval: 0x%x", event->keyval);
-            m_readWindow->CmdFileOpen();
+            getPackageView()->CmdFileOpen();
         }
         break;
     case GDK_KEY_plus:
         if (event->state & GDK_CONTROL_MASK){
             // 放大 Ctrl + +
-            m_readWindow->CmdZoomIn();
+            getDocumentView()->CmdZoomIn();
             LOG_DEBUG("Key Ctrl++ released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_minus:
         if (event->state & GDK_CONTROL_MASK){
             // 缩小 Ctrl + -
-            m_readWindow->CmdZoomOut();
+            getDocumentView()->CmdZoomOut();
             LOG_DEBUG("Key Ctrl+- released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_1:
         if (event->state & GDK_CONTROL_MASK){
             // 原始大小 Ctrl + 1
-            m_readWindow->CmdZoomOriginal();
+            getDocumentView()->CmdZoomOriginal();
             LOG_DEBUG("Key Ctrl+1 released. keyval: 0x%x", event->keyval);
         }
         break;
     case GDK_KEY_2:
         if (event->state & GDK_CONTROL_MASK){
             // 适合页面 Ctrl + 2
-            m_readWindow->CmdZoomFitBest();
+            getDocumentView()->CmdZoomFitBest();
             LOG_DEBUG("Key Ctrl+2 released. keyval: 0x%x", event->keyval);
         }
         break;
@@ -375,10 +386,10 @@ static gboolean key_release_cb(GtkWidget *widget, GdkEventKey *event, gpointer u
         }
         break;
     case GDK_KEY_Home:
-        m_readWindow->CmdFirstPage();
+        getDocumentView()->CmdFirstPage();
         break;
     case GDK_KEY_End:
-        m_readWindow->CmdLastPage();
+        getDocumentView()->CmdLastPage();
         break;
     case GDK_KEY_space:
         LOG_DEBUG("SPACE KEY RELEASED!");
@@ -406,14 +417,28 @@ struct GdkEventButton {
 };
  */
 
-ReadWindow::Action::KeyStatus gdk_event_status_to_key_status(uint32_t event_state){
+//ReadWindow::Action::KeyStatus gdk_event_status_to_key_status(uint32_t event_state){
+    ////ReadWindow::Action::KeyStatus keyStatus;
+    ////if (event_state & GDK_CONTROL_MASK) keyStatus.m_ctrlPressing = true;
+    ////if (event_state & GDK_SHIFT_MASK) keyStatus.m_shiftPressing = true;
+    ////if (event_state & GDK_ALT_MASK) keyStatus.m_altPressing = true;
+    ////if (event_state & GDK_META_MASK) keyStatus.m_metaPressing = true;
+    ////return keyStatus;
+    //return ReadWindow::Action::KeyStatus(
+            //event_state & GDK_CONTROL_MASK, 
+            //event_state & GDK_SHIFT_MASK,
+            //event_state & GDK_META_MASK,
+            //event_state & GDK_SUPER_MASK
+            //);
+//}
+ofd::DocumentView::Action::KeyStatus gdk_event_status_to_key_status(uint32_t event_state){
     //ReadWindow::Action::KeyStatus keyStatus;
     //if (event_state & GDK_CONTROL_MASK) keyStatus.m_ctrlPressing = true;
     //if (event_state & GDK_SHIFT_MASK) keyStatus.m_shiftPressing = true;
     //if (event_state & GDK_ALT_MASK) keyStatus.m_altPressing = true;
     //if (event_state & GDK_META_MASK) keyStatus.m_metaPressing = true;
     //return keyStatus;
-    return ReadWindow::Action::KeyStatus(
+    return ofd::DocumentView::Action::KeyStatus(
             event_state & GDK_CONTROL_MASK, 
             event_state & GDK_SHIFT_MASK,
             event_state & GDK_META_MASK,
@@ -421,32 +446,41 @@ ReadWindow::Action::KeyStatus gdk_event_status_to_key_status(uint32_t event_stat
             );
 }
 static gboolean button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
-    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
 
-    ReadWindow::ActionPtr action = m_readWindow->GetAction();
-    assert(action != nullptr);
-    if (event->button == GDK_BUTTON_PRIMARY){
-        LOG_DEBUG("LEFT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
-        action->OnLButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
-    } else if (event->button == GDK_BUTTON_SECONDARY){
-        LOG_DEBUG("RIGHT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
-        action->OnRButtonPress(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+    DocumentViewPtr documentView = getDocumentView();
+    if (documentView != nullptr){
+        ofd::DocumentView::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+
+        ofd::DocumentView::ActionPtr action = getDocumentView()->GetAction();
+        assert(action != nullptr);
+        if (event->button == GDK_BUTTON_PRIMARY){
+            LOG_DEBUG("LEFT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
+            action->OnLButtonPress(event->x, event->y, keyStatus, (void*)documentView.get()); 
+        } else if (event->button == GDK_BUTTON_SECONDARY){
+            LOG_DEBUG("RIGHT BUTTON PRESSED! x:%.2f y:%.2f", event->x, event->y);
+            action->OnRButtonPress(event->x, event->y, keyStatus, (void*)documentView.get()); 
+        }
     }
 
     return false;
 }
 
 __attribute__((unused)) static gboolean button_release_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data){
-    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
-    ReadWindow::ActionPtr action = m_readWindow->GetAction();
-    assert(action != nullptr);
 
-    if (event->button == GDK_BUTTON_PRIMARY){
-        LOG_DEBUG("LEFT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
-        action->OnLButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
-    } else if (event->button == GDK_BUTTON_SECONDARY){
-        LOG_DEBUG("RIGHT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
-        action->OnRButtonRelease(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+    DocumentViewPtr documentView = getDocumentView();
+    if (documentView != nullptr){
+
+        ofd::DocumentView::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+        ofd::DocumentView::ActionPtr action = getDocumentView()->GetAction();
+        assert(action != nullptr);
+
+        if (event->button == GDK_BUTTON_PRIMARY){
+            LOG_DEBUG("LEFT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
+            action->OnLButtonRelease(event->x, event->y, keyStatus, (void*)documentView.get()); 
+        } else if (event->button == GDK_BUTTON_SECONDARY){
+            LOG_DEBUG("RIGHT BUTTON RELEASE! x:%.2f y:%.2f", event->x, event->y);
+            action->OnRButtonRelease(event->x, event->y, keyStatus, (void*)documentView.get()); 
+        }
     }
     return false;
 }
@@ -475,10 +509,13 @@ static gboolean motion_notify_cb(GtkWidget *widget, GdkEventMotion *event, gpoin
         //LOG_DEBUG("MOTION NOTIFY! x:%d y:%d", x, y);
     //}
 
-    ReadWindow::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
-    ReadWindow::ActionPtr action = m_readWindow->GetAction();
-    assert(action != nullptr);
-    action->OnMotionNotify(event->x, event->y, keyStatus, (void*)m_readWindow.get()); 
+    DocumentViewPtr documentView = getDocumentView();
+    if (documentView != nullptr){
+        ofd::DocumentView::ActionPtr action = getDocumentView()->GetAction();
+        assert(action != nullptr);
+        ofd::DocumentView::Action::KeyStatus keyStatus = gdk_event_status_to_key_status(event->state);
+        action->OnMotionNotify(event->x, event->y, keyStatus, (void*)getDocumentView().get()); 
+    }
 
     return true;
 }
@@ -567,29 +604,32 @@ __attribute__((unused)) gboolean scroll_event_cb(GtkWidget *widget, GdkEventScro
     //GdkScrollDirection direction = event->direction;
     //LOG(DEBUG) << "Scroll Event. Delta x:" << event->delta_x << " Delta y:" << event->delta_y << " Direction:" << direction;
 
-    if (event->state & GDK_SHIFT_MASK){
-        if (event->direction == GDK_SCROLL_UP){
-            m_readWindow->CmdZoomIn();
-        } else if (event->direction == GDK_SCROLL_DOWN){
-            m_readWindow->CmdZoomOut();
-        }
-    } else {
-        if (event->direction == GDK_SCROLL_UP){
-            if (event->state & GDK_CONTROL_MASK){
-                m_readWindow->CmdMoveLeft();
-            } else {
-                m_readWindow->CmdMoveUp();
+    DocumentViewPtr documentView = getDocumentView();
+    if (documentView != nullptr){
+        if (event->state & GDK_SHIFT_MASK){
+            if (event->direction == GDK_SCROLL_UP){
+                documentView->CmdZoomIn();
+            } else if (event->direction == GDK_SCROLL_DOWN){
+                documentView->CmdZoomOut();
             }
-        } else if (event->direction == GDK_SCROLL_DOWN){
-            if (event->state & GDK_CONTROL_MASK){
-                m_readWindow->CmdMoveRight();
-            } else {
-                m_readWindow->CmdMoveDown();
+        } else {
+            if (event->direction == GDK_SCROLL_UP){
+                if (event->state & GDK_CONTROL_MASK){
+                    documentView->CmdMoveLeft();
+                } else {
+                    documentView->CmdMoveUp();
+                }
+            } else if (event->direction == GDK_SCROLL_DOWN){
+                if (event->state & GDK_CONTROL_MASK){
+                    documentView->CmdMoveRight();
+                } else {
+                    documentView->CmdMoveDown();
+                }
+            } else if (event->direction == GDK_SCROLL_LEFT){
+                documentView->CmdMoveLeft();
+            } else if (event->direction == GDK_SCROLL_RIGHT){
+                documentView->CmdMoveRight();
             }
-        } else if (event->direction == GDK_SCROLL_LEFT){
-            m_readWindow->CmdMoveLeft();
-        } else if (event->direction == GDK_SCROLL_RIGHT){
-            m_readWindow->CmdMoveRight();
         }
     }
 
@@ -659,19 +699,32 @@ __attribute__((unused)) static gboolean focus_out_event_cb(GtkWidget *widget, Gd
 static bool m_bFirst = true;
 static void size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data){
 
-    assert(m_readWindow != nullptr);
-    if (m_bFirst){
-        m_bFirst = false;
-        m_readWindow->OnSize(allocation->width, allocation->height);
-        //m_readWindow->CmdZoomFitBest();
-    } else {
-        m_readWindow->OnSize(allocation->width, allocation->height);
+    PackageViewPtr packageView = getPackageView();
+    if (packageView != nullptr){
+        if (m_bFirst){
+            m_bFirst = false;
+            packageView->OnSize(allocation->width, allocation->height);
+            //getDocumentView()->CmdZoomFitBest();
+        } else {
+            packageView->OnSize(allocation->width, allocation->height);
+        }
     }
 }
 
 static gint draw_cb(GtkWindow *widget, cairo_t *cr, gpointer data){
+    GdkRGBA rgba;
+    rgba.red = 0.25;
+    rgba.green = 0.25;
+    rgba.blue = 0.25;
+    rgba.alpha = 0.6;
+    gdk_cairo_set_source_rgba(cr, &rgba);
+    cairo_paint(cr);
 
-    m_readWindow->OnDraw(cr);
+    PackageViewPtr packageView = getPackageView();
+    assert(packageView != nullptr);
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (documentView != nullptr)
+        documentView->OnDraw(cr);
 
     return true;
 }
@@ -785,7 +838,7 @@ static void activate(GApplication *app){
     GtkWindow *mainWindow = (GtkWindow*)gtk_builder_get_object(builder, "mainWindow");
     assert(mainWindow != nullptr);
     g_signal_connect_swapped(G_OBJECT(mainWindow),"destroy",G_CALLBACK(gtk_main_quit), nullptr);
-    m_readWindow->m_mainWindow = mainWindow;
+    getPackageView()->m_mainWindow = mainWindow;
 
     std::string appIcon = "/icons/ofd/16.ico";
     GdkPixbuf *iconPixbuf = gdk_pixbuf_new_from_resource(appIcon.c_str(), nullptr);
@@ -798,29 +851,29 @@ static void activate(GApplication *app){
     // -------- mainToolbar --------
     GtkToolbar *mainToolbar = (GtkToolbar*)gtk_builder_get_object(builder, "mainToolbar");
     assert(mainToolbar != nullptr);
-    m_readWindow->m_mainToolbar = mainToolbar;
+    getPackageView()->m_mainToolbar = mainToolbar;
 
     init_toolbar(mainToolbar);
 
     // -------- infobar --------
     GtkWidget *infobar = GTK_WIDGET(gtk_builder_get_object(builder, "infobar"));
     assert(infobar != nullptr);
-    m_readWindow->infobar = infobar;
+    getPackageView()->m_infobar = infobar;
 
     // -------- message --------
     GtkWidget *message = GTK_WIDGET(gtk_builder_get_object(builder, "message"));
     assert(message != nullptr);
-    m_readWindow->message = message;
+    getPackageView()->m_message = message;
 
     // -------- drawingArea --------
     GtkWidget *drawingArea = GTK_WIDGET(gtk_builder_get_object(builder, "drawingArea"));
     assert(drawingArea != nullptr);
-    m_readWindow->drawingArea = drawingArea;
+    getPackageView()->m_drawingArea = drawingArea;
 
     // -------- renderingWindow --------
     GtkWindow *renderingWindow = (GtkWindow*)gtk_builder_get_object(builder, "renderingWindow");
     assert(renderingWindow != nullptr);
-    m_readWindow->m_renderingWindow = renderingWindow;
+    getPackageView()->m_renderingWindow = renderingWindow;
 
     g_object_unref(builder);
 
@@ -963,7 +1016,16 @@ static void activate(GApplication *app){
     g_signal_emit_by_name(G_OBJECT(drawingArea), "activate");
     gtk_widget_grab_focus(drawingArea);
 
-    m_readWindow->CmdZoomFitBest();
+    //std::string filename = "./data/1.ofd";
+    std::string filename = g_cmdParameters->m_filename;
+    if (!filename.empty()){
+        getPackageView()->OpenOFDFile(filename);
+    }
+    PackageViewPtr packageView = getPackageView();
+    assert(packageView != nullptr);
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (documentView != nullptr)
+        documentView->CmdZoomFitBest();
 }
 
 GtkWidget* create_menubar(){
@@ -981,7 +1043,7 @@ static void startup(GApplication *app){
         LOG_ERROR("gtkofd_get_resource() return nullptr.");
     }
     g_resources_register(resource);
-    m_readWindow->resource = resource;
+    getPackageView()->m_resource = resource;
 
     //GtkBuilder *builder = gtk_builder_new_from_file("./app.ui");
     //GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
@@ -996,21 +1058,6 @@ static void startup(GApplication *app){
     gtk_application_set_menubar(GTK_APPLICATION(app), G_MENU_MODEL(menuBar));
 
     g_object_unref (builder);
-
-    //std::string filename = "./data/1.ofd";
-    std::string filename = g_cmdParameters->m_filename;
-    if (!filename.empty()){
-        ofd::DocumentPtr document = m_readWindow->OpenOFDFile(filename);
-        if (document != nullptr){
-            size_t total_pages = document->GetNumPages();
-            LOG_INFO("%d pages in %s", total_pages, filename.c_str());
-            //if ( total_pages > 0 ){
-                //int screenWidth = 794;
-                //int screenHeight = 1122;
-                //int screenBPP = 32;
-            //}
-        }
-    }
 
 }
 
@@ -1060,7 +1107,6 @@ static void change_theme_state(GSimpleAction *action, GVariant *state, gpointer 
 }
 
 void run_app(int argc, char *argv[]){
-    assert(m_readWindow != nullptr);
     GtkApplication *app;
     static GActionEntry app_entries[] = {
         { "fileOpen", activate_fileOpen, nullptr, nullptr, nullptr },
@@ -1093,14 +1139,13 @@ void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
 }
 
 void cmd_saveas(const CmdSaveAsParameters &parameters){
-    assert(m_readWindow != nullptr);
     std::string destFilename = parameters.m_destFilename;
     std::string srcFilename = parameters.m_filename;
     assert(!srcFilename.empty());
     if (!destFilename.empty()){
         LOG_DEBUG("Do SaveAS. file:%s", destFilename.c_str());
-        if (m_readWindow->OpenOFDFile(parameters.m_filename)){
-            if (m_readWindow->SaveOFDFile(destFilename)){
+        if (getPackageView()->OpenOFDFile(parameters.m_filename)){
+            if (getPackageView()->SaveOFDFile(destFilename)){
                 LOG_ERROR("Save OFD file %s success.", destFilename.c_str());
             } else {
                 LOG_ERROR("Save OFD file %s failed.", destFilename.c_str());
@@ -1114,7 +1159,6 @@ void cmd_saveas(const CmdSaveAsParameters &parameters){
 }
 
 void cmd_export(const CmdExportParameters &parameters){
-    assert(m_readWindow != nullptr);
     if (!parameters.m_textFilename.empty()){
         // Export text
         LOG_DEBUG("Do export text. file:%s", parameters.m_textFilename.c_str());
@@ -1131,7 +1175,6 @@ void cmd_export(const CmdExportParameters &parameters){
 }
 
 void cmd_print(const CmdPrintParameters &parameters){
-    assert(m_readWindow != nullptr);
     LOG_DEBUG("Do print. printer:%s copies:%d", parameters.m_printer.c_str(), parameters.m_copies);
     LOG_DEBUG("autorotate:%d autozoom:%d zoomratio:%.3f layers:0x%x", 
             parameters.m_autoRotate, parameters.m_autoZoom,
@@ -1142,7 +1185,7 @@ int main(int argc, char *argv[]){
 
     utils::Logger::Initialize(1);
 
-    m_readWindow = std::make_shared<ReadWindow>();
+    m_packageView = std::make_shared<ofd::PackageView>();
 
     OFDCmdLine cmdline;
     g_cmdParameters = cmdline.ParseCmdLine(argc, argv);

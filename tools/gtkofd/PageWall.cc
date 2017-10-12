@@ -201,6 +201,8 @@ void PageWall::Rebuild(ofd::DocumentPtr document, int rowPages){
         m_wallCols = 0;
     }
 
+    LOG_DEBUG("PageWall::Rebuild(). totalPages:%d wallRows:%d wallCols:%d", totalPages, m_wallRows, m_wallCols);
+
     rebuildWallRect();
     RebuildWall();
 }

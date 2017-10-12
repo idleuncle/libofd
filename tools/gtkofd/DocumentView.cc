@@ -11,7 +11,6 @@ using namespace ofd;
 DocumentView::DocumentView(PackageViewPtr packageView)
     : m_packageView(packageView)
 {
-
 }
 
 DocumentView::~DocumentView(){
@@ -20,19 +19,26 @@ DocumentView::~DocumentView(){
 void DocumentView::SetDocument(DocumentPtr document){
     m_document = document;
 
-    if (document != nullptr){
+}
+
+void DocumentView::Rebuild(){
+    if (m_document != nullptr){
         if (m_pageWall != nullptr){
-            m_pageWall->SetWallViewArea(0, 0, 0);
+            //m_pageWall->SetWallViewArea(0, 0, 1.0);
             m_pageWall->Rebuild(m_document, m_rowPages);
+        } else {
+            LOG_WARN("DocumentView::SetDocument() m_pageWall == nullptr");
         }
     } else {
+        LOG_WARN("DocumentView::SetDocument() document == nullptr");
         m_pageWall->Rebuild(nullptr, m_rowPages);
     }
-    RedrawDocumentView();
 }
 
 void DocumentView::RedrawDocumentView(){
-    //gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
+    if (m_drawingArea != nullptr){
+        gdk_window_invalidate_rect(gtk_widget_get_window(m_drawingArea), nullptr, false);
+    }
 }
 
 void DocumentView::OnSize(int width, int height){
@@ -42,12 +48,15 @@ void DocumentView::OnSize(int width, int height){
         //m_ofdRender = std::make_shared<ofd::OFDRender>(drawingArea, allocation->width, allocation->height);
     //}
 
+    LOG_DEBUG("DocumentView::OnSize() width:%d height:%d", width, height);
     if (m_pageWall == nullptr){
         m_pageWall = std::make_shared<PageWall>(width, height);
-        m_pageWall->Rebuild(m_document, m_rowPages);
+        //m_pageWall->Rebuild(m_document, m_rowPages);
+        Rebuild();
     } else {
         m_pageWall->OnSize(width, height);
     }
+    RedrawDocumentView();
 }
 
 void DocumentView::OnDraw(cairo_t *cr){
@@ -77,9 +86,10 @@ void DocumentView::FirstPage(){
     m_pageIndex = 0;
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
-    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
+    LOG_DEBUG("Page %d/%d", m_pageIndex + 1, (int)total_pages);
 
-    m_pageWall->MoveFirstPage();
+    if (m_pageWall != nullptr)
+        m_pageWall->MoveFirstPage();
 }
 
 void DocumentView::LastPage(){
@@ -90,7 +100,8 @@ void DocumentView::LastPage(){
     //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 
-    m_pageWall->MoveLastPage();
+    if (m_pageWall != nullptr)
+        m_pageWall->MoveLastPage();
 }
 
 void DocumentView::NextPage(){
@@ -103,7 +114,8 @@ void DocumentView::NextPage(){
     }
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 
-    m_pageWall->MoveNextPage();
+    if (m_pageWall != nullptr)
+        m_pageWall->MoveNextPage();
 }
 
 void DocumentView::PreviousPage(){
@@ -118,7 +130,8 @@ void DocumentView::PreviousPage(){
     //m_ofdRender->SetOffsetY(0.0);
     LOG_DEBUG("Page %d/%d", m_pageIndex + 1, total_pages);
 
-    m_pageWall->MovePreviousPage();
+    if (m_pageWall != nullptr)
+        m_pageWall->MovePreviousPage();
 }
 
 void DocumentView::ZoomIn(){

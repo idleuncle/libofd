@@ -1,15 +1,32 @@
+#include <assert.h>
 #include <string>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include "utils/logger.h"
-#include "ReadWindow.h"
+#include "PackageView.h"
+#include "DocumentView.h"
+
+using namespace ofd;
 
 static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
-    ReadWindow *readWindow = (ReadWindow*)user_data;
+    PackageView *packageView = (PackageView*)user_data;
+    if (packageView == nullptr) {
+        LOG_WARN("PackageView is NULL");
+        return;
+    }
+
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (documentView == nullptr){
+        LOG_WARN("DocumentView is NULL");
+        return;
+    }
+
     std::string name = gtk_widget_get_name(widget);
     LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "document-open"){
-        readWindow->CmdFileOpen();
+        PackageViewPtr packageView = documentView->GetPackageView();
+        assert(packageView != nullptr);
+        packageView->CmdFileOpen();
     }
 }
 
@@ -19,34 +36,56 @@ static void on_toolbar_edit_cb(GtkWidget *widget, gpointer user_data){
 }
 
 static void on_toolbar_go_cb(GtkWidget *widget, gpointer user_data){
-    ReadWindow *readWindow = (ReadWindow*)user_data;
+    PackageView *packageView = (PackageView*)user_data;
+    if (packageView == nullptr) {
+        LOG_WARN("PackageView is NULL");
+        return;
+    }
+
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (documentView == nullptr){
+        LOG_WARN("DocumentView is NULL");
+        return;
+    }
+
     std::string name = gtk_widget_get_name(widget);
     LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "go-first"){
-        readWindow->CmdFirstPage();
+        documentView->CmdFirstPage();
     } else if (name == "go-previous"){
-        readWindow->CmdPreviousPage();
+        documentView->CmdPreviousPage();
     } else if (name == "go-next"){
-        readWindow->CmdNextPage();
+        documentView->CmdNextPage();
     } else if (name == "go-last"){
-        readWindow->CmdLastPage();
+        documentView->CmdLastPage();
     } else if (name == "go-jump"){
-        readWindow->CmdGotoPage();
+        documentView->CmdGotoPage();
     }
 }
 
 static void on_toolbar_zoom_cb(GtkWidget *widget, gpointer user_data){
-    ReadWindow *readWindow = (ReadWindow*)user_data;
+    PackageView *packageView = (PackageView*)user_data;
+    if (packageView == nullptr) {
+        LOG_WARN("PackageView is NULL");
+        return;
+    }
+
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (documentView == nullptr){
+        LOG_WARN("DocumentView is NULL");
+        return;
+    }
+
     std::string name = gtk_widget_get_name(widget);
     LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "zoom-in"){
-        readWindow->CmdZoomIn();
+        documentView->CmdZoomIn();
     } else if (name == "zoom-out"){
-        readWindow->CmdZoomOut();
+        documentView->CmdZoomOut();
     } else if (name == "zoom-fit-best"){
-        readWindow->CmdZoomFitBest();
+        documentView->CmdZoomFitBest();
     } else if (name == "zoom-original"){
-        readWindow->CmdZoomOriginal();
+        documentView->CmdZoomOriginal();
     }
 }
 
@@ -62,9 +101,9 @@ GtkWidget* GTK_IMAGE_FROM_RESOURCE(const std::string &iconName){
     return gtk_image_new_from_resource(resourcePath.c_str());
 }
 
-extern ReadWindowPtr m_readWindow;
+extern PackageViewPtr m_packageView;
 static void insert_toolbar_item(GtkToolbar *toolbar, const std::string &name, const std::string &label, GCallback callback, void *user_data=nullptr, bool enable=true, const std::string &tooltip=""){
-    user_data = (void*)m_readWindow.get();
+    user_data = (void*)m_packageView.get();
     GtkToolItem *item = gtk_tool_button_new(GTK_IMAGE_FROM_RESOURCE(name.c_str()), label.c_str());
     if (tooltip.empty()){
         gtk_tool_item_set_tooltip_text(item, label.c_str());

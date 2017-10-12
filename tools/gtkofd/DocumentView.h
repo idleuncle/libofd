@@ -25,6 +25,9 @@ namespace ofd{
         virtual ~DocumentView();
 
         DocumentViewPtr GetSelf(){return shared_from_this();};
+        PackageViewPtr GetPackageView() const{return m_packageView.lock();};
+
+        GtkWidget *m_drawingArea = nullptr;
     private:
         PackageViewRef m_packageView;
 
@@ -108,6 +111,7 @@ namespace ofd{
 
     public:
         void SetDocument(DocumentPtr document);
+        void Rebuild();
         void RedrawDocumentView();
 
         void OnSize(int width, int height);

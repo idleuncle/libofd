@@ -8,6 +8,7 @@ PackageView::PackageView(){
 }
 
 PackageView::~PackageView(){
+    m_documentViews.clear();
 }
 
 DocumentViewPtr PackageView::CreateNewDocumentView(){
@@ -16,7 +17,17 @@ DocumentViewPtr PackageView::CreateNewDocumentView(){
     return documentView;
 }
 
+DocumentViewPtr PackageView::GetCurrentDocumentView() const{
+    if (m_documentViews.size() > 0){
+        if (m_documentViewIndex >= 0 && (size_t)m_documentViewIndex < m_documentViews.size()){
+            return m_documentViews[m_documentViewIndex];
+        }
+    }
+    return nullptr;
+}
+
 PackagePtr PackageView::OpenOFDFile(const std::string &filename){
+    m_documentViews.clear();
     m_package = std::make_shared<ofd::Package>();
     if ( !m_package->Open(filename) ){
         LOG_ERROR("OFDPackage::Open() failed. filename:%s", filename.c_str());
@@ -30,6 +41,7 @@ PackagePtr PackageView::OpenOFDFile(const std::string &filename){
 
         DocumentViewPtr documentView = CreateNewDocumentView();
         assert(documentView != nullptr);
+        documentView->m_drawingArea = m_drawingArea;
 
         bool bOpened = document->Open();
         if ( !bOpened ){
@@ -38,7 +50,16 @@ PackagePtr PackageView::OpenOFDFile(const std::string &filename){
         }
 
         documentView->SetDocument(document);
+        size_t numPages = document->GetNumPages();
+        LOG_DEBUG("Document %d Total pages:%d", i, numPages);
+
+        if (m_viewingAreaWidth > 0 && m_viewingAreaHeight > 0){
+            documentView->OnSize(m_viewingAreaWidth, m_viewingAreaHeight);
+        }
+
+        //documentView->Rebuild();
     }
+    m_documentViewIndex = 0;
 
     return m_package;
 }
@@ -105,6 +126,17 @@ void PackageView::CmdFileClose(){
 }
 
 void PackageView::RedrawPackageView(){
-    gdk_window_invalidate_rect(gtk_widget_get_window(drawingArea), nullptr, false);
+    assert(m_drawingArea != nullptr);
+    gdk_window_invalidate_rect(gtk_widget_get_window(m_drawingArea), nullptr, false);
 }
 
+void PackageView::OnSize(int width, int height){
+    m_viewingAreaWidth = width;
+    m_viewingAreaHeight = height;
+    for (auto documentView : m_documentViews){
+        documentView->OnSize(width, height);
+    }
+}
+
+void PackageView::OnDraw(cairo_t *cr){
+}
