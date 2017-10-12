@@ -11,12 +11,18 @@ namespace utils {
 
     class Zip : public std::enable_shared_from_this<Zip> {
     public:
+        enum class OpenType{
+            READWRITE = 0,
+            CREATE,
+            READONLY
+        };
+    public:
         Zip();
         ~Zip();
 
         ZipPtr GetSelf();
 
-        bool Open(const std::string &filename, bool bWrite);
+        bool Open(const std::string &filename, OpenType openType = OpenType::READWRITE);
         void Close();
 
         std::tuple<std::string, bool> ReadFileString(const std::string &fileinzip) const;

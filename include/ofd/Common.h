@@ -8,6 +8,9 @@
 #include <sstream>
 #include "utils/utils.h"
 
+#define OFDXML_HEAD_ATTRIBUTES \
+    writer.WriteAttribute("xmlns:ofd", std::string("http://www.ofdspec.org/2016")); 
+
 namespace ofd{
 
     // C++14

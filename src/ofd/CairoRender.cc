@@ -326,6 +326,7 @@ void CairoRender::ImplCls::DrawObject(ObjectPtr object){
         } else if ( object->Type == ofd::ObjectType::IMAGE ){
             ImageObject *imageObject = (ImageObject*)object.get();
             DrawImageObject(cr, imageObject);
+
             //cairo_set_source_rgb(cr, 0, 1.0, 0);
             //cairo_move_to(cr, object->Boundary.XMin, object->Boundary.YMin);
             //cairo_line_to(cr, object->Boundary.XMax, object->Boundary.YMin);
@@ -950,6 +951,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
 
     ofd::ImagePtr image = imageObject->GetImage();
     if ( image == nullptr ) return;
+    if (!image->IsLoaded()) return;
+
     int widthA = image->width;
     int heightA = image->height;
     int nComps = image->nComps;

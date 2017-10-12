@@ -1139,14 +1139,17 @@ void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
 }
 
 void cmd_saveas(const CmdSaveAsParameters &parameters){
+    PackageViewPtr packageView = getPackageView();
+    if (packageView == nullptr) return;
+
     std::string destFilename = parameters.m_destFilename;
     std::string srcFilename = parameters.m_filename;
     assert(!srcFilename.empty());
     if (!destFilename.empty()){
         LOG_DEBUG("Do SaveAS. file:%s", destFilename.c_str());
-        if (getPackageView()->OpenOFDFile(parameters.m_filename)){
-            if (getPackageView()->SaveOFDFile(destFilename)){
-                LOG_ERROR("Save OFD file %s success.", destFilename.c_str());
+        if (packageView->OpenOFDFile(parameters.m_filename)){
+            if (packageView->SaveOFDFile(destFilename)){
+                LOG_NOTICE("Save OFD file %s success.", destFilename.c_str());
             } else {
                 LOG_ERROR("Save OFD file %s failed.", destFilename.c_str());
             }

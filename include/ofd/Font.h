@@ -65,15 +65,20 @@ namespace ofd{
         public:
             const char* GetFontData() const {return m_fontData;};
             size_t GetFontDataSize() const {return m_fontDataSize;};
-            void SetFontFilePath(const std::string &fontFilePath){m_fontFilePath = fontFilePath;};
-            std::string GetFontFilePath() const {return m_fontFilePath;};
+
+            void SetEmbeddedFontFile(const std::string &filePath){m_embeddedFontFile = filePath;};
+            std::string GetEmbeddedFontFile() const {return m_embeddedFontFile;};
+            void SetExternalFontFile(const std::string &filePath){m_externalFontFile = filePath;};
+            std::string GetExternalFontFile() const {return m_externalFontFile;};
+
             bool IsSubstitute() const {return m_substitute;};
         private:
             bool              m_bLoaded;
             char*             m_fontData;
             size_t            m_fontDataSize;
             _cairo_font_face* m_fontFace;
-            std::string       m_fontFilePath;
+            std::string       m_embeddedFontFile;
+            std::string       m_externalFontFile;
             bool              m_substitute;
 
         public:

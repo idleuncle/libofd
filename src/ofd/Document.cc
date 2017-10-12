@@ -235,8 +235,7 @@ void Document::generatePagesXML(XMLWriter &writer) const{
         size_t idx = 0;
         for ( auto page : m_pages ){
             // FIXME
-            //uint64_t pageID = page->GetID();
-            uint64_t pageID = 0;
+            uint64_t pageID = page->ID;
 
             // -------- <Page>
             // Required.

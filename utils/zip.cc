@@ -13,7 +13,7 @@ public:
     ImplCls(Zip *zip);
     ~ImplCls();
 
-    bool Open(const std::string &filename, bool bWrite);
+    bool Open(const std::string &filename, Zip::OpenType openType);
     void Close();
 
     std::tuple<std::string, bool> ReadFileString(const std::string &fileinzip) const;
@@ -36,12 +36,13 @@ Zip::ImplCls::~ImplCls(){
     Close();
 }
 
-bool Zip::ImplCls::Open(const std::string &filename, bool bWrite){
+bool Zip::ImplCls::Open(const std::string &filename, Zip::OpenType openType){
     int error = 0;
 
-    if ( bWrite ){
-        //m_archive = zip_open(filename.c_str(), ZIP_CREATE | ZIP_EXCL, &error);
-        m_archive = zip_open(filename.c_str(), ZIP_CREATE, &error);
+    if (openType == OpenType::CREATE){
+        m_archive = zip_open(filename.c_str(), ZIP_CREATE | ZIP_TRUNCATE, &error);
+    } else if (openType == OpenType::READONLY) {
+        m_archive = zip_open(filename.c_str(), ZIP_RDONLY, &error);
     } else {
         m_archive = zip_open(filename.c_str(), 0, &error);
     }
@@ -196,8 +197,8 @@ Zip::Zip(){
 Zip::~Zip(){
 }
 
-bool Zip::Open(const std::string &filename, bool bWrite){
-    return m_impl->Open(filename, bWrite);
+bool Zip::Open(const std::string &filename, OpenType openType){
+    return m_impl->Open(filename, openType);
 }
 
 void Zip::Close(){

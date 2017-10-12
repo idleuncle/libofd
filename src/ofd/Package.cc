@@ -38,7 +38,7 @@ bool Package::Open(const std::string &filename){
     if ( m_filename.empty() ) return false;
 
     m_zip = std::make_shared<utils::Zip>();
-    if ( !m_zip->Open(m_filename, false) ){
+    if ( !m_zip->Open(m_filename, Zip::OpenType::READWRITE) ){
         LOG_ERROR("Error: Open %s failed.", m_filename.c_str());
         return false;
     }
@@ -94,7 +94,7 @@ bool Package::Save(const std::string &filename){
     if ( m_filename.empty() ) return false;
 
     ZipPtr zip = std::make_shared<utils::Zip>();
-    if ( !zip->Open(m_filename, true) ){
+    if ( !zip->Open(m_filename, Zip::OpenType::CREATE) ){
         LOG_ERROR("Error: Open %s failed.", m_filename.c_str()); 
         return false;
     }
@@ -131,28 +131,28 @@ bool Package::Save(const std::string &filename){
         std::string strDocumentResXML;
         if ( commonData.DocumentRes != nullptr ){
 
-            // -------- Default Font --------
-            // FIXME
-            // Default font. fontID=0, AdobeSongStd-Light.otf
-            FontPtr defaultFont = commonData.DocumentRes->GetFont(0);
-            if ( defaultFont == nullptr ){
-                defaultFont = std::make_shared<Font>();
-                defaultFont->ID = 0;
-                defaultFont->FontName = "Default";
-                defaultFont->FontType = ofd::FontType::TrueType;
-                defaultFont->FontLoc = ofd::FontLocation::Embedded;
-                commonData.DocumentRes->AddFont(defaultFont);
+            //// -------- Default Font --------
+            //// FIXME
+            //// Default font. fontID=0, AdobeSongStd-Light.otf
+            //FontPtr defaultFont = commonData.DocumentRes->GetFont(0);
+            //if ( defaultFont == nullptr ){
+                //defaultFont = std::make_shared<Font>();
+                //defaultFont->ID = -1;
+                //defaultFont->FontName = "Default";
+                //defaultFont->FontType = ofd::FontType::TrueType;
+                //defaultFont->FontLoc = ofd::FontLocation::Embedded;
+                //commonData.DocumentRes->AddFont(defaultFont);
 
-                char *data = nullptr;
-                size_t dataSize = 0;
-                bool dataOK = false;
-                std::tie(data, dataSize, dataOK) = utils::ReadFileData("data/default.otf");
-                if ( dataOK ){
-                    defaultFont->CreateFromData(data, dataSize);
-                } else {
-                    LOG_ERROR("%s", "Read default font data failed.");
-                }
-            }
+                //char *data = nullptr;
+                //size_t dataSize = 0;
+                //bool dataOK = false;
+                //std::tie(data, dataSize, dataOK) = utils::ReadFileData("fonts/default.otf");
+                //if ( dataOK ){
+                    //defaultFont->CreateFromData(data, dataSize);
+                //} else {
+                    //LOG_ERROR("%s", "Read default font data failed.");
+                //}
+            //}
 
             strDocumentResXML = commonData.DocumentRes->GenerateResXML();
         }
@@ -170,6 +170,7 @@ bool Package::Save(const std::string &filename){
             zip->AddDir(pageDir);
 
             // Doc_N/Pages/Page_K/Content.xml
+            page->Open();
             std::string strPageXML = page->GeneratePageXML();
 
             zip->AddFile(pageDir + "/Content.xml", strPageXML);
@@ -225,17 +226,21 @@ bool Package::Save(const std::string &filename){
         const FontMap &fonts = documentRes->GetFonts();
         for ( auto iter : fonts){
             auto font = iter.second;
-            const char *fontData = font->GetFontData();
-            size_t fontDataSize = font->GetFontDataSize();
-            if ( fontData != nullptr && fontDataSize > 0 ){
-                std::string fontFileName = resDir + "/" + generateFontFileName(font->ID);
-                //LOG_ERROR("zip->AddFile() while save Font. file=%s", fontFileName.c_str());
-                zip->AddFile(fontFileName, fontData, fontDataSize);
+
+            std::string embeddedFontFile = font->GetEmbeddedFontFile();
+            if (!embeddedFontFile.empty()){
+                const char *fontData = font->GetFontData();
+                size_t fontDataSize = font->GetFontDataSize();
+                if ( fontData != nullptr && fontDataSize > 0 ){
+                    //std::string fontFileName = resDir + "/" + generateFontFileName(font->ID);
+                    LOG_DEBUG("zip->AddFile() while save embedded Font. file=%s", embeddedFontFile.c_str());
+                    zip->AddFile(embeddedFontFile, fontData, fontDataSize);
+                }
             }
         }
 
-        // Image Resource
-        // Doc_N/Res/Image_M.png
+        //// Image Resource
+        //// Doc_N/Res/Image_M.png
         const ImageMap &images = documentRes->GetImages();
         for ( auto iter : images ){
             auto image = iter.second;

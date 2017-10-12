@@ -273,8 +273,10 @@ void Font::GenerateXML(XMLWriter &writer) const{
 
         // -------- <FontFile>
         // Optional
-        std::string fontFilePath = GetFontFilePath();
-        writer.WriteElement("FontFile", fontFilePath);
+        std::string embeddedFontFile = GetEmbeddedFontFile();
+        if (!embeddedFontFile.empty()){
+            writer.WriteElement("FontFile", embeddedFontFile);
+        }
 
     } writer.EndElement();
 
@@ -337,14 +339,19 @@ bool Font::FromXML(XMLElementPtr fontElement){
             // Optional
             std::tie(FixedWidth, std::ignore) = fontElement->GetBooleanAttribute("FixedWidth");
 
-            std::string fontFilePath;
             XMLElementPtr fontFileElement = fontElement->GetFirstChildElement();
             if ( fontFileElement != nullptr && fontFileElement->GetName() == "FontFile" ){
-                std::tie(fontFilePath, std::ignore) = fontFileElement->GetStringValue();
+                std::string embeddedFontFile;
+                std::tie(embeddedFontFile, std::ignore) = fontFileElement->GetStringValue();
+                SetEmbeddedFontFile(embeddedFontFile);
             } else {
-                fontFilePath = Font::LocateFontFile(FontName);
+                std::string externalFontFile = Font::LocateFontFile(FontName);
+                if (externalFontFile.empty()){
+                    LOG_WARN("External font %s can not be found.", FontName.c_str());
+                    assert(!externalFontFile.empty());
+                } 
+                SetExternalFontFile(externalFontFile);
             }
-            SetFontFilePath(fontFilePath);
 
             ok = true;
         } else {
@@ -377,31 +384,40 @@ bool Font::Load(PackagePtr package, bool reload){
     // --------------
         bool ok = true;
 
-        std::string fontFilePath = m_fontFilePath;
-        LOG_DEBUG("Load Font:%s", fontFilePath.c_str());
-
         char *fontData = nullptr;
         size_t fontDataSize = 0;
         bool readOK = false;
-        if ( package->IsZipFileExist(fontFilePath) ){
-            std::tie(fontData, fontDataSize, readOK) = package->ReadZipFileRaw(fontFilePath);
-        } else {
-            if ( utils::FileExist(fontFilePath) ){
-                std::tie(fontData, fontDataSize, readOK) = utils::ReadFileData(fontFilePath);
+
+        std::string embeddedFontFile = GetEmbeddedFontFile();
+        if (!embeddedFontFile.empty()){
+            if ( package->IsZipFileExist(embeddedFontFile) ){
+                std::tie(fontData, fontDataSize, readOK) = package->ReadZipFileRaw(embeddedFontFile);
+                LOG_DEBUG("Load embedded font:%s", embeddedFontFile.c_str());
             } else {
-                LOG_WARN("Font file %s is not exist in the archive or folder.", fontFilePath.c_str());
+                LOG_WARN("Embedded font %s 's FontFile is empty.", FontName.c_str());
+            }
+        } else {
+            std::string externalFontFile = GetExternalFontFile();
+            if (!externalFontFile.empty()){
+                if ( utils::FileExist(externalFontFile) ){
+                    std::tie(fontData, fontDataSize, readOK) = utils::ReadFileData(externalFontFile);
+                    LOG_DEBUG("Load external font:%s", externalFontFile.c_str());
+                } else {
+                    LOG_WARN("External font %s 's FontFile is not exist.", FontName.c_str());
+                }
             }
         }
+
         if ( readOK ){
             if ( CreateFromData(fontData, fontDataSize) ){
-                LOG_INFO("Font %s (ID=%d) loaded.", FontName.c_str(), ID);
+                LOG_INFO("Font %s (ID=%d) loaded. fontDataSize=%d", FontName.c_str(), ID, fontDataSize);
             } else {
-                LOG_ERROR("%s", "createCairoFontFace() in OFDFont::Load() failed.");
+                LOG_ERROR("CreateFromData font %s (ID=%d) failed. fontDataSize=%d", FontName.c_str(), ID, fontDataSize);
                 ok = false;
             }
         } else {
             ok = false;
-            LOG_ERROR("Call ReadZipFileRaw() to read font file %s failed.", fontFilePath.c_str());
+            LOG_ERROR("Load font %s (ID=%d) failed.", FontName.c_str(), ID);
         }
 
         m_bLoaded = ok;

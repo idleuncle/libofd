@@ -66,7 +66,7 @@ namespace ofd{
             size_t GetImageDataSize() const {return m_imageDataSize;};
             void SetImageFilePath(const std::string &imageFilePath){m_imageFilePath = imageFilePath;};
             std::string GetImageFilePath() const {return m_imageFilePath;};
-
+            bool IsLoaded() const {return m_bLoaded;};
         private:
             bool m_bLoaded;
             char *m_imageData;
