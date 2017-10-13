@@ -7,6 +7,7 @@
 #include <map>
 #include <sstream>
 #include "utils/utils.h"
+#include "utils/xml.h"
 
 #define OFDXML_HEAD_ATTRIBUTES \
     writer.WriteAttribute("xmlns:ofd", std::string("http://www.ofdspec.org/2016")); 
@@ -131,7 +132,7 @@ namespace ofd{
         double x;
         double y;
         ST_Pos() : x(0.0), y(0.0){};
-    } ST_Pos_t;
+    } *ST_Pos_t;
 
 
     typedef struct Boundary{
@@ -229,7 +230,7 @@ namespace ofd{
                 }
             }
 
-    } Boundary_t; // Boundary;
+    } *Boundary_t; // Boundary;
 
     // ST_Box: 矩形区域，以空格分割，前两个值代表了该矩形的左上角坐标，
     // 后两个值依次表示该矩形的宽和高，可以是整数或者浮点数，后两个值应大于0.
@@ -264,7 +265,7 @@ namespace ofd{
             return ss.str();
         }
 
-    } ST_Box_t;
+    } *ST_Box_t;
 
     typedef std::string ST_TIME;
     typedef std::vector<double> DoubleArray;
@@ -316,10 +317,31 @@ namespace ofd{
         bool m_bContentBox;
         bool m_bBleedBox;
 
-    } CT_PageArea_t; 
+    } *CT_PageArea_t; 
 
     void ConcatCTM(double *ctm, double a, double b, double c,
 			 double d, double e, double f); 
+
+    struct ST_Dest : public utils::XMLable {
+        enum class DestType{
+            XYZ = 0,
+            Fit,
+            FitH,
+            FitV,
+            FitR
+        };
+        DestType Type;
+        ST_RefID PageID = 0;
+        // Left, Right, Top, Bottom only available when Type = XZY or FitR
+        double Left = 0.0;
+        double Right = 0.0;
+        double Top = 0.0;
+        double Bottom = 0.0;
+        double Zoom = 0.0;
+
+        virtual void GenerateXML(utils::XMLWriter &writer) const override;
+        virtual bool FromXML(utils::XMLElementPtr element) override;
+    };
 
 }; // namespace ofd
 

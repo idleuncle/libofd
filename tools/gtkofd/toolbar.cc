@@ -24,9 +24,9 @@ static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
     std::string name = gtk_widget_get_name(widget);
     LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
     if (name == "document-open"){
-        PackageViewPtr packageView = documentView->GetPackageView();
-        assert(packageView != nullptr);
         packageView->CmdFileOpen();
+    } else if (name == "document-properties"){
+        documentView->CmdFileProperties();
     }
 }
 

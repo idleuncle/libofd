@@ -2,70 +2,10 @@
 #define __OFD_CMDLINE_H__
 
 #include <string>
+#include "ofd/VPreferences.h"
 
 namespace ofd{
 
-    typedef struct CT_VPreferences{
-        std::string PageMode = "None";
-        std::string PageLayout = "OneColumn";
-        std::string TabDisplay = "FileName";
-        bool HideToolbar = false;
-        bool HideMenubar = false;
-        bool HideWindowUI = false;
-        std::string ZoomMode = "Default";
-        double Zoom;
-    } *CT_VPreferences_t;
-
-    class VPreferences{
-    public:
-        VPreferences();
-
-        CT_VPreferences ToCTVPreferences()const;
-        bool FromCTVPreferences(CT_VPreferences vPreferences);
-
-        enum class PageModeType{
-            NONE=0,
-            FULLSCREEN,
-            USEOUTLINES,
-            USETHUMBS,
-            USECUSTOMTAGS,
-            USELAYERS,
-            USEATTACHS,
-            USEBOOKMARKS
-        };
-
-        enum class PageLayoutType{
-            ONEPAGE=0,
-            ONECOLUMN,
-            TWOPAGEL,
-            TWOCOLUMNL,
-            TWOPAGER,
-            TWOCOLUMNR
-        };
-
-        enum class TabDisplayType{
-            FILENAME=0,
-            DOCTITLE
-        }; 
-
-        enum class ZoomModeType{
-            DEFAULT=0,
-            FITHEIGHT,
-            FITWIDTH,
-            FITRECT
-        };
-
-    public:
-        PageModeType PageMode = PageModeType::NONE;
-        PageLayoutType PageLayout = PageLayoutType::ONECOLUMN;
-        TabDisplayType TabDisplay = TabDisplayType::FILENAME;
-        bool HideToolbar = false;
-        bool HideMenubar = false;
-        bool HideWindowUI = false;
-        ZoomModeType ZoomMode = ZoomModeType::DEFAULT;
-        double Zoom = 1.0;
-
-    }; // class VPreferences
 
     enum class OutputLayerType{
         TEMPLATES=0x01,

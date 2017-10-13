@@ -31,6 +31,7 @@ public:
     void WriteElement(const std::string &name, bool value);
     void WriteAttribute(const std::string &name, const std::string &value);
     void WriteAttribute(const std::string &name, uint64_t value);
+    void WriteAttribute(const std::string &name, int value);
     void WriteAttribute(const std::string &name, double value, int precision);
     void WriteAttribute(const std::string &name, bool value);
     void WriteRaw(const std::string &text);
@@ -109,6 +110,10 @@ void XMLWriter::ImplCls::WriteAttribute(const std::string &name, uint64_t value)
     //WriteAttribute(name, std::to_string(value));    
 }
 
+void XMLWriter::ImplCls::WriteAttribute(const std::string &name, int value){
+    WriteAttribute(name, std::to_string(value));    
+}
+
 void XMLWriter::ImplCls::WriteAttribute(const std::string &name, double value, int precision){
     std::stringstream ss;
     utils::SetStringStreamPrecision(ss, precision);
@@ -183,6 +188,10 @@ void XMLWriter::WriteAttribute(const std::string &name, const std::string &value
 }
 
 void XMLWriter::WriteAttribute(const std::string &name, uint64_t value){
+    m_impl->WriteAttribute(name, value);
+}
+
+void XMLWriter::WriteAttribute(const std::string &name, int value){
     m_impl->WriteAttribute(name, value);
 }
 

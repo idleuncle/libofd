@@ -9,38 +9,73 @@
 // Defined in libxml/tree.h
 struct _xmlNode;
 
+#define BEGIN_XML_CHILD_ELEMENTS_LOOP \
+    XMLElementPtr childElement = element->GetFirstChildElement(); \
+    for ( ; childElement != nullptr ; childElement = childElement->GetNextSiblingElement()){ \
+        std::string childName = childElement->GetName(); \
+        __attribute__((unused)) bool exist = false;
+
+#define END_XML_CHILD_ELEMENTS_LOOP \
+    }
+
+#define XML_CHILD_ELEMENT_GET_OPTINAL_STRING(name, value) \
+    if (childName == #name){ \
+        std::tie(value, std::ignore) = childElement->GetStringValue(); \
+        continue; \
+    }
+
+#define XML_CHILD_ELEMENT_GET_OPTINAL_BOOLEAN(name, value) \
+    if (childName == #name){ \
+        std::tie(value, std::ignore) = childElement->GetBooleanValue(); \
+        continue; \
+    }
+
+#define XML_CHILD_ELEMENT_GET_OPTINAL_INT(name, value) \
+    if (childName == #name){ \
+        std::tie(value, std::ignore) = childElement->GetInteanValue(); \
+        continue; \
+    }
+
+
+#define XML_CHILD_ELEMENT_GET_OPTINAL_FLOAT(name, value) \
+    if (childName == #name){ \
+        std::tie(value, std::ignore) = childElement->GetFloatValue(); \
+        continue; \
+    }
+
 namespace utils{
 
-class XMLWriter{
-public:
-    XMLWriter(bool bHead=false);
-    ~XMLWriter();
+    class XMLWriter{
+        public:
+            XMLWriter(bool bHead=false);
+            ~XMLWriter();
 
-    std::string GetString() const;
+            std::string GetString() const;
 
-    void StartDocument(const std::string &encoding = "utf-8");
-    void StartElement(const std::string &name);
-    void EndElement();
-    void WriteElement(const std::string &name, const std::string &value);
-    void WriteElement(const std::string &name, uint64_t value);
-    void WriteElement(const std::string &name, double value, int precision=3);
-    void WriteElement(const std::string &name, bool value);
-    void WriteAttribute(const std::string &name, const std::string &value);
-    void WriteAttribute(const std::string &name, uint64_t value);
-    void WriteAttribute(const std::string &name, double value, int precision=3);
-    void WriteAttribute(const std::string &name, bool value);
-    void WriteRaw(const std::string &text);
-    void WriteString(const std::string &text);
-    void EndDocument();
+            void StartDocument(const std::string &encoding = "utf-8");
+            void StartElement(const std::string &name);
+            void EndElement();
+            void WriteElement(const std::string &name, const std::string &value);
+            void WriteElement(const std::string &name, uint64_t value);
+            void WriteElement(const std::string &name, double value, int precision=3);
+            void WriteElement(const std::string &name, bool value);
+            void WriteAttribute(const std::string &name, const std::string &value);
+            void WriteAttribute(const std::string &name, uint64_t value);
+            void WriteAttribute(const std::string &name, int value);
+            void WriteAttribute(const std::string &name, double value, int precision=3);
+            void WriteAttribute(const std::string &name, bool value);
+            void WriteRaw(const std::string &text);
+            void WriteString(const std::string &text);
+            void EndDocument();
 
-private:
-    class ImplCls;
-    std::unique_ptr<ImplCls> m_impl;
+        private:
+            class ImplCls;
+            std::unique_ptr<ImplCls> m_impl;
 
-}; // class XMLWriter
+    }; // class XMLWriter
 
-//class XMLReader{
-//public:
+    //class XMLReader{
+    //public:
     //XMLReader();
     //~XMLReader();
 
@@ -64,39 +99,45 @@ private:
     //bool ReadAttribute(const std::string &name, double &value);
     //bool ReadAttribute(const std::string &name, bool &value);
 
-//private:
+    //private:
     //class ImplCls;
     //std::unique_ptr<ImplCls> m_impl;
 
-//}; // class XMLReader
+    //}; // class XMLReader
 
 
-class XMLElement{
-public:
-    XMLElement(_xmlNode *node);
-    ~XMLElement();
+    class XMLElement{
+        public:
+            XMLElement(_xmlNode *node);
+            ~XMLElement();
 
-    static XMLElementPtr ParseRootElement(const std::string &xmlString);
+            static XMLElementPtr ParseRootElement(const std::string &xmlString);
 
-    XMLElementPtr GetFirstChildElement();
-    XMLElementPtr GetNextSiblingElement();
+            XMLElementPtr GetFirstChildElement();
+            XMLElementPtr GetNextSiblingElement();
 
-    std::string GetName() const;
+            std::string GetName() const;
 
-    std::tuple<std::string, bool> GetStringValue() const;
-    std::tuple<uint64_t, bool> GetIntValue() const;
-    std::tuple<double, bool> GetFloatValue() const;
-    std::tuple<bool, bool> GetBooleanValue() const;
+            std::tuple<std::string, bool> GetStringValue() const;
+            std::tuple<uint64_t, bool> GetIntValue() const;
+            std::tuple<double, bool> GetFloatValue() const;
+            std::tuple<bool, bool> GetBooleanValue() const;
 
-    std::tuple<std::string, bool> GetStringAttribute(const std::string &name) const;
-    std::tuple<uint64_t, bool> GetIntAttribute(const std::string &name) const;
-    std::tuple<double, bool> GetFloatAttribute(const std::string &name) const;
-    std::tuple<bool, bool> GetBooleanAttribute(const std::string &name) const;
+            std::tuple<std::string, bool> GetStringAttribute(const std::string &name) const;
+            std::tuple<uint64_t, bool> GetIntAttribute(const std::string &name) const;
+            std::tuple<double, bool> GetFloatAttribute(const std::string &name) const;
+            std::tuple<bool, bool> GetBooleanAttribute(const std::string &name) const;
 
-private:
-    _xmlNode *m_node;
+        private:
+            _xmlNode *m_node;
 
-}; // class XMLElement
+    }; // class XMLElement
+
+    class XMLable{
+        public:
+            virtual void GenerateXML(XMLWriter &writer) const = 0;
+            virtual bool FromXML(XMLElementPtr element) = 0;
+    };
 
 }
 

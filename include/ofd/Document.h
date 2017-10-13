@@ -7,6 +7,8 @@
 #include <tuple>
 #include <unordered_map>
 #include "ofd/Common.h"
+#include "ofd/VPreferences.h"
+#include "ofd/Permission.h"
 
 namespace ofd{
 
@@ -150,6 +152,8 @@ namespace ofd{
             PageArray         m_pages;
             CommonData        m_commonData;
             DocBody           m_docBody;
+            Permission        m_permissions;
+            VPreferences      m_vpreferences;
 
             void generateCommonDataXML(utils::XMLWriter &writer) const;
             void generatePagesXML(utils::XMLWriter &writer) const;

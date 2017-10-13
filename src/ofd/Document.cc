@@ -142,6 +142,14 @@ std::string Document::GenerateDocumentXML() const{
         // Required.
         generateCommonDataXML(writer);    
 
+        // -------- <Permissions>
+        // Optional 
+        m_permissions.GenerateXML(writer);
+
+        // -------- <VPreferences>
+        // Optional
+        m_vpreferences.GenerateXML(writer);
+
         // -------- <Pages> 
         // Required.
         generatePagesXML(writer);
@@ -383,6 +391,18 @@ bool Document::FromDocBodyXML(XMLElementPtr docBodyElement){
         if ( childName == "DocInfo"){
             hasDocInfo = true;
             fromDocInfoXML(childElement);
+
+        // -------- <Permissions>
+        // Optional.
+        if (childName == "Permissions"){
+            m_permissions.FromXML(childElement);
+        }
+
+        // -------- <VPreferences>
+        // Optional.
+        if (childName == "VPreferences"){
+            m_vpreferences.FromXML(childElement);
+        }
 
         // -------- <DocRoot>
         // Optional.
