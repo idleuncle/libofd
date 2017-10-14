@@ -194,7 +194,7 @@ CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std:
     std::vector<std::string> tokens = utils::SplitString(cmd_options, ";");
     //LOG_DEBUG("Total tokens:%d", tokens.size());
     //for (auto t : tokens){
-        //LOG_DEBUG("token:%s", t.c_str());
+        //LOG_NOTICE("token:%s", t.c_str());
     //}
 
     for (auto t : tokens){
@@ -205,11 +205,13 @@ CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std:
 
         if (optName == "dpi"){
             int dpi = atoi(optValue.c_str());
+            LOG_NOTICE("Token dpi = %d", dpi);
             if (dpi != 96 && dpi != 200 && dpi != 300){
                 LOG_WARN("dpi must be 96/200/300, parameter = %d. Set to default value(96).", dpi);
                 dpi = 96;
             }
             parameters->m_dpi = dpi;
+            LOG_NOTICE("Parse parameters->m_dpi=%d", parameters->m_dpi);
         } else if (optName == "format") {
             std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
             std::string format = optValue;

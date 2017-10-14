@@ -798,7 +798,7 @@ bool Document::fromPagesXML(XMLElementPtr pagesElement){
 
 bool Document::ExportText(const std::string &filename) const{
     size_t totalPages = m_pages.size();
-    LOG_DEBUG("Do document export text. file:%s Total %d pages.", filename.c_str(), totalPages);
+    LOG_NOTICE("Do document export text. file:%s Total %d pages.", filename.c_str(), totalPages);
     std::ofstream output;
     output.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
     if (!output.is_open()){
@@ -845,8 +845,8 @@ bool Document::ExportText(const std::string &filename) const{
 
 bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const{
     size_t totalPages = m_pages.size();
-    LOG_DEBUG("Do document export image. dir:%s Total %d pages.", dir.c_str(), totalPages);
-    LOG_DEBUG("dpi:%d format:%s layer:0x%x", 
+    LOG_NOTICE("Do document export image. dir:%s Total %d pages.", dir.c_str(), totalPages);
+    LOG_NOTICE("dpi:%d format:%s layer:0x%x", 
             dpi, 
             get_format_type_label(format).c_str(),
             outputLayers);
@@ -901,6 +901,7 @@ bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType for
                     output.write((const char*)jpegData, jpegDataSize);
                 }
                 output.close();
+                delete jpegData;
             }
 
         }
