@@ -88,6 +88,9 @@ bool Page::Open(){
 
 void Page::Close(){
     if ( !m_opened ) return;
+
+    m_layers.clear();
+    m_opened = false;
 }
 
 LayerPtr Page::AddNewLayer(LayerType layerType){

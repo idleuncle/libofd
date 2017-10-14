@@ -1,8 +1,10 @@
 #include <sys/stat.h> /* mkdir() */
 #include <unistd.h> /* write(), close(), access() */
+#include <string.h> // strtok
 #include <sstream>
 #include <iterator>
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <sys/time.h>
 #include <cstddef>
@@ -13,17 +15,29 @@ namespace utils{
 
     ColorOrder GlobalParameters::colorOrder = ColorOrder::RGB;
 
-    std::vector<std::string> SplitString(const std::string& content){
-        std::istringstream iss(content);
-        std::vector<std::string> tokens{std::istream_iterator<std::string>{iss}, 
-            std::istream_iterator<std::string>{}};
-        return tokens;
-    }
-
     void SetStringStreamPrecision(std::stringstream &ss, int precision){
         ss.setf(std::ios::fixed, std::ios::floatfield); \
             ss.precision(precision);
     }
+
+    std::vector<std::string> SplitString(const std::string& content, const std::string &sep){
+        if (sep.empty()){
+            std::istringstream iss(content);
+            std::vector<std::string> tokens{std::istream_iterator<std::string>{iss}, 
+                std::istream_iterator<std::string>{}};
+            return tokens;
+        } else {
+            std::string data = content;
+            std::replace_if(data.begin(), data.end(), [&](const char &c){if (sep.find(c) != std::string::npos){ return true;} else {return false;}}, ' '); 
+
+            std::istringstream iss(data);
+            std::vector<std::string> tokens{std::istream_iterator<std::string>{iss}, 
+                std::istream_iterator<std::string>{}};
+            return tokens;
+        }
+
+    }
+
 
     std::tuple<char*, size_t, bool> ReadFileData(const std::string &filename){
         bool ok = false;

@@ -44,6 +44,14 @@ CmdParameters* OFDCmdLine::ParseCmdLine(int argc, char *argv[]){
     std::string options;
     if (argc >= 3) cmd = argv[2];
     if (argc >= 4) options = argv[3];
+    //{
+        //for ( int i = 3 ; i < argc ; i++ ){
+            //options += argv[i];
+            //if (i < argc - 1){
+                //options += ";";
+            //}
+        //}
+    //}
 
     CmdParameters* parameters = nullptr;
     if (cmd == "/a"){
@@ -68,9 +76,10 @@ void usage_open(const std::string& appname){
 }
 
 std::pair<std::string, std::string> parse_option(const std::string &str){
+    LOG_DEBUG("parse_option() %s", str.c_str());
     size_t pos = str.find('=');
     if (pos != std::string::npos){
-        return std::make_pair(str.substr(0, pos), str.substr(pos+1, str.length()-pos-1));
+        return std::make_pair(str.substr(0, pos), str.substr(pos+1, str.length()-pos));
     } else {
         return std::make_pair("", "");
     }
@@ -94,11 +103,12 @@ CmdParameters* OFDCmdLine::ParseCmdOpen(const std::string &appname, const std::s
     }
     if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_open(appname);
+        return nullptr;
     }
     std::string cmd_options = options.substr(1,len-2);
 
     CT_VPreferences vps;
-    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    std::vector<std::string> tokens = utils::SplitString(cmd_options, ";");
     for (auto t : tokens){
         std::string optName;
         std::string optValue;
@@ -142,10 +152,11 @@ CmdParameters* OFDCmdLine::ParseCmdSaveAs(const std::string &appname, const std:
     if (len < 2) return parameters;
     if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_saveas(appname);
+        return nullptr;
     }
     std::string cmd_options = options.substr(1,len-2);
 
-    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    std::vector<std::string> tokens = utils::SplitString(cmd_options, ";");
     for (auto t : tokens){
         std::string optName;
         std::string optValue;
@@ -170,14 +181,22 @@ void usage_export(const std::string& appname){
 CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std::string &options){
     CmdExportParameters *parameters = new CmdExportParameters();
 
+    LOG_DEBUG("options=%s", options.c_str());
     size_t len = options.length();
     if (len < 2) return parameters;
     if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_export(appname);
+        return nullptr;
     }
     std::string cmd_options = options.substr(1,len-2);
+    LOG_DEBUG("cmd_options=%s", cmd_options.c_str());
 
-    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    std::vector<std::string> tokens = utils::SplitString(cmd_options, ";");
+    //LOG_DEBUG("Total tokens:%d", tokens.size());
+    //for (auto t : tokens){
+        //LOG_DEBUG("token:%s", t.c_str());
+    //}
+
     for (auto t : tokens){
         std::string optName;
         std::string optValue;
@@ -186,15 +205,15 @@ CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std:
 
         if (optName == "dpi"){
             int dpi = atoi(optValue.c_str());
-            if (dpi != 96 || dpi != 200 || dpi != 300){
-                LOG_WARN("dpi must be 96/200/300, parameter = %d", dpi);
+            if (dpi != 96 && dpi != 200 && dpi != 300){
+                LOG_WARN("dpi must be 96/200/300, parameter = %d. Set to default value(96).", dpi);
                 dpi = 96;
             }
             parameters->m_dpi = dpi;
         } else if (optName == "format") {
             std::transform(optValue.begin(), optValue.end(), optValue.begin(), ::tolower);
             std::string format = optValue;
-            if (format != "bmp" || format != "jpg" || format != "png"){
+            if (format != "bmp" && format != "jpg" && format != "png"){
                 LOG_WARN("format must be bmp|jpg|png. parameter = %s", format.c_str());
                 format = "bmp"; 
             }
@@ -231,10 +250,11 @@ CmdParameters* OFDCmdLine::ParseCmdPrint(const std::string &appname, const std::
     if (len < 2) return parameters;
     if (options.substr(0, 1) != "[" || options.substr(len-1, 1) != "]"){
         usage_print(appname);
+        return nullptr;
     }
     std::string cmd_options = options.substr(1,len-2);
 
-    std::vector<std::string> tokens = utils::SplitString(cmd_options);
+    std::vector<std::string> tokens = utils::SplitString(cmd_options, ";");
     for (auto t : tokens){
         std::string optName;
         std::string optValue;

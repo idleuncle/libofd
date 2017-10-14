@@ -41,7 +41,7 @@ namespace utils{
         return GlobalParameters::colorOrder == ColorOrder::BGR;
     }
 
-    std::vector<std::string> SplitString(const std::string& content);
+    std::vector<std::string> SplitString(const std::string& content, const std::string &sep= "");
 
     void SetStringStreamPrecision(std::stringstream &ss, int precision);
 

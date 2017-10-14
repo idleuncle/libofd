@@ -1,14 +1,18 @@
 #include <sstream>
 #include <assert.h>
 #include <fstream>
+#include "ofd/Common.h"
 #include "ofd/Package.h"
 #include "ofd/Document.h"
 #include "ofd/Page.h"
 #include "ofd/Resource.h"
+#include "ofd/CairoRender.h"
 #include "utils/xml.h"
 #include "utils/uuid.h"
 #include "utils/logger.h"
 #include "utils/utils.h"
+#include "utils/Geometry.h"
+#include "utils/JPEGStream.h"
 
 using namespace ofd;
 using namespace utils;
@@ -93,6 +97,8 @@ bool Document::Open(){
 
 void Document::Close(){
     if ( !m_opened ) return;
+
+    m_opened = false;
 }
 
 const PagePtr Document::GetPage(size_t idx) const{
@@ -792,7 +798,7 @@ bool Document::fromPagesXML(XMLElementPtr pagesElement){
 
 bool Document::ExportText(const std::string &filename) const{
     size_t totalPages = m_pages.size();
-    LOG_DEBUG("Do document export text. file:%s Total %d pages", filename.c_str(), totalPages);
+    LOG_DEBUG("Do document export text. file:%s Total %d pages.", filename.c_str(), totalPages);
     std::ofstream output;
     output.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
     if (!output.is_open()){
@@ -804,6 +810,7 @@ bool Document::ExportText(const std::string &filename) const{
     for ( size_t k = 0 ; k < totalPages ; k++){
         PagePtr page = GetPage(k);
         page->Open();
+
         ofd::text::TextPagePtr textPage = page->GetTextPage(); 
         size_t totalLines = textPage->GetTextLinesCount();
         LOG_DEBUG("==> Page %d/%d total %d line", k+1, totalPages, totalLines);
@@ -830,16 +837,76 @@ bool Document::ExportText(const std::string &filename) const{
             output << std::endl;
         }
         output << std::endl << std::endl;
+        page->Close();
     }
     output.close();
     return true;
 }
 
 bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const{
-    LOG_DEBUG("Do document export image. dir:%s", dir.c_str());
+    size_t totalPages = m_pages.size();
+    LOG_DEBUG("Do document export image. dir:%s Total %d pages.", dir.c_str(), totalPages);
     LOG_DEBUG("dpi:%d format:%s layer:0x%x", 
             dpi, 
             get_format_type_label(format).c_str(),
             outputLayers);
+
+    utils::MkdirIfNotExist(dir);
+    // ---------------- pages ----------------
+    for ( size_t k = 0 ; k < totalPages ; k++){
+        PagePtr page = GetPage(k);
+        page->Open();
+
+        ST_Box physicalBox = page->Area.PhysicalBox;
+        double mmWidth = physicalBox.Width;
+        double mmHeight = physicalBox.Height;
+        double pixelWidth = mm_to_pixel(mmWidth, dpi);
+        double pixelHeight = mm_to_pixel(mmHeight, dpi);
+        LOG_DEBUG("Page %d/%d PhysicalBox:(%.2f, %.2f) ImageBox:(%.2f, %.2f)", 
+                k + 1, totalPages, 
+                mmWidth, mmHeight, pixelWidth, pixelHeight );
+
+        std::unique_ptr<CairoRender> cairoRender = 
+            utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
+
+        double offsetX = 0.0;
+        double offsetY = 0.0;
+        double scaling = 1.0;
+        ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
+        cairoRender->DrawPage(page, viewArea);
+
+        cairo_surface_t *backgroundSurface = cairoRender->GetCairoSurface();
+        //pixelWidth = cairo_image_surface_get_width(backgroundSurface);
+        //pixelHeight = cairo_image_surface_get_height(backgroundSurface);
+
+        if (format == ExportFormatType::BMP){
+            std::string imageFile = dir + "/" + std::to_string(k) + ".bmp";
+
+        } else if (format == ExportFormatType::PNG){
+            std::string imageFile = dir + "/" + std::to_string(k) + ".png";
+            cairo_surface_write_to_png(backgroundSurface, imageFile.c_str());
+
+        } else if (format == ExportFormatType::JPG){
+            std::string imageFile = dir + "/" + std::to_string(k) + ".jpg";
+
+            unsigned char *pixelData = cairo_image_surface_get_data(backgroundSurface);
+            int quality = 100;
+            unsigned char *jpegData = nullptr;
+            size_t jpegDataSize = 0;
+            std::tie(jpegData, jpegDataSize) = utils::GenerateJPEGData(pixelData, pixelWidth, pixelHeight, quality);
+            if (jpegData != nullptr && jpegDataSize > 0){
+                std::ofstream output;
+                output.open(imageFile, std::ios::out | std::ios::binary | std::ios::trunc);
+                if (output.is_open()){
+                    output.write((const char*)jpegData, jpegDataSize);
+                }
+                output.close();
+            }
+
+        }
+
+        page->Close();
+    }
+
     return true;
 }

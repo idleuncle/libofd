@@ -44,7 +44,8 @@ int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsi
 
 namespace utils{
 
-std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char* data, size_t dataSize);
+    std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char* data, size_t dataSize);
+    std::tuple<unsigned char*, size_t> GenerateJPEGData(unsigned char *pixelData, int pixelWidth, int pixelHeight, int quality);
 
 }; // namespace utils
 

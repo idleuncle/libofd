@@ -14,6 +14,7 @@
 
 #include "JPEGStream.h"
 #include "utils.h"
+#include "logger.h"
 using namespace utils;
   
 // 参考 libjpeg学习2：内存篇 http://blog.csdn.net/subfate/article/details/46700675
@@ -63,6 +64,7 @@ std::tuple<char*, size_t, int, int, int> jpeg2rgb(unsigned char* jpeg_buffer, in
     jpeg_read_header(&cinfo, TRUE);  
   
     //cinfo.out_color_space = JCS_RGB; //JCS_YCbCr;  // 设置输出格式  
+    cinfo.out_color_space = JCS_EXT_BGRA; // 设置输出格式  
   
     jpeg_start_decompress(&cinfo);  
   
@@ -92,15 +94,16 @@ std::tuple<char*, size_t, int, int, int> jpeg2rgb(unsigned char* jpeg_buffer, in
     {  
         jpeg_read_scanlines(&cinfo, buffer, 1);  
         //// 复制到内存  
-        if (utils::IsColorBGR()){
-            memcpy(tmp_buffer, buffer[0], row_stride);  
-        } else {
-            for ( auto n = 0 ; n < row_stride ; n += imageComponents ){
-                for ( auto k = 0 ; k < imageComponents ; k++ ){
-                    tmp_buffer[n+k] = buffer[0][n+imageComponents-k-1]; 
-                }
-            }
-        }
+        memcpy(tmp_buffer, buffer[0], row_stride);  
+        //if (utils::IsColorBGR()){
+            //memcpy(tmp_buffer, buffer[0], row_stride);  
+        //} else {
+            //for ( auto n = 0 ; n < row_stride ; n += imageComponents ){
+                //for ( auto k = 0 ; k < imageComponents ; k++ ){
+                    //tmp_buffer[n+k] = buffer[0][n+imageComponents-k-1]; 
+                //}
+            //}
+        //}
         tmp_buffer -= row_stride;  
     }  
   
@@ -130,8 +133,10 @@ int rgb2jpeg(unsigned char* rgb_buffer, int width, int height, int quality, unsi
   
     cinfo.image_width = width;  
     cinfo.image_height = height;  
-    cinfo.input_components = 3;  
-    cinfo.in_color_space = JCS_RGB;  
+    //cinfo.input_components = 3;  
+    //cinfo.in_color_space = JCS_RGB;  
+    cinfo.input_components = 4;  
+    cinfo.in_color_space = JCS_EXT_BGRA;  
   
     jpeg_set_defaults(&cinfo);  
     jpeg_set_quality(&cinfo, quality, (boolean)1);  // todo 1 == true  
@@ -167,6 +172,16 @@ std::tuple<ImageDataHead, char*, size_t> LoadJPEGData(char *data, size_t dataSiz
     imageDataHead.Bits = 8;
 
     return std::make_tuple(imageDataHead, imageData, imageDataSize);
+}
+
+std::tuple<unsigned char*, size_t> GenerateJPEGData(unsigned char *pixelData, int pixelWidth, int pixelHeight, int quality){
+
+    unsigned char *jpeg_buffer = nullptr;
+    unsigned long jpeg_size = 0;
+    if (rgb2jpeg(pixelData, pixelWidth, pixelHeight, quality, &jpeg_buffer, &jpeg_size) != 0){
+        LOG_WARN("GenerateJPEGData() failed.");
+    }
+    return std::make_tuple(jpeg_buffer, jpeg_size);
 }
 
 }; // namespace utils
