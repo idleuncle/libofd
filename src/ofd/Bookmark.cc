@@ -1,4 +1,5 @@
 #include "ofd/Bookmark.h"
+#include "utils/logger.h"
 using namespace ofd;
 using namespace utils;
 
@@ -11,14 +12,15 @@ Bookmark::~Bookmark(){
 void Bookmark::GenerateXML(XMLWriter &writer) const{
     writer.StartElement("Bookmark");{
 
-        writer.WriteAttribute("Name", strType);
+        writer.WriteAttribute("Name", Name);
         Dest.GenerateXML(writer);
 
     } writer.EndElement();
 }
 
 bool Bookmark::FromXML(XMLElementPtr element){
-    std::tie(Name, exist) = childElement->GetStringAttribute("Name");
+    bool exist = false;
+    std::tie(Name, exist) = element->GetStringAttribute("Name");
     if (!exist){
         LOG_ERROR("Name attribute must be defined in Bookmark.");
         return false;

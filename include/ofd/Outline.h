@@ -5,6 +5,9 @@
 
 namespace ofd{
 
+    class OutlineElem;
+    typedef std::shared_ptr<OutlineElem> OutlineElemPtr;
+
     class OutlineElem : public utils::XMLable{
     public:
         OutlineElem();

@@ -325,10 +325,10 @@ namespace ofd{
     struct ST_Dest : public utils::XMLable {
         enum class DestType{
             XYZ = 0,
-            Fit,
-            FitH,
-            FitV,
-            FitR
+            FIT,
+            FITH,
+            FITV,
+            FITR
         };
         DestType Type;
         ST_RefID PageID = 0;

@@ -1,34 +1,44 @@
+#include <string>
 #include "ofd/Outline.h"
+#include "utils/logger.h"
 using namespace ofd;
 using namespace utils;
 
-OutlineeElem::OutlineElem(){
+OutlineElem::OutlineElem(){
 }
 
-OutlineeElem::~OutlineElem(){
+OutlineElem::~OutlineElem(){
 }
 
 void OutlineElem::GenerateXML(XMLWriter &writer) const{
     writer.StartElement("OutlineElem");{
 
-        writer.WriteAttribute("Name", strType);
-        Dest.GenerateXML(writer);
+        writer.WriteAttribute("Title", this->Title);
+        writer.WriteAttribute("Count", this->Count);
+        writer.WriteAttribute("Expanded", this->Expanded);
+        // TODO Actions
 
     } writer.EndElement();
 }
 
 bool OutlineElem::FromXML(XMLElementPtr element){
-    std::tie(Name, exist) = childElement->GetStringAttribute("OutlineElem");
+    bool exist = false;
+    std::tie(this->Title, exist) = element->GetStringAttribute("Title");
     if (!exist){
-        LOG_ERROR("Name attribute must be defined in Bookmark.");
+        LOG_ERROR("Title attribute of OutlineElem must be given.");
         return false;
     }
-    BEGIN_XML_CHILD_ELEMENTS_LOOP{
-        
-        Dest.FromXML(element);
-        break;
+    std::tie(this->Count, std::ignore) = element->GetIntAttribute("Count");
+    std::tie(this->Expanded, std::ignore) = element->GetBooleanAttribute("Expanded");
 
-    } END_XML_CHILD_ELEMENTS_LOOP;
+    // TODO Actions
+    //
+    //BEGIN_XML_CHILD_ELEMENTS_LOOP{
+        
+        //Dest.FromXML(element);
+        //break;
+
+    //} END_XML_CHILD_ELEMENTS_LOOP;
 
     return true;
 }

@@ -2,10 +2,11 @@
 #define __OFD_BOOKMARK_H__
 
 #include "ofd/Common.h"
+#include "utils/xml.h"
 
 namespace ofd{
 
-    class Bookmark : public XMLable {
+    class Bookmark : public utils::XMLable {
     public:
         Bookmark();
         virtual ~Bookmark();
