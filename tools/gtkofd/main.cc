@@ -1140,7 +1140,10 @@ void cmd_open(const CmdOpenParameters &parameters, int argc, char *argv[]){
 
 void cmd_saveas(const CmdSaveAsParameters &parameters){
     PackageViewPtr packageView = getPackageView();
-    if (packageView == nullptr) return;
+    if (packageView == nullptr){
+        LOG_WARN("packageView is nullptr.");
+        return;
+    }
 
     std::string destFilename = parameters.m_destFilename;
     std::string srcFilename = parameters.m_filename;
@@ -1162,18 +1165,32 @@ void cmd_saveas(const CmdSaveAsParameters &parameters){
 }
 
 void cmd_export(const CmdExportParameters &parameters){
-    if (!parameters.m_textFilename.empty()){
-        // Export text
-        LOG_DEBUG("Do export text. file:%s", parameters.m_textFilename.c_str());
-    } else if (!parameters.m_dir.empty()){
-        // Export image
-        LOG_DEBUG("Do export image. dir:%s", parameters.m_dir.c_str());
-        LOG_DEBUG("dpi:%d format:%s layer:0x%x", 
-                parameters.m_dpi, 
-                get_format_type_label(parameters.m_format).c_str(),
-                parameters.m_outputLayers);
+    PackageViewPtr packageView = getPackageView();
+    if (packageView == nullptr){
+        LOG_WARN("packageView is nullptr.");
+        return;
+    }
+
+    std::string srcFilename = parameters.m_filename;
+    assert(!srcFilename.empty());
+    LOG_DEBUG("Do Export. src file:%s", srcFilename.c_str());
+    if (packageView->OpenOFDFile(parameters.m_filename)){
+        PackagePtr package = packageView->GetPackage();
+        assert(package != nullptr);
+        if (!parameters.m_textFilename.empty()){
+            // Export text
+            package->ExportText(parameters.m_textFilename);
+        } else if (!parameters.m_dir.empty()){
+            // Export image
+            package->ExportImage(parameters.m_dir,
+                    parameters.m_dpi,
+                    parameters.m_format,
+                    parameters.m_outputLayers);
+        } else {
+            LOG_WARN("file or dir parameter must be given. /e [file=xxx.txt|dir=xxx]");
+        }
     } else {
-        LOG_WARN("file or dir parameter must be given. /e [file=xxx.txt|dir=xxx]");
+        LOG_ERROR("Open OFD file %s failed.", srcFilename.c_str());
     }
 }
 

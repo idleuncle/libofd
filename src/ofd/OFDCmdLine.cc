@@ -199,11 +199,11 @@ CmdParameters* OFDCmdLine::ParseCmdExport(const std::string &appname, const std:
                 format = "bmp"; 
             }
             if (format == "bmp")
-                parameters->m_format = FormatType::BMP;
+                parameters->m_format = ExportFormatType::BMP;
             else if (format == "jpg")
-                parameters->m_format = FormatType::JPG;
+                parameters->m_format = ExportFormatType::JPG;
             else if (format == "png")
-                parameters->m_format = FormatType::PNG;
+                parameters->m_format = ExportFormatType::PNG;
         } else if (optName == "dir") {
             parameters->m_dir = optValue;
         } else if (optName == "layer") {

@@ -343,6 +343,25 @@ namespace ofd{
         virtual bool FromXML(utils::XMLElementPtr element) override;
     };
 
+    enum class ExportFormatType{
+        BMP=0,
+        JPG,
+        PNG
+    }; 
+    inline std::string get_format_type_label(ExportFormatType formatType){
+        if (formatType == ExportFormatType::BMP) return "bmp";
+        else if (formatType == ExportFormatType::JPG) return "jpg";
+        else if (formatType == ExportFormatType::PNG) return "png";
+        else return "Unknown";
+    }
+
+    enum class OutputLayerType{
+        TEMPLATES=0x01,
+        CONTENTS=0x10,
+        ANNOTS=0x100,
+        SEALS=0x1000
+    };
+
 }; // namespace ofd
 
 #endif // __OFD_COMMON_H__

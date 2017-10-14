@@ -29,6 +29,8 @@ namespace ofd{
             void Close();
             bool Save(const std::string &filename);
             DocumentPtr AddNewDocument();
+            bool ExportText(const std::string &filename) const;
+            bool ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const;
 
             std::tuple<std::string, bool> ReadZipFileString(const std::string &fileinzip) const;
             std::tuple<char*, size_t, bool> ReadZipFileRaw(const std::string &fileinzip) const;

@@ -179,7 +179,7 @@ void PageWall::Rebuild(ofd::DocumentPtr document, int rowPages){
 
     size_t totalPages = 0;
     if (m_document != nullptr){
-        totalPages = m_document->GetNumPages();
+        totalPages = m_document->GetPagesCount();
     }
 
     // -------- PageFrame Margins --------
@@ -425,7 +425,7 @@ void PageWall::RebuildWall(){
 
     if (m_document == nullptr) return;
 
-    size_t totalPages = m_document->GetNumPages();
+    size_t totalPages = m_document->GetPagesCount();
     if ( totalPages == 0 ){
         return;
     }

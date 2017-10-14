@@ -27,6 +27,9 @@ namespace ofd{
         TextLine(TextParagraphPtr textParagraph);
         virtual ~TextLine();
 
+        size_t GetObjectsCount() const {return m_objects.size();};
+        ObjectPtr GetObject(size_t idx) const {return m_objects[idx];};
+
         TextLinePtr GetSelf(){return shared_from_this();};
         const TextParagraphPtr GetParagraph() const;
         TextParagraphPtr GetParagraph();

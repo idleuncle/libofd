@@ -116,7 +116,7 @@ public:
     int GetWallHeight() const {return m_wallRect.height;};
     size_t GetTotalPages() const{
         if (m_document != nullptr){
-            return m_document->GetNumPages();
+            return m_document->GetPagesCount();
         } else {
             return 0;
         }

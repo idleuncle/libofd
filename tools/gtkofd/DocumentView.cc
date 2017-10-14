@@ -82,7 +82,7 @@ void DocumentView::OnDraw(cairo_t *cr){
 
 void DocumentView::FirstPage(){
     if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
+    size_t total_pages = m_document->GetPagesCount();
     m_pageIndex = 0;
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
@@ -94,7 +94,7 @@ void DocumentView::FirstPage(){
 
 void DocumentView::LastPage(){
     if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
+    size_t total_pages = m_document->GetPagesCount();
     m_pageIndex = total_pages - 1;
     //m_ofdRender->SetOffsetX(0.0);
     //m_ofdRender->SetOffsetY(0.0);
@@ -106,7 +106,7 @@ void DocumentView::LastPage(){
 
 void DocumentView::NextPage(){
     if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
+    size_t total_pages = m_document->GetPagesCount();
     if (m_pageIndex < total_pages - 1){
         m_pageIndex++;
     } else {
@@ -120,7 +120,7 @@ void DocumentView::NextPage(){
 
 void DocumentView::PreviousPage(){
     if (m_document == nullptr) return;
-    size_t total_pages = m_document->GetNumPages();
+    size_t total_pages = m_document->GetPagesCount();
     if (m_pageIndex > 0){
         m_pageIndex--;
     } else {

@@ -84,7 +84,7 @@ bool OFDRender::RebuildBackgroundImage(int screenWidth, int screenHeight, int sc
 
 void OFDRender::RenderBackgroundImage(DocumentPtr document, size_t pageIndex){
     if ( document != nullptr && m_cairoRender != nullptr ){
-        size_t totalPages = document->GetNumPages();
+        size_t totalPages = document->GetPagesCount();
         if ( totalPages > 0 ){
             PagePtr page = document->GetPage(pageIndex);
             if (page != nullptr){

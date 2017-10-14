@@ -368,7 +368,7 @@ void MySDLApp::OnEvent(SDL_Event event, bool &done){
     case SDL_KEYDOWN:
         if (event.key.keysym.sym == SDLK_UP) {
             if ( m_document != nullptr ){
-                size_t totalPages = m_document->GetNumPages();
+                size_t totalPages = m_document->GetPagesCount();
                 if ( totalPages > 0 ){
                     if ( m_pageIndex == 0 ){
                         m_pageIndex = totalPages - 1;
@@ -381,7 +381,7 @@ void MySDLApp::OnEvent(SDL_Event event, bool &done){
             break;
         } else if (event.key.keysym.sym == SDLK_DOWN) {
             if ( m_document != nullptr ){
-                size_t totalPages = m_document->GetNumPages();
+                size_t totalPages = m_document->GetPagesCount();
                 if ( totalPages > 0 ){
                     if ( m_pageIndex < totalPages - 1 ){
                         m_pageIndex++;
@@ -415,7 +415,7 @@ void MySDLApp::OnEvent(SDL_Event event, bool &done){
 void MySDLApp::OnRender(cairo_surface_t *surface){
     //if ( m_document != nullptr ){
     if ( m_document != nullptr && m_cairoRender != nullptr ){
-        size_t totalPages = m_document->GetNumPages();
+        size_t totalPages = m_document->GetPagesCount();
         if ( totalPages > 0 ){
             PagePtr page = m_document->GetPage(m_pageIndex);
             if ( page->Open() ){
@@ -513,7 +513,7 @@ int sdl_main(int argc, char *argv[]){
         exit(-1);
     }
 
-    size_t total_pages = document->GetNumPages();
+    size_t total_pages = document->GetPagesCount();
     LOG_INFO("%d pages in %s", total_pages, filename.c_str());
     if ( total_pages > 0 ){
         int screenWidth = 794;

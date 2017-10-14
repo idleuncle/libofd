@@ -114,8 +114,10 @@ namespace ofd{
             bool Open();
             void Close();
             bool IsOpened() const{return m_opened;};
+            bool ExportText(const std::string &filename) const;
+            bool ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const;
 
-            size_t GetNumPages() const;
+            size_t GetPagesCount() const {return m_pages.size();};
             const PagePtr GetPage(size_t idx) const;
             PagePtr GetPage(size_t idx);
             PagePtr AddNewPage();

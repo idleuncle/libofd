@@ -50,7 +50,7 @@ PackagePtr PackageView::OpenOFDFile(const std::string &filename){
         }
 
         documentView->SetDocument(document);
-        size_t numPages = document->GetNumPages();
+        size_t numPages = document->GetPagesCount();
         LOG_DEBUG("Document %d Total pages:%d", i, numPages);
 
         if (m_viewingAreaWidth > 0 && m_viewingAreaHeight > 0){

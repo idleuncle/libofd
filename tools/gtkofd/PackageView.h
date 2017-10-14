@@ -18,6 +18,7 @@ namespace ofd{
     public:
         PackageView();
         virtual ~PackageView();
+        PackagePtr GetPackage() const {return m_package;};
 
         PackageViewPtr GetSelf(){return shared_from_this();};
         DocumentViewPtr CreateNewDocumentView();

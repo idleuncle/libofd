@@ -145,7 +145,7 @@ namespace ofd{
 
             // ---------------- Private Attributes ----------------
         public:
-            size_t GetNumTextCodes() const {return m_textCodes.size();};
+            size_t GetTextCodesCount() const {return m_textCodes.size();};
             const Text::TextCode& GetTextCode(size_t idx) const{return m_textCodes[idx];};
             Text::TextCode& GetTextCode(size_t idx){return m_textCodes[idx];};
 

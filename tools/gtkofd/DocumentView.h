@@ -111,6 +111,7 @@ namespace ofd{
 
     public:
         void SetDocument(DocumentPtr document);
+        DocumentPtr GetDocument() const {return m_document;};
         void Rebuild();
         void RedrawDocumentView();
 

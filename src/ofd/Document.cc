@@ -1,5 +1,6 @@
 #include <sstream>
 #include <assert.h>
+#include <fstream>
 #include "ofd/Package.h"
 #include "ofd/Document.h"
 #include "ofd/Page.h"
@@ -92,10 +93,6 @@ bool Document::Open(){
 
 void Document::Close(){
     if ( !m_opened ) return;
-}
-
-size_t Document::GetNumPages() const{
-    return m_pages.size();
 }
 
 const PagePtr Document::GetPage(size_t idx) const{
@@ -791,4 +788,58 @@ bool Document::fromPagesXML(XMLElementPtr pagesElement){
     }
 
     return ok;
+}
+
+bool Document::ExportText(const std::string &filename) const{
+    size_t totalPages = m_pages.size();
+    LOG_DEBUG("Do document export text. file:%s Total %d pages", filename.c_str(), totalPages);
+    std::ofstream output;
+    output.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+    if (!output.is_open()){
+        LOG_ERROR("Create file %s failed", filename.c_str());
+        return false;
+    }
+
+    // ---------------- pages ----------------
+    for ( size_t k = 0 ; k < totalPages ; k++){
+        PagePtr page = GetPage(k);
+        page->Open();
+        ofd::text::TextPagePtr textPage = page->GetTextPage(); 
+        size_t totalLines = textPage->GetTextLinesCount();
+        LOG_DEBUG("==> Page %d/%d total %d line", k+1, totalPages, totalLines);
+
+        // ---------------- lines ----------------
+        for ( size_t i = 0 ; i < totalLines ; i++){
+            ofd::text::TextLinePtr textLine = textPage->GetTextLine(i);
+            size_t totalObjects = textLine->GetObjectsCount();
+
+            // ---------------- objects ----------------
+            for ( size_t j = 0 ; j < totalObjects ; j++){
+                ObjectPtr object = textLine->GetObject(j);
+                if (object->Type == ObjectType::TEXT){
+                    TextObject *textObject = (TextObject*)object.get();
+
+                    // ---------------- texcodes ----------------
+                    for ( size_t n = 0 ; n < textObject->GetTextCodesCount() ; n++ ){
+                        const Text::TextCode &textCode = textObject->GetTextCode(n);
+                        std::string text = textCode.Text;
+                        output << text;
+                    }
+                }
+            }
+            output << std::endl;
+        }
+        output << std::endl << std::endl;
+    }
+    output.close();
+    return true;
+}
+
+bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const{
+    LOG_DEBUG("Do document export image. dir:%s", dir.c_str());
+    LOG_DEBUG("dpi:%d format:%s layer:0x%x", 
+            dpi, 
+            get_format_type_label(format).c_str(),
+            outputLayers);
+    return true;
 }

@@ -161,7 +161,7 @@ bool Package::Save(const std::string &filename){
         // mkdir Doc_N/Pages
         zip->AddDir(Doc_N + "/Pages"); 
 
-        size_t numPages = document->GetNumPages();
+        size_t numPages = document->GetPagesCount();
         for ( size_t k = 0 ; k < numPages ; k++ ){
             PagePtr page = document->GetPage(k);
             std::string Page_K = std::string("Page_") + std::to_string(k);
@@ -449,4 +449,25 @@ bool Package::fromOFDXML(const std::string &strOFDXML){
     }
 
     return ok;
+}
+
+bool Package::ExportText(const std::string &filename) const{
+    LOG_DEBUG("Do package export text. file:%s. Total %d documents. Only export the first one.", filename.c_str(), m_documents.size());
+    for (auto document : m_documents){
+        document->ExportText(filename);
+        break;
+    }
+    return true;
+}
+
+bool Package::ExportImage(const std::string &dir, int dpi, ExportFormatType format, uint32_t outputLayers) const{
+    LOG_DEBUG("Do package export image. dir:%s. Total %d documents. Only export the first one.", dir.c_str(), m_documents.size());
+    LOG_DEBUG("dpi:%d format:%s layer:0x%x", dpi, 
+            get_format_type_label(format).c_str(), outputLayers);
+
+    for (auto document : m_documents){
+        document->ExportImage(dir, dpi, format, outputLayers);
+        break;
+    }
+    return true;
 }
