@@ -15,14 +15,18 @@ static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
         return;
     }
 
-    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
-    if (documentView == nullptr){
-        LOG_WARN("DocumentView is NULL");
-        return;
-    }
 
     std::string name = gtk_widget_get_name(widget);
     LOG_DEBUG("toolbar clicked. name:%s", name.c_str());
+
+    DocumentViewPtr documentView = packageView->GetCurrentDocumentView();
+    if (name != "document-open"){
+        if (documentView == nullptr){
+            LOG_WARN("DocumentView is NULL");
+            return;
+        }
+    }
+
     if (name == "document-open"){
         packageView->CmdFileOpen();
     } else if (name == "document-properties"){

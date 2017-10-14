@@ -880,14 +880,14 @@ bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType for
         //pixelHeight = cairo_image_surface_get_height(backgroundSurface);
 
         if (format == ExportFormatType::BMP){
-            std::string imageFile = dir + "/" + std::to_string(k) + ".bmp";
+            std::string imageFile = dir + "/" + std::to_string(k+1) + ".bmp";
 
         } else if (format == ExportFormatType::PNG){
-            std::string imageFile = dir + "/" + std::to_string(k) + ".png";
+            std::string imageFile = dir + "/" + std::to_string(k+1) + ".png";
             cairo_surface_write_to_png(backgroundSurface, imageFile.c_str());
 
         } else if (format == ExportFormatType::JPG){
-            std::string imageFile = dir + "/" + std::to_string(k) + ".jpg";
+            std::string imageFile = dir + "/" + std::to_string(k+1) + ".jpg";
 
             unsigned char *pixelData = cairo_image_surface_get_data(backgroundSurface);
             int quality = 100;

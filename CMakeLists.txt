@@ -5,14 +5,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 INCLUDE_DIRECTORIES(
     ./
     ./include
+    ./tools/libjpeg-turbo
     ./tools/poppler/poppler
     ./tools/poppler
 )
 
 LINK_DIRECTORIES(
     ./build/lib
-    /usr/local/lib
+    ./tools/libjpeg-turbo/.libs
     ./tools/poppler/poppler/.libs
+    /usr/local/lib
 )
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
