@@ -1195,10 +1195,19 @@ void cmd_export(const CmdExportParameters &parameters){
 }
 
 void cmd_print(const CmdPrintParameters &parameters){
+
+    DocumentViewPtr documentView = getDocumentView();
+    if (documentView == nullptr){
+        LOG_WARN("documentView == nullptr");
+        return;
+    }
+
     LOG_DEBUG("Do print. printer:%s copies:%d", parameters.m_printer.c_str(), parameters.m_copies);
     LOG_DEBUG("autorotate:%d autozoom:%d zoomratio:%.3f layers:0x%x", 
             parameters.m_autoRotate, parameters.m_autoZoom,
             parameters.m_zoomRatio, parameters.m_outputLayers);
+
+    documentView->DoPrint();
 }
 
 int main(int argc, char *argv[]){

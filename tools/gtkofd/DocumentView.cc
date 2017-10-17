@@ -294,3 +294,139 @@ void DocumentView::SelectText(double x0, double y0, double x1, double y1){
         }
     }
 }
+
+// A typical use for ::begin-print is to use the parameters from the GtkPrintContext and paginate the document accordingly, and then set the number of pages with gtk_print_operation_set_n_pages().
+static gboolean begin_print_cb(
+        GtkPrintOperation *operation, 
+        GtkPrintContext   *context, 
+        gpointer          user_data){
+    LOG_DEBUG("Print begin print.");
+    return false;
+}
+
+// Emitted for every page that is printed. The signal handler must render the page_nr 's page onto the cairo context obtained from context using gtk_print_context_get_cairo_context().
+static gboolean draw_page_cb(
+        GtkPrintOperation *operation, 
+        GtkPrintContext   *context, 
+        gint              page_nr,
+        gpointer          user_data){
+    LOG_DEBUG("Print draw page.");
+
+    cairo_t *cr = gtk_print_context_get_cairo_context(context);
+    gdouble width = gtk_print_context_get_width(context);
+
+    //cairo_rectangle(cr, 0, 0, width, HEADER_HEIGHT);
+    cairo_rectangle(cr, 0, 0, width, 50);
+
+    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+    cairo_fill(cr);
+
+    //PangoLayout *layout = gtk_print_context_create_pango_layout(context);
+    //PangoFontDescription *desc = pango_font_description_from_string("sans:14");
+    //pango_layout_set_font_description(layout, desc);
+    //pango_font_description_free(desc);
+
+    //pango_layout_set_text(layout, "some text", -1);
+    //pango_layout_set_width(layout, width * PANGO_SCALE);
+    //pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+
+    //gdouble text_height;
+    //pango_layout_get_size(layout, nullptr, &layout_height);
+    //text_height = (gdouble)layout_height / PANGO_SCALE;
+
+    //cairo_move_to(cr, width / 2, (HEADER_HEIGHT - text_height) / 2);
+    //pango_cairo_show_layout(cr, layout);
+
+    //g_object_unref(layout);
+
+    return false;
+}
+
+// Emitted after all pages have been rendered. A handler for this signal can clean up any resources that have been allocated in the “begin-print” handler.
+static gboolean end_print_cb(
+        GtkPrintOperation *operation, 
+        GtkPrintContext   *context, 
+        gpointer          user_data){
+    LOG_DEBUG("Print end print.");
+    return false;
+}
+
+static gboolean preview_cb(
+        GtkPrintOperation        *operation, 
+        GtkPrintOperationPreview *preview, 
+        GtkPrintContext          *context,
+        GtkWindow                *parent,
+        gpointer                 user_data){
+    LOG_NOTICE("Print preview");
+
+    cairo_t *cr = gtk_print_context_get_cairo_context(context);
+    gdouble width = gtk_print_context_get_width(context);
+
+    //cairo_rectangle(cr, 0, 0, width, HEADER_HEIGHT);
+    cairo_rectangle(cr, 0, 0, width, 50);
+
+    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+    cairo_fill(cr);
+
+    return false;
+}
+
+static gboolean done_cb(
+        GtkPrintOperation       *operation,
+        GtkPrintOperationResult result,
+        gpointer                user_data){
+    return false;
+}
+
+static gboolean status_changed_cb(GtkPrintOperation *operation, gpointer user_data){
+    const GtkPrintStatus status = gtk_print_operation_get_status(operation);
+    std::string status_string = gtk_print_operation_get_status_string(operation);
+    LOG_NOTICE("Print status: (%d) %s", status, status_string.c_str());
+    return false;
+}
+
+
+// GtkPrintOperation
+// https://developer.gnome.org/gtk3/stable/gtk3-High-level-Printing-API.html#GtkPrintOperation-begin-print
+// Signals:
+//  begin-print
+//  draw-page
+//  end-print
+//  preview
+void DocumentView::DoPrint() const{
+    GtkPrintSettings *settings = nullptr;
+
+    GtkPrintOperationResult res;
+    GtkPrintOperation *print = gtk_print_operation_new();
+    if (settings != nullptr){
+        gtk_print_operation_set_print_settings(print, settings);
+    }
+    gtk_print_operation_set_allow_async(print, true);
+    gtk_print_operation_set_n_pages(print, 1);
+    gtk_print_operation_set_show_progress(print, true);
+    //gtk_print_operation_set_export_filename(print, "xxx.pdf");
+    //gtk_print_operation_set_embed_page_setup(print, true);
+    //gtk_print_operation_set_current_page(print, 0);
+    //gtk_print_operation_set_use_full_page(print, true);
+
+    g_signal_connect(print, "begin-print", G_CALLBACK(begin_print_cb), nullptr);
+    g_signal_connect(print, "draw-page", G_CALLBACK(draw_page_cb), nullptr);
+    g_signal_connect(print, "end-print", G_CALLBACK(end_print_cb), nullptr);
+    g_signal_connect(print, "preview", G_CALLBACK(preview_cb), nullptr);
+    g_signal_connect(print, "done", G_CALLBACK(done_cb), nullptr);
+    g_signal_connect(print, "status-changed", G_CALLBACK(status_changed_cb), nullptr);
+
+    res = gtk_print_operation_run(print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+            GTK_WINDOW(nullptr), nullptr);
+
+    if (res == GTK_PRINT_OPERATION_RESULT_APPLY){
+        if (settings != nullptr){
+            g_object_unref(settings);
+            settings = nullptr;
+        }
+        settings = (GtkPrintSettings*)g_object_ref(gtk_print_operation_get_print_settings(print));
+    }
+
+    g_object_unref(print);
+
+}    

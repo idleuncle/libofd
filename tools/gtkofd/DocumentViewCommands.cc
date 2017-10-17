@@ -17,6 +17,7 @@ void DocumentView::CmdFileExport(){
 }
 
 void DocumentView::CmdFilePrint(){
+    DoPrint();
 }
 
 static void set_property_label(GtkBuilder *builder, const std::string &widgetName, const std::string &text){

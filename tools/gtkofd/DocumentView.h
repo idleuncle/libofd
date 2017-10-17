@@ -187,10 +187,11 @@ namespace ofd{
 
     public:
         ActionPtr GetAction() const {return m_action;};
-
+        void DoPrint() const;
     private:
         ActionPtr m_action = ActionFactory::CreateAction(Action::Type::NORMAL);
         //ActionPtr m_action = ActionFactory::CreateAction(Action::Type::SELECTTEXT);
+
     }; // class DocumentView
 
 }; // namespace ofd

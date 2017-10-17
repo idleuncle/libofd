@@ -25,12 +25,14 @@ static void on_toolbar_document_cb(GtkWidget *widget, gpointer user_data){
             LOG_WARN("DocumentView is NULL");
             return;
         }
-    }
+    } 
 
     if (name == "document-open"){
         packageView->CmdFileOpen();
     } else if (name == "document-properties"){
         documentView->CmdFileProperties();
+    } else if (name == "document-print"){
+        documentView->DoPrint();
     }
 }
 
