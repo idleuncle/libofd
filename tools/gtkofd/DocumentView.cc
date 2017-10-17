@@ -310,10 +310,19 @@ static gboolean draw_page_cb(
         GtkPrintContext   *context, 
         gint              page_nr,
         gpointer          user_data){
-    LOG_DEBUG("Print draw page %d.", page_nr);
+
+    //GtkPrintSettings *settings = gtk_print_operation_get_print_settings(operation);
+    //assert(settings != nullptr);
+    //GtkPaperSize *paperSize = gtk_print_settings_get_paper_size(settings);
+    //assert(paperSize != nullptr);
+    //double pixelPaperWidth = gtk_paper_size_get_width(paperSize, GTK_UNIT_PIXEL);
+    //double pixelPaperHeight = gtk_paper_size_get_height(paperSize, GTK_UNIT_PIXEL);
 
     cairo_t *cr = gtk_print_context_get_cairo_context(context);
-    //gdouble width = gtk_print_context_get_width(context);
+    gdouble pixelPaperWidth = gtk_print_context_get_width(context);
+    gdouble pixelPaperHeight = gtk_print_context_get_height(context);
+
+    LOG_DEBUG("Print draw page %d. paper pixel size:(%.2f, %.2f)", page_nr, pixelPaperWidth, pixelPaperHeight);
 
     ////cairo_rectangle(cr, 0, 0, width, HEADER_HEIGHT);
     //cairo_rectangle(cr, 0, 0, width, 50);
@@ -337,7 +346,7 @@ static gboolean draw_page_cb(
         bool bOK = false;
         std::unique_ptr<CairoRender> cairoRender = 
             utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
-        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, cr);
+        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, pixelPaperWidth, pixelPaperHeight, cr);
         if (!bOK){
             LOG_WARN("Page %d draw failed.", page->ID);
         } 
@@ -516,7 +525,7 @@ void DocumentView::DoPrint() const{
     }
 
     g_object_unref(print);
-    g_object_unref(settings);
+    //g_object_unref(settings);
     //g_object_unref(paperSize);
 
 }    

@@ -889,7 +889,7 @@ bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType for
         bool bOK = false;
         std::unique_ptr<CairoRender> cairoRender = 
             utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
-        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, nullptr);
+        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, 0.0, 0.0, nullptr);
         if (!bOK){
             LOG_WARN("Page %d draw failed.", page->ID);
         } else {

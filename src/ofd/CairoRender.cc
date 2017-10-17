@@ -1809,7 +1809,7 @@ void CairoRender::ImplCls::doRadialShFill(cairo_t *cr, PathObject *pathObject){
     }
 }
      
-std::tuple<double, double, bool> CairoRender::RenderPage(PagePtr page, int dpi, cairo_t *cr){
+std::tuple<double, double, bool> CairoRender::RenderPage(PagePtr page, int dpi, double pixelPaperWidth, double pixelPaperHeight, cairo_t *cr){
     if (page == nullptr){
         LOG_WARN("page == nullptr");
         return std::make_tuple(0, 0, false);
@@ -1824,11 +1824,17 @@ std::tuple<double, double, bool> CairoRender::RenderPage(PagePtr page, int dpi, 
             page->ID, 
             mmWidth, mmHeight, pixelWidth, pixelHeight );
 
-    this->Rebuild(pixelWidth, pixelHeight, dpi, dpi);
+    double paperScaling = 1.0;
+    if (pixelPaperWidth > 0.0){
+        paperScaling = pixelPaperWidth / pixelWidth;
+    }
+    LOG_DEBUG("paperScaling:%.3f", paperScaling);
+
+    this->Rebuild(pixelWidth * paperScaling, pixelHeight * paperScaling, dpi, dpi);
 
     double offsetX = 0.0;
     double offsetY = 0.0;
-    double scaling = 1.0;
+    double scaling = paperScaling;
     ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
     this->DrawPage(page, viewArea);
 
@@ -1838,6 +1844,6 @@ std::tuple<double, double, bool> CairoRender::RenderPage(PagePtr page, int dpi, 
         cairo_paint(cr);
     }
 
-    return std::make_tuple(pixelWidth, pixelHeight, true);
+    return std::make_tuple(pixelWidth * paperScaling, pixelHeight * paperScaling, true);
 }
 
