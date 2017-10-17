@@ -102,6 +102,10 @@ void Document::Close(){
 }
 
 const PagePtr Document::GetPage(size_t idx) const{
+    if (idx >= m_pages.size()){
+        LOG_WARN("Page index %d must be less than %d", idx, m_pages.size());
+        return nullptr;
+    }
     return m_pages[idx];
 }
 
@@ -854,56 +858,72 @@ bool Document::ExportImage(const std::string &dir, int dpi, ExportFormatType for
     utils::MkdirIfNotExist(dir);
     // ---------------- pages ----------------
     for ( size_t k = 0 ; k < totalPages ; k++){
+        LOG_DEBUG("Export page %d/%d to image.", k+1, totalPages);
         PagePtr page = GetPage(k);
         page->Open();
 
-        ST_Box physicalBox = page->Area.PhysicalBox;
-        double mmWidth = physicalBox.Width;
-        double mmHeight = physicalBox.Height;
-        double pixelWidth = mm_to_pixel(mmWidth, dpi);
-        double pixelHeight = mm_to_pixel(mmHeight, dpi);
-        LOG_DEBUG("Page %d/%d PhysicalBox:(%.2f, %.2f) ImageBox:(%.2f, %.2f)", 
-                k + 1, totalPages, 
-                mmWidth, mmHeight, pixelWidth, pixelHeight );
+        //ST_Box physicalBox = page->Area.PhysicalBox;
+        //double mmWidth = physicalBox.Width;
+        //double mmHeight = physicalBox.Height;
+        //double pixelWidth = mm_to_pixel(mmWidth, dpi);
+        //double pixelHeight = mm_to_pixel(mmHeight, dpi);
+        //LOG_DEBUG("Page %d/%d PhysicalBox:(%.2f, %.2f) ImageBox:(%.2f, %.2f)", 
+                //k + 1, totalPages, 
+                //mmWidth, mmHeight, pixelWidth, pixelHeight );
 
+        //std::unique_ptr<CairoRender> cairoRender = 
+            //utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
+
+        //double offsetX = 0.0;
+        //double offsetY = 0.0;
+        //double scaling = 1.0;
+        //ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
+        //cairoRender->DrawPage(page, viewArea);
+
+        //cairo_surface_t *backgroundSurface = cairoRender->GetCairoSurface();
+        //double pixelWidth = cairo_image_surface_get_width(backgroundSurface);
+        //double pixelHeight = cairo_image_surface_get_height(backgroundSurface);
+
+        double pixelWidth = 0.0;
+        double pixelHeight = 0.0;
+        bool bOK = false;
         std::unique_ptr<CairoRender> cairoRender = 
             utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
+        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, nullptr);
+        if (!bOK){
+            LOG_WARN("Page %d draw failed.", page->ID);
+        } else {
 
-        double offsetX = 0.0;
-        double offsetY = 0.0;
-        double scaling = 1.0;
-        ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
-        cairoRender->DrawPage(page, viewArea);
+            cairo_surface_t *backgroundSurface = cairoRender->GetCairoSurface();
+            //double pixelWidth = cairo_image_surface_get_width(backgroundSurface);
+            //double pixelHeight = cairo_image_surface_get_height(backgroundSurface);
 
-        cairo_surface_t *backgroundSurface = cairoRender->GetCairoSurface();
-        //pixelWidth = cairo_image_surface_get_width(backgroundSurface);
-        //pixelHeight = cairo_image_surface_get_height(backgroundSurface);
+            if (format == ExportFormatType::BMP){
+                std::string imageFile = dir + "/" + std::to_string(k+1) + ".bmp";
 
-        if (format == ExportFormatType::BMP){
-            std::string imageFile = dir + "/" + std::to_string(k+1) + ".bmp";
+            } else if (format == ExportFormatType::PNG){
+                std::string imageFile = dir + "/" + std::to_string(k+1) + ".png";
+                cairo_surface_write_to_png(backgroundSurface, imageFile.c_str());
 
-        } else if (format == ExportFormatType::PNG){
-            std::string imageFile = dir + "/" + std::to_string(k+1) + ".png";
-            cairo_surface_write_to_png(backgroundSurface, imageFile.c_str());
+            } else if (format == ExportFormatType::JPG){
+                std::string imageFile = dir + "/" + std::to_string(k+1) + ".jpg";
 
-        } else if (format == ExportFormatType::JPG){
-            std::string imageFile = dir + "/" + std::to_string(k+1) + ".jpg";
-
-            unsigned char *pixelData = cairo_image_surface_get_data(backgroundSurface);
-            int quality = 100;
-            unsigned char *jpegData = nullptr;
-            size_t jpegDataSize = 0;
-            std::tie(jpegData, jpegDataSize) = utils::GenerateJPEGData(pixelData, pixelWidth, pixelHeight, quality);
-            if (jpegData != nullptr && jpegDataSize > 0){
-                std::ofstream output;
-                output.open(imageFile, std::ios::out | std::ios::binary | std::ios::trunc);
-                if (output.is_open()){
-                    output.write((const char*)jpegData, jpegDataSize);
+                unsigned char *pixelData = cairo_image_surface_get_data(backgroundSurface);
+                int quality = 100;
+                unsigned char *jpegData = nullptr;
+                size_t jpegDataSize = 0;
+                std::tie(jpegData, jpegDataSize) = utils::GenerateJPEGData(pixelData, pixelWidth, pixelHeight, quality);
+                if (jpegData != nullptr && jpegDataSize > 0){
+                    std::ofstream output;
+                    output.open(imageFile, std::ios::out | std::ios::binary | std::ios::trunc);
+                    if (output.is_open()){
+                        output.write((const char*)jpegData, jpegDataSize);
+                    }
+                    output.close();
+                    delete jpegData;
                 }
-                output.close();
-                delete jpegData;
-            }
 
+            }
         }
 
         page->Close();

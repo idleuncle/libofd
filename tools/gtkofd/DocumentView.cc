@@ -310,16 +310,42 @@ static gboolean draw_page_cb(
         GtkPrintContext   *context, 
         gint              page_nr,
         gpointer          user_data){
-    LOG_DEBUG("Print draw page.");
+    LOG_DEBUG("Print draw page %d.", page_nr);
 
     cairo_t *cr = gtk_print_context_get_cairo_context(context);
-    gdouble width = gtk_print_context_get_width(context);
+    //gdouble width = gtk_print_context_get_width(context);
 
-    //cairo_rectangle(cr, 0, 0, width, HEADER_HEIGHT);
-    cairo_rectangle(cr, 0, 0, width, 50);
+    ////cairo_rectangle(cr, 0, 0, width, HEADER_HEIGHT);
+    //cairo_rectangle(cr, 0, 0, width, 50);
 
-    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
-    cairo_fill(cr);
+    //cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+    //cairo_fill(cr);
+
+
+    DocumentView *documentView = (DocumentView*)user_data;
+    assert(documentView != nullptr);
+    int dpi = documentView->m_print_dpi;
+
+    DocumentPtr document = documentView->GetDocument();
+    assert(document != nullptr);
+    PagePtr page = document->GetPage(page_nr);
+    if (page != nullptr){
+        page->Open();
+
+        double pixelWidth = 0.0;
+        double pixelHeight = 0.0;
+        bool bOK = false;
+        std::unique_ptr<CairoRender> cairoRender = 
+            utils::make_unique<ofd::CairoRender>(pixelWidth, pixelHeight, dpi, dpi);
+        std::tie(pixelWidth, pixelHeight, bOK) = cairoRender->RenderPage(page, dpi, cr);
+        if (!bOK){
+            LOG_WARN("Page %d draw failed.", page->ID);
+        } 
+    }
+
+    //double pixelWidth = cairo_image_surface_get_width(backgroundSurface);
+    //double pixelHeight = cairo_image_surface_get_height(backgroundSurface);
+
 
     //PangoLayout *layout = gtk_print_context_create_pango_layout(context);
     //PangoFontDescription *desc = pango_font_description_from_string("sans:14");
@@ -394,27 +420,89 @@ static gboolean status_changed_cb(GtkPrintOperation *operation, gpointer user_da
 //  end-print
 //  preview
 void DocumentView::DoPrint() const{
-    GtkPrintSettings *settings = nullptr;
+
+    GtkPrintSettings *settings = gtk_print_settings_new();
+
+    gtk_print_settings_set_resolution(settings, m_print_dpi);
+    //gtk_print_settings_set_scale(settings, 1.0);
+    // GTK_PRINt_PAGES_ALL
+    // GTK_PRINt_PAGES_CURRENT
+    // GTK_PRINt_PAGES_RANGES
+    // GTK_PRINt_PAGES_SELECTION
+    gtk_print_settings_set_print_pages(settings, GTK_PRINT_PAGES_ALL);
+    //gtk_print_settings_set_print_pages(settings, GTK_PRINT_PAGES_RANGES);
+    //GtkPageRange pageRange; 
+    //pageRange.start = 0;
+    //pageRange.end = 1;
+    //gtk_print_settings_set_page_ranges(settings, &pageRange, 1);
+
+    // GTK_PAGE_SET_ALL
+    // GTK_PAGE_SET_EVEN
+    // GTK_PAGE_SET_ODD
+    gtk_print_settings_set_page_set(settings, GTK_PAGE_SET_ALL);
+
+    GtkPaperSize *paperSize = gtk_paper_size_new(GTK_PAPER_NAME_A4);
+    double mmPaperWidth = gtk_paper_size_get_width(paperSize, GTK_UNIT_MM);
+    double mmPaperHeight = gtk_paper_size_get_height(paperSize, GTK_UNIT_MM);
+    double pixelPaperWidth = gtk_paper_size_get_width(paperSize, GTK_UNIT_PIXEL);
+    double pixelPaperHeight = gtk_paper_size_get_height(paperSize, GTK_UNIT_PIXEL);
+    double pointPaperWidth = gtk_paper_size_get_width(paperSize, GTK_UNIT_POINTS);
+    double pointPaperHeight = gtk_paper_size_get_height(paperSize, GTK_UNIT_POINTS);
+    LOG_INFO("Default paper size mm:(%.2f, %.2f) pixel:(%.2f, %.2f) point:(%.2f, %.2f)", 
+            mmPaperWidth, mmPaperHeight,
+            pixelPaperWidth,pixelPaperHeight,
+            pointPaperWidth, pointPaperHeight);
+
+    gtk_print_settings_set_paper_size(settings, paperSize);
+
+    // GTK_PAGE_ORIENTATION_PORTRAIT
+    // GTK_PAGE_ORIENTATION_LANDSCAPE
+    // GTK_PAGE_ORIENTATION_REVERSE_PORTRAIT
+    // GTK_PAGE_ORIENTATION_REVERSE_LANDSCAPE
+    gtk_print_settings_set_orientation(settings, GTK_PAGE_ORIENTATION_PORTRAIT);
+
+    gtk_print_settings_set_use_color(settings, true);
+    gtk_print_settings_set_reverse(settings, false);
+    // GTK_PRINT_DUPLEX_SIMPLEX
+    // GTK_PRINT_DUPLEX_HORIZONTAL
+    // GTK_PRINT_DUPLEX_VERTICAL
+    gtk_print_settings_set_duplex(settings, GTK_PRINT_DUPLEX_SIMPLEX);
+    //// GTK_PRINT_QUALITY_LOW
+    //// GTK_PRINT_QUALITY_NORMAL
+    //// GTK_PRINT_QUALITY_HIGH
+    //// GTK_PRINT_QUALITY_DRAFT
+    gtk_print_settings_set_quality(settings, GTK_PRINT_QUALITY_NORMAL);
+    gtk_print_settings_set_n_copies(settings, 1);
+    //gtk_print_settings_set_number_up(settings, GTK_NUMBER_UP_LAYOUT_LEFT_TO_RIGHT_TOP_TO_BOTTOM);
+
 
     GtkPrintOperationResult res;
     GtkPrintOperation *print = gtk_print_operation_new();
     if (settings != nullptr){
         gtk_print_operation_set_print_settings(print, settings);
     }
+
+    DocumentPtr document = this->GetDocument();
+    if (document == nullptr){
+        LOG_WARN("document == nullptr");
+        return;
+    }
+    size_t totalPages = document->GetPagesCount();
+
     gtk_print_operation_set_allow_async(print, true);
-    gtk_print_operation_set_n_pages(print, 1);
+    gtk_print_operation_set_n_pages(print, totalPages);
     gtk_print_operation_set_show_progress(print, true);
     //gtk_print_operation_set_export_filename(print, "xxx.pdf");
     //gtk_print_operation_set_embed_page_setup(print, true);
     //gtk_print_operation_set_current_page(print, 0);
     //gtk_print_operation_set_use_full_page(print, true);
 
-    g_signal_connect(print, "begin-print", G_CALLBACK(begin_print_cb), nullptr);
-    g_signal_connect(print, "draw-page", G_CALLBACK(draw_page_cb), nullptr);
-    g_signal_connect(print, "end-print", G_CALLBACK(end_print_cb), nullptr);
-    g_signal_connect(print, "preview", G_CALLBACK(preview_cb), nullptr);
-    g_signal_connect(print, "done", G_CALLBACK(done_cb), nullptr);
-    g_signal_connect(print, "status-changed", G_CALLBACK(status_changed_cb), nullptr);
+    g_signal_connect(print, "begin-print", G_CALLBACK(begin_print_cb), (gpointer)this);
+    g_signal_connect(print, "draw-page", G_CALLBACK(draw_page_cb), (gpointer)this);
+    g_signal_connect(print, "end-print", G_CALLBACK(end_print_cb), (gpointer)this);
+    g_signal_connect(print, "preview", G_CALLBACK(preview_cb), (gpointer)this);
+    g_signal_connect(print, "done", G_CALLBACK(done_cb), (gpointer)this);
+    g_signal_connect(print, "status-changed", G_CALLBACK(status_changed_cb), (gpointer)this);
 
     res = gtk_print_operation_run(print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
             GTK_WINDOW(nullptr), nullptr);
@@ -428,5 +516,7 @@ void DocumentView::DoPrint() const{
     }
 
     g_object_unref(print);
+    g_object_unref(settings);
+    //g_object_unref(paperSize);
 
 }    

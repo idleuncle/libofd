@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <cairo/cairo.h>
 #include "ofd/Common.h"
 #include "ofd/Layer.h"
 #include "ofd/TextPage.h"
@@ -29,6 +30,7 @@ namespace ofd{
         public:
             bool Open();
             void Close();
+            cairo_surface_t* RenderPage(int dpi);
             
             std::tuple<int, int> GetPixelSize(double resolutionX, double resolutionY) const;
 

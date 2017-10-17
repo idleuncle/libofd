@@ -9,6 +9,7 @@
 #include "ofd/ImageObject.h"
 #include "ofd/VideoObject.h"
 #include "ofd/CompositeObject.h"
+#include "ofd/CairoRender.h"
 #include "utils/xml.h"
 #include "utils/logger.h"
 
@@ -448,3 +449,4 @@ double Page::GetFitScaling(double screenWidth, double screenHeight, double resol
     //LOG(DEBUG) << "Page::GetFitScaling() page size (" << pageWidth << "," << pageHeight << ") screen size (" << screenWidth << "," << screenHeight << ") scalingX=" << scalingX << " scalingY=" << scalingY << " scaling=" << scaling;
     return scaling;
 }
+

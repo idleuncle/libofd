@@ -188,6 +188,7 @@ namespace ofd{
     public:
         ActionPtr GetAction() const {return m_action;};
         void DoPrint() const;
+        int m_print_dpi = 96;
     private:
         ActionPtr m_action = ActionFactory::CreateAction(Action::Type::NORMAL);
         //ActionPtr m_action = ActionFactory::CreateAction(Action::Type::SELECTTEXT);

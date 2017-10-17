@@ -1808,4 +1808,36 @@ void CairoRender::ImplCls::doRadialShFill(cairo_t *cr, PathObject *pathObject){
         //}
     }
 }
-    // 
+     
+std::tuple<double, double, bool> CairoRender::RenderPage(PagePtr page, int dpi, cairo_t *cr){
+    if (page == nullptr){
+        LOG_WARN("page == nullptr");
+        return std::make_tuple(0, 0, false);
+    }
+
+    ST_Box physicalBox = page->Area.PhysicalBox;
+    double mmWidth = physicalBox.Width;
+    double mmHeight = physicalBox.Height;
+    double pixelWidth = mm_to_pixel(mmWidth, dpi);
+    double pixelHeight = mm_to_pixel(mmHeight, dpi);
+    LOG_DEBUG("Page %d PhysicalBox:(%.2f, %.2f) ImageBox:(%.2f, %.2f)", 
+            page->ID, 
+            mmWidth, mmHeight, pixelWidth, pixelHeight );
+
+    this->Rebuild(pixelWidth, pixelHeight, dpi, dpi);
+
+    double offsetX = 0.0;
+    double offsetY = 0.0;
+    double scaling = 1.0;
+    ofd::ViewArea viewArea = std::make_tuple(offsetX, offsetY, scaling);
+    this->DrawPage(page, viewArea);
+
+    if (cr != nullptr){
+        cairo_surface_t *backgroundSurface = this->GetCairoSurface();
+        cairo_set_source_surface(cr, backgroundSurface, 0, 0);
+        cairo_paint(cr);
+    }
+
+    return std::make_tuple(pixelWidth, pixelHeight, true);
+}
+

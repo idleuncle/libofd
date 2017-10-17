@@ -294,41 +294,41 @@ static gboolean key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer use
         //LOG_DEBUG("Right KEY PRESSED!");
         getDocumentView()->CmdMoveRight();
         break;
-    case GDK_KEY_i:
-        if (no_special_keys(event)){
-            getDocumentView()->CmdZoomIn();    
-        } else {
-            return false;
-        }
-        break;
-    case GDK_KEY_o:
-        if (no_special_keys(event)){
-            getDocumentView()->CmdZoomOut();    
-        } else {
-            return false;
-        }
-        break;
-    case GDK_KEY_f:
-        getDocumentView()->CmdZoomFitBest();
-        break;
-    case GDK_KEY_h:
-        getDocumentView()->CmdMoveLeft();
-        break;
-    case GDK_KEY_j:
-        getDocumentView()->CmdMoveDown();
-        break;
-    case GDK_KEY_k:
-        getDocumentView()->CmdMoveUp();
-        break;
-    case GDK_KEY_l:
-        getDocumentView()->CmdMoveRight();
-        break;
-    case GDK_KEY_n:
-        getDocumentView()->CmdNextPage();
-        break;
-    case GDK_KEY_p:
-        getDocumentView()->CmdPreviousPage();
-        break;
+    //case GDK_KEY_i:
+        //if (no_special_keys(event)){
+            //getDocumentView()->CmdZoomIn();    
+        //} else {
+            //return false;
+        //}
+        //break;
+    //case GDK_KEY_o:
+        //if (no_special_keys(event)){
+            //getDocumentView()->CmdZoomOut();    
+        //} else {
+            //return false;
+        //}
+        //break;
+    //case GDK_KEY_f:
+        //getDocumentView()->CmdZoomFitBest();
+        //break;
+    //case GDK_KEY_h:
+        //getDocumentView()->CmdMoveLeft();
+        //break;
+    //case GDK_KEY_j:
+        //getDocumentView()->CmdMoveDown();
+        //break;
+    //case GDK_KEY_k:
+        //getDocumentView()->CmdMoveUp();
+        //break;
+    //case GDK_KEY_l:
+        //getDocumentView()->CmdMoveRight();
+        //break;
+    //case GDK_KEY_n:
+        //getDocumentView()->CmdNextPage();
+        //break;
+    //case GDK_KEY_p:
+        //getDocumentView()->CmdPreviousPage();
+        //break;
     default:
         //LOG(DEBUG) << "Key pressed. keyval:" << event->keyval;
         return false;

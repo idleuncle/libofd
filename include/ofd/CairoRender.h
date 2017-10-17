@@ -44,6 +44,8 @@ namespace ofd{
         void Clip(PathPtr clipPath);
         void EoClip(PathPtr clipPath);
 
+        std::tuple<double, double, bool> RenderPage(PagePtr page, int dpi, cairo_t *cr = nullptr);
+
     private:
         class ImplCls;
         std::unique_ptr<ImplCls> m_impl;
