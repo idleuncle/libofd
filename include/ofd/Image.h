@@ -3,7 +3,6 @@
 
 #include <string>
 #include <cairo/cairo.h>
-#include "ofd/Common.h"
 #include "utils/ImageStream.h"
 
 namespace ofd{

@@ -939,14 +939,15 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
 //}; // class MemStream
 //}
 
-// Defined in CairoRender_Poppler.cc
-namespace ofd{
-    cairo_surface_t *createImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
+//// Defined in CairoRender_Poppler.cc
+//namespace ofd{
+    //cairo_surface_t *createImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
 
-//cairo_filter_t getFilterForSurface(cairo_surface_t *image, cairo_t *cr, bool interpolate); 
-//void getImageScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight); 
-} // namespace ofd
+////cairo_filter_t getFilterForSurface(cairo_surface_t *image, cairo_t *cr, bool interpolate); 
+////void getImageScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight); 
+//} // namespace ofd
 
+#include "ofd/ImageSurface.h"
 void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject){
     if ( imageObject == nullptr ) return;
 
@@ -984,7 +985,9 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
     cairo_get_matrix(cr, &matrix);
     getImageScaledSize (&matrix, widthA, heightA, &scaledWidth, &scaledHeight);
 
-    imageSurface = createImageSurface(imageData, imageDataSize, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits);
+    //imageSurface = createImageSurface(imageData, imageDataSize, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits);
+    ImageSurface iSurface(imageData, imageDataSize, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits);
+    imageSurface = iSurface.GetCairoSurface();
     if ( imageSurface == nullptr ){
         cairo_restore(cr);
         return;
@@ -1004,7 +1007,7 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
         //setMimeData(state, str, ref, colorMap, imageSurface);
 
     cairo_pattern_t *pattern = cairo_pattern_create_for_surface(imageSurface);
-    cairo_surface_destroy (imageSurface);
+    //cairo_surface_destroy (imageSurface);
     if (cairo_pattern_status (pattern))
         return;
 

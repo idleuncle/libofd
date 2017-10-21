@@ -4,8 +4,10 @@
 #include <GfxState.h>
 #include <OutputDev.h>
 #include "utils/utils.h"
+#include "ofd/ImageSurface.h"
 
 using namespace utils;
+using namespace ofd;
 
 // poppler/poppler/CairoOutputDev.cc
 
@@ -212,6 +214,47 @@ public:
 #include <math.h>
 
 namespace ofd{
+    
+class ImageSurface::ImplCls {
+public:
+    ImplCls(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits){
+        m_memStream = new MemStream(imageData, 0, imageDataSize, Object(objNull));
+        //ofd::MemStream *memStream = new ofd::MemStream(imageData, 0, imageDataSize);
+
+        RescaleDrawImage rescale;
+        m_imageSurface = rescale.getSourceImage(m_memStream, widthA, heightA, scaledWidth, scaledHeight, false, nComps, nBits, nullptr);//colorMap, maskColors);
+    }
+
+    virtual ~ImplCls(){
+        if (m_memStream != nullptr){
+            delete m_memStream;
+            m_memStream = nullptr;
+        }
+        if (m_imageSurface != nullptr){
+            cairo_surface_destroy(m_imageSurface);
+            m_imageSurface = nullptr;
+        }
+    }
+
+    cairo_surface_t *GetCairoSurface() const {return m_imageSurface;};
+
+private:
+    MemStream *m_memStream = nullptr;
+    cairo_surface_t *m_imageSurface = nullptr;
+}; // class ImageSurfaceImpl
+
+
+ImageSurface::ImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits){
+    m_impl = std::unique_ptr<ImplCls>(new ImplCls(imageData, imageDataSize, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits));
+}
+
+ImageSurface::~ImageSurface(){
+}
+
+cairo_surface_t *ImageSurface::GetCairoSurface() const {
+    return m_impl->GetCairoSurface();
+}
+        
     cairo_surface_t *createImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits){  
 
         MemStream *memStream = new MemStream(imageData, 0, imageDataSize, Object(objNull));
@@ -320,5 +363,5 @@ namespace ofd{
         return CAIRO_FILTER_BILINEAR;
     }
 
-}
+}; // namespace ofd
 

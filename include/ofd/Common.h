@@ -12,6 +12,8 @@
 #define OFDXML_HEAD_ATTRIBUTES \
     writer.WriteAttribute("xmlns:ofd", std::string("http://www.ofdspec.org/2016")); 
 
+using namespace utils;
+
 namespace ofd{
 
     // C++14
@@ -174,14 +176,14 @@ namespace ofd{
 
             std::string to_string() const {
                 std::stringstream ss;
-                utils::SetStringStreamPrecision(ss, 3);
+                //utils:SetStringStreamPrecision(ss, 3);
                 ss << "(" << _XMin << "," << _YMin << "," << _XMax << "," << _YMax << ")"; 
                 return ss.str();
             }
 
             std::string to_xmlstring() const {
                 std::stringstream ss;
-                utils::SetStringStreamPrecision(ss, 3);
+                //utils::SetStringStreamPrecision(ss, 3);
                 ss << _XMin << " " << _YMin << " " << (_XMax - _XMin) << " " << (_YMax - _YMin); 
                 return ss.str();
             }
@@ -250,7 +252,7 @@ namespace ofd{
 
         std::string to_string() const {
             std::stringstream ss;
-            utils::SetStringStreamPrecision(ss, 3);
+            //utils::SetStringStreamPrecision(ss, 3);
             ss << Left << ", " << Top << ", " << Width << ", " << Height; 
 
             return std::string("[") +
@@ -260,7 +262,7 @@ namespace ofd{
 
         std::string to_xmlstring() const {
             std::stringstream ss;
-            utils::SetStringStreamPrecision(ss, 3);
+            //utils::SetStringStreamPrecision(ss, 3);
             ss << Left << " " << Top << " " << Width << " " << Height; 
             return ss.str();
         }
