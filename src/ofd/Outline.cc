@@ -4,6 +4,8 @@
 using namespace ofd;
 using namespace utils;
 
+// ================ class OutlineElem ================
+
 OutlineElem::OutlineElem(){
 }
 
@@ -42,3 +44,21 @@ bool OutlineElem::FromXML(XMLElementPtr element){
 
     return true;
 }
+
+// ================ class Outlines ================
+
+Outlines::Outlines(){
+
+}
+
+Outlines::~Outlines(){
+
+}
+
+void Outlines::GenerateXML(utils::XMLWriter &writer) const{
+
+} 
+
+bool Outlines::FromXML(utils::XMLElementPtr element){
+    return true; 
+} 

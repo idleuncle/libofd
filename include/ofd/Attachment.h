@@ -26,8 +26,20 @@ namespace ofd{
         ST_Loc FileLoc;
 
 
-    }; // class Bookmark
+    }; // class Attachment
 
+    class Attachments : public utils::XMLable{
+    public:
+        Attachments();
+        virtual ~Attachments();
+
+        virtual void GenerateXML(utils::XMLWriter &writer) const override;
+        virtual bool FromXML(utils::XMLElementPtr element) override;
+
+    public:
+
+    }; // class Attachments
+    
 }; // namespace ofd
 
 #endif // __OFD_ATTACHMENT_H__

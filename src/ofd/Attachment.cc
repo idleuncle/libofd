@@ -3,6 +3,8 @@
 using namespace ofd;
 using namespace utils;
 
+// ================ class Attachment ================
+
 Attachment::Attachment(){
 }
 
@@ -63,3 +65,21 @@ bool Attachment::FromXML(XMLElementPtr element){
 
     return true;
 }
+
+// ================ class Attachments ================
+
+Attachments::Attachments(){
+
+}
+
+Attachments::~Attachments(){
+
+}
+
+void Attachments::GenerateXML(utils::XMLWriter &writer) const{
+
+} 
+
+bool Attachments::FromXML(utils::XMLElementPtr element){
+    return true;
+} 

@@ -7,8 +7,15 @@
 #include <tuple>
 #include <unordered_map>
 #include "ofd/Common.h"
-#include "ofd/VPreferences.h"
+#include "ofd/Outline.h"
 #include "ofd/Permission.h"
+#include "ofd/Action.h"
+#include "ofd/VPreferences.h"
+#include "ofd/Bookmark.h"
+#include "ofd/Annotation.h"
+#include "ofd/CustomTag.h"
+#include "ofd/Attachment.h"
+#include "ofd/Extension.h"
 
 namespace ofd{
 
@@ -150,12 +157,22 @@ namespace ofd{
 
         private:
             std::weak_ptr<Package> m_package;
-            bool              m_opened;
-            PageArray         m_pages;
-            CommonData        m_commonData;
-            DocBody           m_docBody;
-            Permission        m_permissions;
-            VPreferences      m_vpreferences;
+            bool              m_opened = false;
+            DocBody           m_docBody; // parsed by package.
+
+            // Doc_0/Document.xml
+            CommonData        m_commonData;   // 文档公共数据结构
+            PageArray         m_pages;        // 页树
+            Outlines          m_outlines;     // 大纲
+            Actions           m_actions;      // 动作
+            Permission        m_permissions;  // 权限声明
+            VPreferences      m_vpreferences; // 视图首选项
+            Bookmarks         m_bookmarks;    // 书签
+            Annotations       m_annotations;  // 注释
+            CustomTags        m_customtags;   // 自定义标引
+            Attachments       m_attachments;  // 附件
+            Extensions        m_extensions;   // 扩展
+
 
             void generateCommonDataXML(utils::XMLWriter &writer) const;
             void generatePagesXML(utils::XMLWriter &writer) const;

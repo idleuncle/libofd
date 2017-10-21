@@ -69,10 +69,13 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
 
         auto * id = font->getID();
 
-        Object ref_obj;
-        ref_obj.initRef(id->num, id->gen);
-        ref_obj.fetch(m_xref, &font_obj);
-        ref_obj.free();
+        // TODO
+        //Object ref_obj;
+        //ref_obj.initRef(id->num, id->gen);
+        //ref_obj.fetch(m_xref, &font_obj);
+        //ref_obj.free();
+        Object ref_obj(id->num, id->gen);
+        font_obj = ref_obj.fetch(m_xref);
 
         if(!font_obj.isDict()) {
             LOG_ERROR("Font object is not a dictionary");
@@ -80,7 +83,11 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         }
 
         Dict * dict = font_obj.getDict();
-        if(dict->lookup("DescendantFonts", &font_obj2)->isArray()) {
+        // TODO
+        //if(dict->lookup("DescendantFonts", &font_obj2)->isArray()) {
+        font_obj2 = dict->lookup("DescendantFonts");
+        if (font_obj2.isArray()){
+
             if(font_obj2.arrayGetLength() == 0) {
                 LOG_ERROR("Warning: empty DescendantFonts array");
             } else {
@@ -88,21 +95,29 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
                     LOG_ERROR("TODO: multiple entries in DescendantFonts array");
                 }
 
-                if(font_obj2.arrayGet(0, &obj2)->isDict()) {
+                obj2 = font_obj2.arrayGet(0);
+                if (obj2.isDict()){
+                //if(font_obj2.arrayGet(0, &obj2)->isDict()) {
                     dict = obj2.getDict();
                 }
             }
         }
 
-        if(!dict->lookup("FontDescriptor", &fontdesc_obj)->isDict()) {
+        //if(!dict->lookup("FontDescriptor", &fontdesc_obj)->isDict()) {
+        fontdesc_obj = dict->lookup("FontDescriptor");
+        if (!fontdesc_obj.isDict()){
             LOG_ERROR("Cannot find FontDescriptor ");
             throw 0;
         }
 
         dict = fontdesc_obj.getDict();
 
-        if(dict->lookup("FontFile3", &obj)->isStream()) {
-            if(obj.streamGetDict()->lookup("Subtype", &obj1)->isName()) {
+        //if(dict->lookup("FontFile3", &obj)->isStream()) {
+        obj = dict->lookup("FontFile3");
+        if (obj.isStream()) {
+            obj1 = obj.streamGetDict()->lookup("Subtype");
+            if (obj1.isName()){
+            //if(obj.streamGetDict()->lookup("Subtype", &obj1)->isName()) {
                 subtype = obj1.getName();
                 if(subtype == "Type1C") {
                     suffix = ".cff";
@@ -118,13 +133,23 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
                 LOG_ERROR("Invalid subtype in font descriptor");
                 throw 0;
             }
-        } else if (dict->lookup("FontFile2", &obj)->isStream()) { 
-            suffix = ".ttf";
-        } else if (dict->lookup("FontFile", &obj)->isStream()) {
-            suffix = ".pfa";
+        //} else if (dict->lookup("FontFile2", &obj)->isStream()) { 
+            //suffix = ".ttf";
+        //} else if (dict->lookup("FontFile", &obj)->isStream()) {
+            //suffix = ".pfa";
         } else {
-            LOG_ERROR("Cannot find FontFile for dump");
-            throw 0;
+            obj = dict->lookup("FontFile2");
+            if (obj.isStream()){
+                suffix = ".ttf";
+            } else {
+                obj = dict->lookup("FontFile");
+                if (obj.isStream()){
+                    suffix = ".pfa";
+                } else {
+                    LOG_ERROR("Cannot find FontFile for dump");
+                    throw 0;
+                }
+            }
         }
 
         if(suffix == "") {
@@ -152,13 +177,13 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         LOG_ERROR("Something wrong when trying to dump font 0x%x", fn_id);
     }
 
-    obj2.free();
-    obj1.free();
-    obj.free();
+    //obj2.free();
+    //obj1.free();
+    //obj.free();
 
-    fontdesc_obj.free();
-    font_obj2.free();
-    font_obj.free();
+    //fontdesc_obj.free();
+    //font_obj2.free();
+    //font_obj.free();
 
     return filepath;
 }

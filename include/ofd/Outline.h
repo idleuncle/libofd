@@ -25,6 +25,15 @@ namespace ofd{
         std::vector<OutlineElemPtr> OutlineElems;
 
     }; // class OutlineElem
+       
+    class Outlines : public utils::XMLable{
+    public:
+        Outlines();
+        virtual ~Outlines();
+
+        virtual void GenerateXML(utils::XMLWriter &writer) const override;
+        virtual bool FromXML(utils::XMLElementPtr element) override;
+    }; // class Outlines
 
 }; // namespace ofd
 
