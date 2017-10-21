@@ -6,14 +6,15 @@ INCLUDE_DIRECTORIES(
     ./
     ./include
     ./tools/libjpeg-turbo
-    ./tools/poppler/poppler
     ./tools/poppler
+    ./tools/poppler/poppler
 )
 
 LINK_DIRECTORIES(
     ./build/lib
     ./tools/libjpeg-turbo/.libs
-    ./tools/poppler/poppler/.libs
+    ./tools/poppler/build
+    ./tools/poppler/build/glib
     /usr/local/lib
 )
 
@@ -40,7 +41,7 @@ endif ()
 
 # -------- CXX Compile Options --------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -Wall -Werror -Wno-c++11-extensions")
-SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu poppler poppler-cairo stdc++)
+SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu poppler poppler-glib stdc++)
 
 # -------- LD_FLAGS Options --------
 # -lbfd  backward add line and code snipts.

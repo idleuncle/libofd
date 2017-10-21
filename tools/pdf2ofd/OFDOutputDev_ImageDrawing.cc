@@ -129,9 +129,10 @@ void OFDOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxIma
             return;
     }
 
-    str->getDict()->lookup("ColorSpace", &obj);
+    obj = str->getDict()->lookup("ColorSpace"); 
+    //str->getDict()->lookup("ColorSpace", &obj);
     colorSpace = GfxColorSpace::parse(NULL, &obj, this, state);
-    obj.free();
+    //obj.free();
 
     // colorspace in stream dict may be different from colorspace in jpx
     // data

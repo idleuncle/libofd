@@ -212,9 +212,18 @@ public:
 #include <math.h>
 
 namespace ofd{
-    cairo_surface_t *createImageSurface(Stream *str, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits){  
+    cairo_surface_t *createImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits){  
+
+        MemStream *memStream = new MemStream(imageData, 0, imageDataSize, Object(objNull));
+        //ofd::MemStream *memStream = new ofd::MemStream(imageData, 0, imageDataSize);
+        //memStream->reset();
+
         RescaleDrawImage rescale;
-        cairo_surface_t *imageSurface = rescale.getSourceImage(str, widthA, heightA, scaledWidth, scaledHeight, false, nComps, nBits, nullptr);//colorMap, maskColors);
+        cairo_surface_t *imageSurface = rescale.getSourceImage(memStream, widthA, heightA, scaledWidth, scaledHeight, false, nComps, nBits, nullptr);//colorMap, maskColors);
+
+        // FIXME
+        //delete memStream;
+
         return imageSurface;
     }
 

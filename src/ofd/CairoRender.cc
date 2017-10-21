@@ -851,97 +851,97 @@ void CairoRender::ImplCls::DrawPathObject(cairo_t *cr, PathObject *pathObject){
     return;
 }
 
-namespace ofd{
-class MemStream : public Stream{
-    public:
-        MemStream(char *data, size_t startA, size_t dataSize): 
-            buf(data), length(dataSize), start(startA), bufPtr(data), bufEnd(data+startA+dataSize),
-            needFree(false){
-        }
-        virtual ~MemStream(){
-            if (needFree){
-                delete[] buf;
-            }
-        }
+//namespace ofd{
+//class MemStream : public Stream{
+    //public:
+        //MemStream(char *data, size_t startA, size_t dataSize): 
+            //buf(data), length(dataSize), start(startA), bufPtr(data), bufEnd(data+startA+dataSize),
+            //needFree(false){
+        //}
+        //virtual ~MemStream(){
+            //if (needFree){
+                //delete[] buf;
+            //}
+        //}
 
-        virtual StreamKind getKind(){return strWeird;} ;
-        virtual void reset(){
-            bufPtr = buf + start;
-        }
-        virtual void close(){
-        }
-        // Get next char from stream.
-        virtual int getChar(){
-            return (bufPtr < bufEnd) ? (*bufPtr++ & 0xff) : EOF; 
-        }
+        //virtual StreamKind getKind(){return strWeird;} ;
+        //virtual void reset(){
+            //bufPtr = buf + start;
+        //}
+        //virtual void close(){
+        //}
+        //// Get next char from stream.
+        //virtual int getChar(){
+            //return (bufPtr < bufEnd) ? (*bufPtr++ & 0xff) : EOF; 
+        //}
 
-        // Peek at next char in stream.
-        virtual int lookChar(){
-            return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; 
-        }
+        //// Peek at next char in stream.
+        //virtual int lookChar(){
+            //return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; 
+        //}
 
-        virtual Goffset getPos() { return (int)(bufPtr - buf); }
-        virtual void setPos(Goffset pos, int dir = 0){
-            Guint i;
+        //virtual Goffset getPos() { return (int)(bufPtr - buf); }
+        //virtual void setPos(Goffset pos, int dir = 0){
+            //Guint i;
 
-            if (dir >= 0) {
-                i = pos;
-            } else {
-                i = start + length - pos;
-            }
-            if (i < start) {
-                i = start;
-            } else if (i > start + length) {
-                i = start + length;
-            }
-            bufPtr = buf + i;
-        }
-        virtual Goffset getStart() { return start; }
-        //virtual void moveStart(Goffset delta);
+            //if (dir >= 0) {
+                //i = pos;
+            //} else {
+                //i = start + length - pos;
+            //}
+            //if (i < start) {
+                //i = start;
+            //} else if (i > start + length) {
+                //i = start + length;
+            //}
+            //bufPtr = buf + i;
+        //}
+        //virtual Goffset getStart() { return start; }
+        ////virtual void moveStart(Goffset delta);
 
-        //if needFree = true, the stream will delete buf when it is destroyed
-        //otherwise it will not touch it. Default value is false
-        virtual void setNeedFree (GBool val) { needFree = val; }
+        ////if needFree = true, the stream will delete buf when it is destroyed
+        ////otherwise it will not touch it. Default value is false
+        //virtual void setNeedFree (GBool val) { needFree = val; }
 
-        virtual int getUnfilteredChar () { return getChar(); }
-        virtual void unfilteredReset () { reset (); } 
+        //virtual int getUnfilteredChar () { return getChar(); }
+        //virtual void unfilteredReset () { reset (); } 
 
-        virtual GBool hasGetChars() { return true; }
-        virtual int getChars(int nChars, Guchar *buffer) {
-            int n;
+        //virtual GBool hasGetChars() { return true; }
+        //virtual int getChars(int nChars, Guchar *buffer) {
+            //int n;
 
-            if (nChars <= 0) {
-                return 0;
-            }
-            if (bufEnd - bufPtr < nChars) {
-                n = (int)(bufEnd - bufPtr);
-            } else {
-                n = nChars;
-            }
-            memcpy(buffer, bufPtr, n);
-            bufPtr += n;
-            return n;
-        }
+            //if (nChars <= 0) {
+                //return 0;
+            //}
+            //if (bufEnd - bufPtr < nChars) {
+                //n = (int)(bufEnd - bufPtr);
+            //} else {
+                //n = nChars;
+            //}
+            //memcpy(buffer, bufPtr, n);
+            //bufPtr += n;
+            //return n;
+        //}
 
 
-        virtual GBool isBinary(GBool last = gTrue) { return last; }
-        virtual BaseStream *getBaseStream() { return nullptr; }
-        virtual Stream *getUndecodedStream() { return this; }
-        virtual Dict *getDict() { return nullptr; }
-    private:
-        char *buf;
-        size_t length;
-        size_t start;
-        char *bufPtr;
-        char *bufEnd;
-        bool needFree;
+        //virtual GBool isBinary(GBool last = gTrue) { return last; }
+        //virtual BaseStream *getBaseStream() { return nullptr; }
+        //virtual Stream *getUndecodedStream() { return this; }
+        //virtual Dict *getDict() { return nullptr; }
+    //private:
+        //char *buf;
+        //size_t length;
+        //size_t start;
+        //char *bufPtr;
+        //char *bufEnd;
+        //bool needFree;
 
-}; // class MemStream
-}
+//}; // class MemStream
+//}
 
 // Defined in CairoRender_Poppler.cc
 namespace ofd{
-    cairo_surface_t *createImageSurface(Stream *str, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
+    cairo_surface_t *createImageSurface(char *imageData, size_t imageDataSize, int widthA, int heightA, int scaledWidth, int scaledHeight, int nComps, int nBits);
 
 //cairo_filter_t getFilterForSurface(cairo_surface_t *image, cairo_t *cr, bool interpolate); 
 //void getImageScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight); 
@@ -963,9 +963,6 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
     char *imageData = image->GetImageData();
     size_t imageDataSize = image->GetImageDataSize();
 
-    //MemStream *memStream = new MemStream(imageData, 0, imageDataSize, nullptr);
-    ofd::MemStream *memStream = new ofd::MemStream(imageData, 0, imageDataSize);
-    //memStream->reset();
 
     cairo_surface_t *imageSurface = nullptr;
     cairo_matrix_t matrix;
@@ -987,9 +984,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
     cairo_get_matrix(cr, &matrix);
     getImageScaledSize (&matrix, widthA, heightA, &scaledWidth, &scaledHeight);
 
-    imageSurface = createImageSurface(memStream, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits);
+    imageSurface = createImageSurface(imageData, imageDataSize, widthA, heightA, scaledWidth, scaledHeight, nComps, nBits);
     if ( imageSurface == nullptr ){
-        delete memStream;
         cairo_restore(cr);
         return;
     }
@@ -1071,7 +1067,8 @@ void CairoRender::ImplCls::DrawImageObject(cairo_t *cr, ImageObject *imageObject
 
     cairo_pattern_destroy (pattern);
 
-    delete memStream;
+    // FIXME
+    //delete memStream;
 }
 
 void CairoRender::ImplCls::DrawVideoObject(cairo_t *cr, VideoObject *videoObject){
