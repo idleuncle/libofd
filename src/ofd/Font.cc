@@ -348,7 +348,7 @@ bool Font::FromXML(XMLElementPtr fontElement){
                 std::string externalFontFile = Font::LocateFontFile(FontName);
                 if (externalFontFile.empty()){
                     LOG_WARN("External font %s can not be found.", FontName.c_str());
-                    assert(!externalFontFile.empty());
+                    //assert(!externalFontFile.empty());
                 } 
                 SetExternalFontFile(externalFontFile);
             }

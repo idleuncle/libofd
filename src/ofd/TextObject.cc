@@ -8,6 +8,7 @@
 #include "ofd/Resource.h"
 #include "utils/xml.h"
 #include "utils/logger.h"
+#include "utils/unicode.h"
 
 using namespace ofd;
 
@@ -227,17 +228,56 @@ bool TextObject::IterateElementsXML(utils::XMLElementPtr childElement){
 
         std::tie(textCode.Text, std::ignore) = childElement->GetStringValue();
 
+        size_t totalChars = get_utf8_string_length(textCode.Text);
+
         //LOG_DEBUG("X: %.3f Y: %.3f textCode.Y Text:%s", textCode.X, textCode.Y, textCode.Text.c_str());
 
+        size_t numChars = 0;
         std::vector<std::string> xTokens = utils::SplitString(strDeltaX);
         for (size_t i = 0 ; i < xTokens.size() ; i++){
-            double value = atof(xTokens[i].c_str());
-            textCode.DeltaX.push_back(value);
+            if (xTokens[i] == "g"){
+                if (i + 2 >= xTokens.size()){
+                    LOG_WARN("DeltaX format failed. g int double.");
+                    break;
+                }
+                int cnt = atoi(xTokens[i+1].c_str());
+                if (numChars + cnt >= totalChars){
+                    cnt = totalChars - numChars;
+                }
+                double value = atof(xTokens[i+2].c_str());
+                for (int n = 0 ; n < cnt ; n++){
+                    textCode.DeltaX.push_back(value);
+                }
+                numChars += cnt;
+                i += 2;
+            } else {
+                double value = atof(xTokens[i].c_str());
+                textCode.DeltaX.push_back(value);
+                numChars++;
+            }
         }
         std::vector<std::string> yTokens = utils::SplitString(strDeltaY);
         for (size_t i = 0 ; i < yTokens.size() ; i++){
-            double value = atof(yTokens[i].c_str());
-            textCode.DeltaY.push_back(value);
+            if (yTokens[i] == "g"){
+                if (i + 2 >= yTokens.size()){
+                    LOG_WARN("DeltaY format failed. g int double.");
+                    break;
+                }
+                int cnt = atoi(yTokens[i+1].c_str());
+                if (numChars + cnt >= totalChars){
+                    cnt = totalChars - numChars;
+                }
+                double value = atof(yTokens[i+2].c_str());
+                for (int n = 0 ; n < cnt ; n++){
+                    textCode.DeltaY.push_back(value);
+                }
+                numChars += cnt;
+                i += 2;
+            } else {
+                double value = atof(yTokens[i].c_str());
+                textCode.DeltaY.push_back(value);
+                numChars++;
+            }
         }
 
         m_textCodes.push_back(textCode);
@@ -256,11 +296,11 @@ bool TextObject::IterateElementsXML(utils::XMLElementPtr childElement){
         std::tie(strokeColor, exist) = Color::ReadColorXML(childElement);
         if ( exist ){
             StrokeColor = strokeColor;
-            LOG_DEBUG("Readed stroke color = (%d, %d, %d)", 
-                    strokeColor->Value.RGB.Red,
-                    strokeColor->Value.RGB.Green,
-                    strokeColor->Value.RGB.Blue
-                    );
+            //LOG_DEBUG("Readed stroke color = (%d, %d, %d)", 
+                    //strokeColor->Value.RGB.Red,
+                    //strokeColor->Value.RGB.Green,
+                    //strokeColor->Value.RGB.Blue
+                    //);
         }
     }
 
