@@ -6,15 +6,15 @@ INCLUDE_DIRECTORIES(
     ./
     ./include
     ./tools/libjpeg-turbo
-    ./tools/poppler
-    ./tools/poppler/poppler
+    #./tools/poppler
+    #./tools/poppler/poppler
 )
 
 LINK_DIRECTORIES(
     ./build/lib
     ./tools/libjpeg-turbo/.libs
-    ./tools/poppler/build
-    ./tools/poppler/build/glib
+    #./tools/poppler/build
+    #./tools/poppler/build/glib
     /usr/local/lib
 )
 
@@ -33,6 +33,10 @@ INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
 # -------- HarfBuzz --------
 FIND_PACKAGE(Harfbuzz REQUIRED)
 INCLUDE_DIRECTORIES(${HARFBUZZ_INCLUDE_DIRS})
+
+# -------- Poppler --------
+FIND_PACKAGE(Poppler REQUIRED)
+INCLUDE_DIRECTORIES(${POPPLER_INCLUDE_DIRS})
 
 # -------- Darwin Libraries --------
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")

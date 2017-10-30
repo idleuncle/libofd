@@ -27,6 +27,23 @@ static void set_property_label(GtkBuilder *builder, const std::string &widgetNam
 }
 
 void DocumentView::CmdFileProperties(){
+    //GtkWidget *dlg = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    //gtk_widget_set_size_request(dlg, 800, 600);
+
+    //GtkWidget *notebook = gtk_notebook_new();
+    //gtk_container_add(GTK_CONTAINER(dlg), notebook);
+    //gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_TOP);
+
+    //GtkWidget *hbox = gtk_hbox_new(true, 5);
+    //gtk_container_add(GTK_CONTAINER(dlg), hbox);
+
+    //GtkWidget *label = gtk_label_new("文档元数据");
+    //gtk_container_add(GTK_CONTAINER(hbox), 
+
+    //gobject_unref(dlg);
+}
+
+void DocumentView::CmdFileProperties_from_resource(){
 
     GtkBuilder *builder = gtk_builder_new_from_resource("/ui/app.ui");
 

@@ -150,6 +150,7 @@ namespace ofd{
         void CmdFileExport();
         void CmdFilePrint();
         void CmdFileProperties();
+        void CmdFileProperties_from_resource();
 
         void CmdToolsNormal();
         void CmdToolsSelectAnnotation();
