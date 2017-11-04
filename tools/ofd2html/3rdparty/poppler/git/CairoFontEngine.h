@@ -97,6 +97,7 @@ private:
 		 cairo_font_face_t *cairo_font_face,
 		 int *codeToGID, Guint codeToGIDLen,
 		 GBool printing, XRef *xref);
+public:
   PDFDoc *doc;
 };
 

@@ -74,8 +74,10 @@ std::string FontOutputDev::dumpEmbeddedFont(GfxFont * font, FontInfo & info) {
         //ref_obj.initRef(id->num, id->gen);
         //ref_obj.fetch(m_xref, &font_obj);
         //ref_obj.free();
+
         Object ref_obj(id->num, id->gen);
         font_obj = ref_obj.fetch(m_xref);
+        //font_obj = m_xref->fetch(id->num, id->gen);
 
         if(!font_obj.isDict()) {
             LOG_ERROR("Font object is not a dictionary");

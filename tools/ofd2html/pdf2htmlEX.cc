@@ -345,8 +345,13 @@ void check_param()
     }
 }
 
+#include "utils/ffw.h"
 int main(int argc, char **argv)
 {
+    cerr << "ffw_init() begin" << std::endl;
+    ffw_init(false);
+    cerr << "ffw_init() end" << std::endl;
+
     // We need to adjust these directories before parsing the options.
 #if defined(__MINGW32__)
     param.data_dir = get_exec_dir(argv[0]);
