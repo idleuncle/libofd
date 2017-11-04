@@ -6,15 +6,18 @@ INCLUDE_DIRECTORIES(
     ./
     ./include
     ./tools/libjpeg-turbo
-    #./tools/poppler
-    #./tools/poppler/poppler
+    ./tools/poppler
+    ./tools/poppler/poppler
+    ./tools/fontforge/inc
+    ./tools/fontforge/fontforge
 )
 
 LINK_DIRECTORIES(
     ./build/lib
     ./tools/libjpeg-turbo/.libs
-    #./tools/poppler/build
-    #./tools/poppler/build/glib
+    ./tools/poppler/build
+    ./tools/poppler/build/glib
+    ./tools/fontforge/fontforge/.libs
     /usr/local/lib
 )
 
@@ -34,9 +37,9 @@ INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
 FIND_PACKAGE(Harfbuzz REQUIRED)
 INCLUDE_DIRECTORIES(${HARFBUZZ_INCLUDE_DIRS})
 
-# -------- Poppler --------
-FIND_PACKAGE(Poppler REQUIRED)
-INCLUDE_DIRECTORIES(${POPPLER_INCLUDE_DIRS})
+## -------- Poppler --------
+#FIND_PACKAGE(Poppler REQUIRED)
+#INCLUDE_DIRECTORIES(${POPPLER_INCLUDE_DIRS})
 
 # -------- Darwin Libraries --------
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -45,7 +48,7 @@ endif ()
 
 # -------- CXX Compile Options --------
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -Wall -Werror -Wno-c++11-extensions")
-SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu poppler poppler-glib stdc++)
+SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu fontforge poppler poppler-glib stdc++)
 
 # -------- LD_FLAGS Options --------
 # -lbfd  backward add line and code snipts.

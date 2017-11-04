@@ -54,16 +54,12 @@ static void dumb_post_error(const char * title, const char * error, ...) { }
 
 void ffw_init(int debug)
 {
-    fprintf(stderr, "enter ffw_init\n");
     InitSimpleStuff();
-    fprintf(stderr, "1\n");
     if ( default_encoding==NULL )
         default_encoding=FindOrMakeEncoding("ISO8859-1");
-    fprintf(stderr, "1-1\n");
     if ( default_encoding==NULL )
         default_encoding=&custom; /* In case iconv is broken */
 
-    fprintf(stderr, "2\n");
     if(!debug)
     {
         //disable error output of Fontforge
@@ -71,18 +67,15 @@ void ffw_init(int debug)
         ui_interface->post_error = &dumb_post_error;
     }
 
-    fprintf(stderr, "3\n");
     original_enc = FindOrMakeEncoding("original");
     unicodefull_enc = FindOrMakeEncoding("UnicodeFull");
 
-    fprintf(stderr, "4\n");
     {
         Val v;
         v.type = v_int;
         v.u.ival = 1;
         SetPrefs("DetectDiagonalStems", &v, NULL);
     }
-    fprintf(stderr, "ffw_init() done.\n");
 }
 
 void ffw_finalize(void)

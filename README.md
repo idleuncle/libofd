@@ -62,7 +62,36 @@ $ cd tools && ./build-poppler.sh
 $ sudo apt-get install libfontforge-dev libspiro-dev
 $ sudo apt-get install libtinyxml2-dev libsodium-dev libzip-dev
 
+liblog4cpp5-dev
+libglfw3-dev
+libpango1.0-dev
+libxml2-dev
+libzmq-dev
+libjpeg-dev
+libtiff-dev
+libgif-dev
+libglew-dev
+uuid-dev
+libpng-dev
+libreadline6-dev
+libpython-dev
+libspiro-dev
+libltdl-dev
+libopenjpeg-dev
+libgdk-pixbuf2.0-dev
+libgflags-dev
+libgtk-3-dev
+
 ```
+gtk+-3.22
+Glib:
+libffi-dev
+libmount-dev
+GObject:
+python-dev
+
+pango:
+FREETYPE_CFLAGS=$(pkg-config --cflags freetype2) FREETYPE_LIBS=$(pkg-config --libs freetype2) HARFBUZZ_CFLAGS=$(pkg-config --cflags harfbuzz) HARFBUZZ_LIBS=$(pkg-config --libs harfbuzz) ./configure
 
 ### fontforge
 

@@ -58,19 +58,19 @@ typedef struct{
 } ApplicationWindowContext;
 
 
-__attribute__((unused)) static gint my_popup_handler(GtkWidget *widget, GdkEvent *event){
-    GtkMenu *menu = GTK_MENU(widget);
+//__attribute__((unused)) static gint my_popup_handler(GtkWidget *widget, GdkEvent *event){
+    //GtkMenu *menu = GTK_MENU(widget);
 
-    if (event->type == GDK_BUTTON_PRESS){
-        GdkEventButton *event_button = (GdkEventButton*)event;
-        if (event_button->button == GDK_BUTTON_SECONDARY){
-            gtk_menu_popup_at_pointer(menu, event);
-            return true;
-        }
-    }
+    //if (event->type == GDK_BUTTON_PRESS){
+        //GdkEventButton *event_button = (GdkEventButton*)event;
+        //if (event_button->button == GDK_BUTTON_SECONDARY){
+            //gtk_menu_popup_at_pointer(menu, event);
+            //return true;
+        //}
+    //}
 
-    return false;
-}
+    //return false;
+//}
 
 static void activate_about(GSimpleAction *action, GVariant *parameter, gpointer user_data){
 
@@ -746,6 +746,7 @@ void adjust_window_size(GtkWindow *window){
 
     GdkRectangle workArea;
 
+    // gtk  3.22
     GdkDisplay *display = gdk_display_get_default();
     GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
     gdk_monitor_get_workarea(monitor, &workArea);

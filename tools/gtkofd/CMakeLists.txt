@@ -1,5 +1,12 @@
 PROJECT(gtkofd)
 
+#INCLUDE_DIRECTORIES(
+    #/usr/include/gtk-3.0
+    #/usr/include/gdk-pixbuf-2.0
+    #/usr/include/pango-1.0
+    #/usr/include/atk-1.0
+#)
+
 #EXEC_PROGRAM(glib-compile-resources ARGS "--generate --generate-source --target gtkofd_resources.c --sourcedir ./ui gtkofd.gresource.xml")
 
 ADD_CUSTOM_TARGET(
@@ -24,9 +31,16 @@ ADD_EXECUTABLE(gtkofd ${SRC_LIST})
 
 INCLUDE(FindPkgConfig)
 
-# -------- Gtk3 --------
+## -------- Gtk3 --------
 FIND_PACKAGE(GTK3 REQUIRED)
 INCLUDE_DIRECTORIES(${GTK3_INCLUDE_DIRS})
+# -------- GTK --------
+#FIND_PACKAGE(GTK REQUIRED)
+#INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIR})
+
+# -------- Glib --------
+FIND_PACKAGE(GLIB REQUIRED)
+INCLUDE_DIRECTORIES(${GLIB_INCLUDE_DIRS})
 
 # -------- Cairo --------
 FIND_PACKAGE(Cairo REQUIRED)
@@ -57,4 +71,5 @@ SET(LIBOFD_LIBRARY ofd)
 #IF(Static_libofd)
     #SET(LIBOFD_LIBRARY ${Static_libofd})
 #ENDIF(Static_libofd) 
-TARGET_LINK_LIBRARIES(gtkofd ${LIBOFD_LIBRARY} ${CAIRO_LIBRARIES} ${POPPLER_LIBRARIES} ${GTK3_LIBRARIES} ${SDL2_LIBRARIES})
+#TARGET_LINK_LIBRARIES(gtkofd ${LIBOFD_LIBRARY} utils ${CAIRO_LIBRARIES} ${POPPLER_LIBRARIES} ${GTK_LIBRARIES} gtk-3 gdk-3 pangocairo-1.0 pango-1.0 atk-1.0 gdk_pixbuf-2.0 gobject-2.0 gio-2.0 ${GLIB_LIBRARIES} ${SDL2_LIBRARIES})
+TARGET_LINK_LIBRARIES(gtkofd ${LIBOFD_LIBRARY} utils ${CAIRO_LIBRARIES} ${POPPLER_LIBRARIES} ${GTK3_LIBRARIES} ${GLIB_LIBRARIES} ${SDL2_LIBRARIES})

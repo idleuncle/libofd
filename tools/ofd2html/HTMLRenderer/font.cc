@@ -70,8 +70,11 @@ string HTMLRenderer::dump_embedded_font (GfxFont * font, FontInfo & info)
         //ref_obj.initRef(id->num, id->gen);
         //ref_obj.fetch(xref, &font_obj);
         //ref_obj.free();
-        Object ref_obj(id->num, id->gen);
-        font_obj = ref_obj.fetch(xref);
+        
+        //Object ref_obj(id->num, id->gen);
+        //font_obj = ref_obj.fetch(xref);
+
+        font_obj = xref->fetch(id->num, id->gen);
 
         if(!font_obj.isDict())
         {
@@ -103,7 +106,7 @@ string HTMLRenderer::dump_embedded_font (GfxFont * font, FontInfo & info)
         }
 
         fontdesc_obj = dict->lookup("FontDescriptor");
-        if (fontdesc_obj.isDict()){
+        if (!fontdesc_obj.isDict()){
         //if(!dict->lookup("FontDescriptor", &fontdesc_obj)->isDict())
         //{
             cerr << "Cannot find FontDescriptor " << endl;
