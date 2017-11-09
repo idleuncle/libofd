@@ -381,7 +381,7 @@
                   <attribute name="action">win.toolsDrawRect></attribute>
               </item>
               <item>
-                  <attribute name="label" translatable="yes">绘制拆线(_P)</attribute>
+                  <attribute name="label" translatable="yes">绘制折线(_P)</attribute>
                   <attribute name="action">win.toolsDrawPolyline</attribute>
               </item>
           </section>

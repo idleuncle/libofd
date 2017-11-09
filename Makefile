@@ -1,3 +1,4 @@
+WXOFD=./build/bin/wxofd
 GTKOFD=./build/bin/gtkofd
 IMOFD=./build/bin/imofd
 OFDVIEWER=./build/bin/ofdviewer
@@ -20,8 +21,11 @@ ${PDF2OFD}: build
 ${OFDVIEWER}: build
 ${OFDTEST}: build
 
-run: ${GTKOFD}
-	${GTKOFD} ./data/1.ofd --v=1
+run: ${WXOFD}
+	${WXOFD} ./data/1.ofd --v=1
+
+run-wxofd: ${WXOFD}
+	${WXOFD} ./data/1.ofd --v=1
 
 run-gtkofd: ${GTKOFD}
 	${GTKOFD} ./data/1.ofd --v=1
