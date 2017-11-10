@@ -47,7 +47,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 endif ()
 
 # -------- CXX Compile Options --------
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -Wall -Werror -Wno-c++11-extensions")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -Wall -Werror -Wno-attributes -Wno-c++11-extensions")
 SET(LIBOFD_DEPENDCIES ${FREETYPE_LIBRARIES} ${HARFBUZZ_LIBRARIES} ${CAIRO_LIBRARIES} harfbuzz-icu fontforge poppler poppler-glib stdc++)
 
 # -------- LD_FLAGS Options --------

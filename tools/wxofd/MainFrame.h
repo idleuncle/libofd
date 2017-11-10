@@ -6,17 +6,6 @@
 
 class MainFrame : public wxFrame {
 
-    enum {
-        ID_USER_BEGIN = wxID_HIGHEST+1,
-
-        ID_CustomizeToolbar,
-        ID_CreatePerspective,
-
-        ID_SampleItem, // must be last
-
-        ID_FirstPerspective = ID_CreatePerspective+1000
-    };
-
 public:
     MainFrame(wxWindow* parent,
             wxWindowID id,

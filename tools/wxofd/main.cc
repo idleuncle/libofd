@@ -69,7 +69,7 @@ bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser) {
  
     // to get at your unnamed parameters use
     wxArrayString args;
-    for (int i = 0; i < parser.GetParamCount(); i++) {
+    for (unsigned int i = 0; i < parser.GetParamCount(); i++) {
         wxString arg = parser.GetParam(i); 
         std::cout << arg << std::endl; 
         args.Add(arg);

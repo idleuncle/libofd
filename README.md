@@ -81,6 +81,11 @@ libopenjpeg-dev
 libgdk-pixbuf2.0-dev
 libgflags-dev
 libgtk-3-dev
+libm
+
+graphicsmagick
+rsvg2-bin
+libgraphicsmagick-dev
 
 ```
 gtk+-3.22

@@ -25,13 +25,14 @@ run: ${WXOFD}
 	${WXOFD} ./data/1.ofd --v=1
 
 run-wxofd: ${WXOFD}
-	${WXOFD} ./data/1.ofd --v=1
+	${WXOFD} 
 
 run-gtkofd: ${GTKOFD}
 	${GTKOFD} ./data/1.ofd --v=1
 
-debug: ${IMOFD}
-	lldb -- ${IMOFD} ./data/1.ofd --v=1
+debug-wxofd: ${WXOFD}
+	#lldb -- ${WXOFD} ./data/1.ofd --v=1
+	lldb -s conf/lldb/wxofd.s ${WXOFD}
 
 #pdf2ofd: ${PDF2OFD}
 	#rm -fr sample0.ofd sample0

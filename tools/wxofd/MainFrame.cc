@@ -19,6 +19,7 @@
 
 #include "MainFrame.h"
 #include "wxOFDWindow.h"
+#include "Global.h"
 
 // defined in menu.cc
 wxMenuBar *CreateMainMenubar();
