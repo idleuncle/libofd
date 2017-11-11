@@ -17,7 +17,9 @@ public:
     virtual ~wxOFDWindow();
 
 private:
-    void AddDocument();
+    void AddFirstDocument();
+    void OpenFirstOFDFile(); 
+
 
     class ImplCls;
     std::unique_ptr<ImplCls> m_impl;

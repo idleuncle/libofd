@@ -29,3 +29,5 @@ INSTALL(TARGETS ofd
 )
 
 INSTALL(FILES *.h DESTINATION include/ofd)
+
+ADD_SUBDIRECTORY(ofd/reader)
